@@ -1,5 +1,3 @@
-# AutoServe
-
 # AutoServe — Spring Boot Project Configuration
 
 Generated from [start.spring.io](https://start.spring.io/) project setup.
