@@ -25,6 +25,6 @@ public class AuthController {
     }
     @GetMapping("/hello")
     public String index() {
-        return authRepository.Hello();
+        return "Hello";
     }
 }
