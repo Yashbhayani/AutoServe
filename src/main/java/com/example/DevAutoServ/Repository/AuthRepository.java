@@ -11,56 +11,37 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
 public interface AuthRepository {
-    // Generate access token
-    String generateAccessToken(
-            String username,
-            String ipv4,
-            String ipv6,
-            String browser,
-            String os,
-            String device
-    );
 
-    // Generate refresh token
-//    String generateRefreshToken(
-//            String username,
-//            String ipv4,
-//            String ipv6,
-//            String browser,
-//            String os,
-//            String device
-//    );
+    // Generate access token using email/username.
+    // JWT includes tokenType = "access" and an expiration claim.
+    String generateAccessToken(String username);
 
+    // Generate refresh token using email/username.
+    // JWT includes tokenType = "refresh" and an expiration claim.
+    String generateRefreshToken(String username);
 
-    // Extract token information
+    // Extract username/email from token.
     String getUsernameFromToken(String token);
 
-    String getIpv4FromToken(String token);
-
-    String getIpv6FromToken(String token);
-
-    String getBrowserFromToken(String token);
-
-    String getOsFromToken(String token);
-
-    String getDeviceFromToken(String token);
-
+    // Extract token type: "access" or "refresh".
     String getTokenType(String token);
 
-    // Parse JWT claims
+    // Parse JWT claims, including expiration.
     Jws<Claims> getClaims(String token);
 
-    // Validate token and token type
+    // Validate token and expiration.
     boolean isTokenValid(String token);
 
+    // Validate access token type and expiration.
     boolean isAccessTokenValid(String token);
 
+    // Validate refresh token type and expiration.
     boolean isRefreshTokenValid(String token);
 
-    // Generate a new access token from a valid refresh token
+    // Generate a new access token from a valid refresh token.
     String refreshAccessToken(String refreshToken);
 
-    // Existing ID encryption methods
+    // Existing ID encryption methods.
     String IdEncrypt(String data)
             throws InvalidKeyException,
             NoSuchPaddingException,

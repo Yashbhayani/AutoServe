@@ -6,6 +6,7 @@ import java.util.List;
 public class Appointment {
 
     private Long id;
+    private Long vehicleId;
     private List<String> serviceRequest;
     private LocalDateTime scheduledDate;
     private Long technicianId;
@@ -15,9 +16,11 @@ public class Appointment {
     }
 
     public Appointment(Long id, List<String> serviceRequest,
+                       Long vehicleId,
                        LocalDateTime scheduledDate, Long technicianId,
                        Integer statusId) {
         this.id = id;
+        this.vehicleId =  vehicleId;
         this.serviceRequest = serviceRequest;
         this.scheduledDate = scheduledDate;
         this.technicianId = technicianId;
@@ -30,6 +33,14 @@ public class Appointment {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getVehicleId() {
+        return vehicleId;
+    }
+
+    public void setVehicleId(Long vehicleId) {
+        this.vehicleId = vehicleId;
     }
 
     public List<String> getServiceRequest() {

@@ -1,8 +1,8 @@
 package com.example.DevAutoServ.Services;
 
 import com.example.DevAutoServ.Enum.ProjectCodes;
-import com.example.DevAutoServ.Model.Appointment;
 import com.example.DevAutoServ.CommonModel.CommonQueryServicesModel;
+import com.example.DevAutoServ.Model.Appointment;
 import com.example.DevAutoServ.Repository.AppointmentsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -14,7 +14,6 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.PrimitiveIterator;
 
 
 @Service
@@ -46,6 +45,8 @@ public class AppointmentsServices implements AppointmentsRepository {
 
         try {
 
+
+
             for(String app:appointment.getServiceRequest()){
                 GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -55,21 +56,11 @@ public class AppointmentsServices implements AppointmentsRepository {
                     PreparedStatement ps = connection.prepareStatement(
                             queries.InsertAppointment,
                             Statement.RETURN_GENERATED_KEYS);
-
                     ps.setLong(1, SID);
-
-//                    if (appointment.getTechnicianId() == null) {
-//                        ps.setNull(2, Types.BIGINT);
-//                    } else {
-//                        ps.setLong(2, appointment.getTechnicianId());
-//                    }
-
                     ps.setTimestamp(2, Timestamp.valueOf(
                             appointment.getScheduledDate()));
-
                     int StatusID =   queryHandlerServices.GetServicsType(commonQueryServicesModel.GetStatusID, ProjectCodes.AppointmentStatus.SCHEDULED.name());
                     ps.setLong(3, StatusID);
-
 
                     return ps;
                 }, keyHolder);

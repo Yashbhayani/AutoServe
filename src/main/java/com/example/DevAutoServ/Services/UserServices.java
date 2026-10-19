@@ -3,6 +3,7 @@ package com.example.DevAutoServ.Services;
 import com.example.DevAutoServ.AutoServeModel.LogIn;
 import com.example.DevAutoServ.CommonModel.CommonQueryServicesModel;
 import com.example.DevAutoServ.Enum.ProjectCodes;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.example.DevAutoServ.AutoServeModel.User;
@@ -28,7 +29,7 @@ public class UserServices implements UserRepository {
     private  QueryHandlerServices queryHandlerServices;
     private JdbcTemplate jdbcTemplate;
     private PasswordServices passwordServices;
-    private  final  AuthServices authServices;
+    private AuthServices authServices;
     public String SpResult = null;
 
     CommonQueryServicesModel commonQueryServicesModel = new CommonQueryServicesModel();
@@ -40,10 +41,13 @@ public class UserServices implements UserRepository {
         this.authServices = authServices;
         this.queryHandlerServices  = queryHandlerServices;
         this.jdbcTemplate = jdbcTemplate;
+        this.passwordServices = passwordServices;
     }
 
+
+
     @Override
-    public Map<String, Object> AddUser(User userModel) {
+    public Map<String, Object> AddUser(User userModel, HttpServletResponse responses) {
 
         Map<String, Object> response = new HashMap<>();
 
@@ -128,6 +132,7 @@ public class UserServices implements UserRepository {
                 response.put("message", "Invalid email or password");
                 return response;
             }
+
 
             Map<String, Object> user = users.get(0);
 

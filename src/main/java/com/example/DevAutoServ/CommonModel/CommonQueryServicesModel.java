@@ -1,6 +1,7 @@
 package com.example.DevAutoServ.CommonModel;
 
 public class CommonQueryServicesModel {
+
     public String CheckDublicateMail= "SELECT CASE\n" +
             "    WHEN COUNT(*) > 1 THEN TRUE\n" +
             "    ELSE FALSE\n" +
@@ -206,4 +207,10 @@ public class CommonQueryServicesModel {
           LIMIT 1
       )
     """;
+
+    public String ServiceRequests= """
+            Insert INTO dev_autoserve.service_requests
+            	(customer_id, vehicle_id, description, preferred_date)
+            VALUES ( ?, ?, ?, ?)
+            """;
 }

@@ -3,6 +3,7 @@ package com.example.DevAutoServ.Controller;
 import com.example.DevAutoServ.AutoServeModel.LogIn;
 import com.example.DevAutoServ.AutoServeModel.User;
 import com.example.DevAutoServ.Repository.UserRepository;
+import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.ComponentScan;
@@ -25,8 +26,8 @@ public class UserController {
     }
 
     @PostMapping("/add")
-    public Map<String, Object> AddUser(@RequestBody User userModel){
-        return userRepository.AddUser(userModel);
+    public Map<String, Object> AddUser(@RequestBody User userModel, HttpServletResponse responses){
+        return userRepository.AddUser(userModel, responses);
     }
 
     @GetMapping("/login")

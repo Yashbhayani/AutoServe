@@ -12,12 +12,13 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-import javax.crypto.BadPaddingException;
+
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -36,13 +37,13 @@ public class AuthServices implements AuthRepository {
     @Value("${jwt.refresh-expiration}")
     private Long refreshExpiration;
 
-    // Existing key used for ID encryption/decryption.
+    // Existing key for ID encryption/decryption
     @Value("${secretKey}")
-    public String secretKey;
+    private String secretKey;
 
     private SecretKey key;
 
-    // Initialize and validate the JWT signing key.
+    // INITIALIZE JWT SIGNING KEY
     @PostConstruct
     public void init() {
 
@@ -71,88 +72,49 @@ public class AuthServices implements AuthRepository {
             );
         }
 
-        // HS256 requires at least 256 bits (32 bytes).
+        // Require at least 256 bits for HMAC signing.
         if (decodedSecret.length < 32) {
             throw new IllegalArgumentException(
-                    "JWT secret must decode to at least 32 bytes. "
-                            + "Generate a secure 32-byte random key "
-                            + "and Base64-encode it."
+                    "JWT secret must decode to at least 32 bytes."
             );
         }
 
         this.key = Keys.hmacShaKeyFor(decodedSecret);
     }
 
+    // GENERATE ACCESS TOKEN
     @Override
-    public String refreshAccessToken(String refreshToken) {
-
-        if (!isRefreshTokenValid(refreshToken)) {
-            throw new IllegalArgumentException(
-                    "Invalid or expired refresh token."
-            );
-        }
-
-        String username = getUsernameFromToken(refreshToken);
-
-        return generateAccessToken(
-                username,
-                getIpv4FromToken(refreshToken),
-                getIpv6FromToken(refreshToken),
-                getBrowserFromToken(refreshToken),
-                getOsFromToken(refreshToken),
-                getDeviceFromToken(refreshToken)
-        );
-    }
-
-    public String generateAccessToken(
-            String username,
-            String ipv4,
-            String ipv6,
-            String browser,
-            String os,
-            String device) {
+    public String generateAccessToken(String username) {
 
         return generateToken(
                 username,
-                ipv4,
-                ipv6,
-                browser,
-                os,
-                device,
                 expiration,
                 "access"
         );
     }
 
-    public String generateRefreshToken(
-            String username,
-            String ipv4,
-            String ipv6,
-            String browser,
-            String os,
-            String device) {
+    // GENERATE REFRESH TOKEN
+    @Override
+    public String generateRefreshToken(String username) {
 
         return generateToken(
                 username,
-                ipv4,
-                ipv6,
-                browser,
-                os,
-                device,
                 refreshExpiration,
                 "refresh"
         );
     }
 
+    // COMMON TOKEN GENERATION
     private String generateToken(
             String username,
-            String ipv4,
-            String ipv6,
-            String browser,
-            String os,
-            String device,
             long expirationMs,
             String tokenType) {
+
+        if (username == null || username.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Email/username cannot be empty."
+            );
+        }
 
         Date now = new Date();
 
@@ -165,15 +127,27 @@ public class AuthServices implements AuthRepository {
                 .issuedAt(now)
                 .expiration(expiryDate)
                 .claim("tokenType", tokenType)
-                .claim("ipv4", ipv4)
-                .claim("ipv6", ipv6)
-                .claim("browser", browser)
-                .claim("os", os)
-                .claim("device", device)
                 .signWith(key)
                 .compact();
     }
 
+    // REFRESH ACCESS TOKEN
+    @Override
+    public String refreshAccessToken(String refreshToken) {
+
+        if (!isRefreshTokenValid(refreshToken)) {
+            throw new IllegalArgumentException(
+                    "Invalid or expired refresh token."
+            );
+        }
+
+        String username = getUsernameFromToken(refreshToken);
+
+        return generateAccessToken(username);
+    }
+
+    // EXTRACT JWT CLAIMS
+    @Override
     public Jws<Claims> getClaims(String token) {
 
         return Jwts.parser()
@@ -182,48 +156,24 @@ public class AuthServices implements AuthRepository {
                 .parseSignedClaims(token);
     }
 
+    @Override
     public String getUsernameFromToken(String token) {
+
         return getClaims(token)
                 .getPayload()
                 .getSubject();
     }
 
-    public String getIpv4FromToken(String token) {
-        return getClaims(token)
-                .getPayload()
-                .get("ipv4", String.class);
-    }
-
-    public String getIpv6FromToken(String token) {
-        return getClaims(token)
-                .getPayload()
-                .get("ipv6", String.class);
-    }
-
-    public String getBrowserFromToken(String token) {
-        return getClaims(token)
-                .getPayload()
-                .get("browser", String.class);
-    }
-
-    public String getOsFromToken(String token) {
-        return getClaims(token)
-                .getPayload()
-                .get("os", String.class);
-    }
-
-    public String getDeviceFromToken(String token) {
-        return getClaims(token)
-                .getPayload()
-                .get("device", String.class);
-    }
-
+    @Override
     public String getTokenType(String token) {
+
         return getClaims(token)
                 .getPayload()
                 .get("tokenType", String.class);
     }
 
+    // VALIDATE TOKEN
+    @Override
     public boolean isTokenValid(String token) {
 
         try {
@@ -239,6 +189,7 @@ public class AuthServices implements AuthRepository {
         }
     }
 
+    @Override
     public boolean isAccessTokenValid(String token) {
 
         try {
@@ -250,6 +201,7 @@ public class AuthServices implements AuthRepository {
         }
     }
 
+    @Override
     public boolean isRefreshTokenValid(String token) {
 
         try {
@@ -261,7 +213,7 @@ public class AuthServices implements AuthRepository {
         }
     }
 
-    // Existing ID encryption method retained for compatibility.
+    // ENCRYPT ID
     @Override
     public String IdEncrypt(String data)
             throws InvalidKeyException,
@@ -301,7 +253,7 @@ public class AuthServices implements AuthRepository {
         }
     }
 
-    // Existing ID decryption method retained for compatibility.
+    // DECRYPT ID
     @Override
     public String IdDecrypt(String encryptedText)
             throws NoSuchPaddingException,

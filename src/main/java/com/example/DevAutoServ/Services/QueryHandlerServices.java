@@ -8,19 +8,20 @@ import org.springframework.stereotype.Service;
 public class QueryHandlerServices {
     @Autowired
     private JdbcTemplate jdbcTemplate;
+    public  String Query;
 
     public  String CheckDublicatResult(String querystring, String data){
-        String Query  = jdbcTemplate.queryForObject(querystring, new Object[]{data.toLowerCase()}, String.class);
+        Query  = jdbcTemplate.queryForObject(querystring, new Object[]{data.toLowerCase()}, String.class);
         return  Query.toString();
     }
 
     public Short GetRole(String querystring, String data){
-        String Query  = jdbcTemplate.queryForObject(querystring, new Object[]{data.toUpperCase()}, String.class);
+        Query  = jdbcTemplate.queryForObject(querystring, new Object[]{data.toUpperCase()}, String.class);
         return  Short.parseShort(Query);
     }
 
     public int GetServicsType(String querystring ,String code){
-        String Query = jdbcTemplate.queryForObject(querystring, new Object[]{code.toUpperCase()}, String.class);
+        Query = jdbcTemplate.queryForObject(querystring, new Object[]{code.toUpperCase()}, String.class);
         return  Integer.parseInt(Query);
     }
 }
