@@ -1,0 +1,10 @@
+{
+  "description": "Streamline automotive service management with role-based dashboards for customers, technicians, and admins to track repairs, appointments, and inventory.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
