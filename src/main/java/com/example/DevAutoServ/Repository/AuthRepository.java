@@ -11,7 +11,6 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
 public interface AuthRepository {
-/*
     // Generate access token
     String generateAccessToken(
             String username,
@@ -23,14 +22,14 @@ public interface AuthRepository {
     );
 
     // Generate refresh token
-    String generateRefreshToken(
-            String username,
-            String ipv4,
-            String ipv6,
-            String browser,
-            String os,
-            String device
-    );
+//    String generateRefreshToken(
+//            String username,
+//            String ipv4,
+//            String ipv6,
+//            String browser,
+//            String os,
+//            String device
+//    );
 
 
     // Extract token information
@@ -62,7 +61,7 @@ public interface AuthRepository {
     String refreshAccessToken(String refreshToken);
 
     // Existing ID encryption methods
-    String IdEncrypt(long bookid)
+    String IdEncrypt(String data)
             throws InvalidKeyException,
             NoSuchPaddingException,
             NoSuchAlgorithmException;
@@ -72,5 +71,5 @@ public interface AuthRepository {
             NoSuchAlgorithmException,
             InvalidKeyException,
             IllegalBlockSizeException,
-            BadPaddingException;*/
+            BadPaddingException;
 }

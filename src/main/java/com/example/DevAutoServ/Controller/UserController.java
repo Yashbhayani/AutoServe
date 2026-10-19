@@ -1,23 +1,20 @@
 package com.example.DevAutoServ.Controller;
 
+import com.example.DevAutoServ.AutoServeModel.LogIn;
 import com.example.DevAutoServ.AutoServeModel.User;
-import com.example.DevAutoServ.Model.UserModel;
 import com.example.DevAutoServ.Repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
 @ComponentScan(basePackages = "com.example.DevAutoServ.Services")
 @Configuration
 @RestController
-@RequestMapping("api")
+@RequestMapping("api/user")
 public class UserController {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -27,8 +24,24 @@ public class UserController {
         this.userRepository = userRepository;
     }
 
-    @GetMapping("/add-user")
+    @PostMapping("/add")
     public Map<String, Object> AddUser(@RequestBody User userModel){
         return userRepository.AddUser(userModel);
+    }
+
+    @GetMapping("/login")
+    public Map<String, Object> login(@RequestBody LogIn logIn){
+        return userRepository.Login(logIn);
+    }
+
+    @PutMapping("/edit")
+    public Map<String, Object> EditUser(        @PathVariable Long id,
+                                                @RequestBody User userModel){
+        return userRepository.EditUser(userModel);
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public Map<String, Object> deleteUser(@PathVariable Long id) {
+        return userRepository.deleteUser(id);
     }
 }
