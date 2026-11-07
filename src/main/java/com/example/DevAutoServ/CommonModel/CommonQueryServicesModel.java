@@ -29,6 +29,40 @@ public class CommonQueryServicesModel {
             ")\n" +
             "VALUES ( ?,?);";
 
+
+    public String GetUserId = """
+    SELECT id
+    FROM dev_autoserve.users
+    WHERE username = ?
+      AND is_active = 1;
+    """;
+
+   public String GetUserRole = """
+         SELECT
+              r.name AS UserRole
+         FROM dev_autoserve.users AS u
+         INNER JOIN dev_autoserve.user_roles AS ur
+             ON ur.user_id = u.id
+         INNER JOIN dev_autoserve.roles AS r
+             ON r.id = ur.role_id
+         WHERE u.username = ?;
+         """;
+
+
+    public String CheckRolePermission = """
+    SELECT EXISTS (
+        SELECT 1
+        FROM dev_autoserve.permissions AS p
+        INNER JOIN dev_autoserve.role_permissions AS rp
+            ON rp.permission_id = p.id
+        INNER JOIN dev_autoserve.roles AS r
+            ON r.id = rp.role_id
+        WHERE p.code = ?
+          AND r.code = ?
+          AND p.is_active = 1
+          AND r.is_active = 1
+    )
+    """;
    public String GetRole = """
     SELECT Id
     FROM dev_autoserve.roles
@@ -212,5 +246,35 @@ public class CommonQueryServicesModel {
             Insert INTO dev_autoserve.service_requests
             	(customer_id, vehicle_id, description, preferred_date)
             VALUES ( ?, ?, ?, ?)
+            """;
+
+    public  String InsertRefreshtokens = """
+            INSERT INTO refresh_tokens (
+                user_id,
+                token_hash,
+                expires_at
+            )
+            VALUES (?, ?, ?)""";
+
+    public String ValidateAnActive= """
+            SELECT id, user_id, expires_at
+            FROM refresh_tokens
+            WHERE token_hash = ?
+              AND is_active = TRUE
+              AND expires_at > CURRENT_TIMESTAMP(3);
+            """;
+
+
+    public String DeactivateToken= """
+            UPDATE refresh_tokens
+            SET is_active = FALSE
+            WHERE token_hash = ?;""";
+
+
+    public String DeactivateUserRefreshTokens= """
+            SELECT id, user_id, is_active, expires_at, created_at, updated_at
+            FROM refresh_tokens
+            WHERE user_id = ?
+            ORDER BY created_at DESC;
             """;
 }

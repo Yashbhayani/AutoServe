@@ -1,6 +1,8 @@
 
 package com.example.DevAutoServ.Services;
 
+import com.example.DevAutoServ.CommonModel.CommonQueryServicesModel;
+import com.example.DevAutoServ.Enum.ProjectCodes;
 import com.example.DevAutoServ.Repository.AuthRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
@@ -10,6 +12,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.BadPaddingException;
@@ -18,12 +21,15 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+import javax.management.ObjectName;
 
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class AuthServices implements AuthRepository {
@@ -42,6 +48,9 @@ public class AuthServices implements AuthRepository {
     private String secretKey;
 
     private SecretKey key;
+    private  QueryHandlerServices queryHandlerServices;
+
+    CommonQueryServicesModel commonQueryServicesModel = new CommonQueryServicesModel();
 
     // INITIALIZE JWT SIGNING KEY
     @PostConstruct
@@ -299,4 +308,122 @@ public class AuthServices implements AuthRepository {
             );
         }
     }
+
+    @Override
+    public Date getTokenExpiration(String token) {
+        return getClaims(token)
+                .getPayload()
+                .getExpiration();
+    }
+
+    @Override
+    public Map<String, Object> VerifyToken(String authorization) {
+
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+
+            if (authorization == null || authorization.isBlank()) {
+                response.put("success", false);
+                response.put("message", "Authorization header is required");
+                return response;
+            }
+
+            if (!authorization.startsWith("Bearer ")) {
+                response.put("success", false);
+                response.put("message", "Invalid authorization header format");
+                return response;
+            }
+
+            String token = authorization.substring(7).trim();
+
+            if (token.isEmpty()) {
+                response.put("success", false);
+                response.put("message", "Access token is required");
+                return response;
+            }
+
+            if (!isAccessTokenValid(token)) {
+                response.put("success", false);
+                response.put("message", "Invalid or expired access token");
+                return response;
+            }
+
+            String username = getUsernameFromToken(token);
+
+            response.put("success", true);
+            response.put("message", "Token verified successfully");
+            response.put("username", username);
+
+            return response;
+
+        } catch (Exception e) {
+
+            response.put("success", false);
+            response.put("message", "Token verification failed");
+
+            return response;
+        }
+
+    }
+
+
+
+    public Map<String, Object> CheckUserRole(String username) {
+
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+
+            if (username == null || username.trim().isEmpty()) {
+                response.put("success", false);
+                response.put("message", "Username is required");
+                return response;
+            }
+
+            // Get user role from database
+            String userRole = queryHandlerServices.GetUserRole(
+                    commonQueryServicesModel.GetUserRole,
+                    username.trim()
+            );
+
+            // Check whether role exists
+            if (userRole == null || userRole.trim().isEmpty()) {
+                response.put("success", false);
+                response.put("message", "User role not found");
+                return response;
+            }
+
+            response.put("success", true);
+            response.put("message", "User role retrieved successfully");
+            response.put("userRole", userRole.toLowerCase());
+
+        } catch (EmptyResultDataAccessException e) {
+
+            response.put("success", false);
+            response.put("message", "No role assigned to this user");
+
+        } catch (Exception e) {
+
+            response.put("success", false);
+            response.put("message", "Unable to retrieve user role");
+        }
+
+        return response;
+    }
+
+
+    public  boolean CheckthePermission (String PermissionName, String Role ){
+
+        // 4. Check whether the user has ADMIN permission
+        boolean hasPermission = queryHandlerServices.CheckRolePermission(
+                commonQueryServicesModel.CheckRolePermission,
+                PermissionName,
+                Role
+        );
+
+        return hasPermission;
+
+    }
+
 }

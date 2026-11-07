@@ -14,6 +14,33 @@ public class ProjectCodes {
         StatusTableEnum
     }
 
+    public enum PermissionEnum {
+
+        PROFILE_VIEW,
+        PROFILE_UPDATE,
+
+        USER_VIEW_ALL,
+        USER_CREATE,
+        USER_UPDATE_ALL,
+        USER_DELETE,
+
+        VEHICLE_VIEW_OWN,
+        VEHICLE_CREATE,
+        VEHICLE_UPDATE_OWN,
+        VEHICLE_DELETE_OWN,
+
+        APPOINTMENT_VIEW_OWN,
+        APPOINTMENT_CREATE,
+        APPOINTMENT_UPDATE_OWN,
+        APPOINTMENT_MANAGE_ALL,
+
+        JOB_VIEW_ASSIGNED,
+        JOB_UPDATE_ASSIGNED,
+
+        REPORT_VIEW,
+        SERVICE_MANAGE
+    }
+
     public enum AppointmentStatus {
         SCHEDULED,
         CONFIRMED,

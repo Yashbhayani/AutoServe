@@ -9,6 +9,8 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Date;
+import java.util.Map;
 
 public interface AuthRepository {
 
@@ -53,4 +55,9 @@ public interface AuthRepository {
             InvalidKeyException,
             IllegalBlockSizeException,
             BadPaddingException;
+
+    Date getTokenExpiration(String token);
+
+
+    Map<String, Object> VerifyToken(String authorization);
 }

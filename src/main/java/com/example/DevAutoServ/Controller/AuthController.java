@@ -27,4 +27,5 @@ public class AuthController {
     public String index() {
         return "Hello";
     }
+
 }
