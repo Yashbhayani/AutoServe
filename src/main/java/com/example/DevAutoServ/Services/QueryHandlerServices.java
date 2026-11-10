@@ -53,4 +53,13 @@ public class QueryHandlerServices {
 
         return result != null && result == 1;
     }
+
+    public  Integer checkVehicleQuery(String queryString, Long customerId, Long vehicleId ){
+        return  jdbcTemplate.queryForObject(
+                queryString,
+                Integer.class,
+                vehicleId,
+                customerId
+        );
+    }
 }

@@ -39,12 +39,12 @@ public class UserController {
         return userRepository.AddUser(userModel, responses);
     }
 
-    @GetMapping("/login")
+    @PostMapping("/login")
     public Map<String, Object> login(@RequestBody LogIn logIn){
         return userRepository.Login(logIn);
     }
 
-    @PutMapping("/edit")
+    @PutMapping("/edit/{id}")
     public Map<String, Object> EditUser(        @PathVariable Long id,
                                                 @RequestBody User userModel,
                                                 @RequestHeader(value = "Authorization", required = false)

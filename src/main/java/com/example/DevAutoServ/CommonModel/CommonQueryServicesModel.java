@@ -99,16 +99,18 @@ public class CommonQueryServicesModel {
 
     public String InsertVehicle = """
     INSERT INTO dev_autoserve.vehicles
-        (customer_id, make, model, year, vin, license_plate)
-    VALUES (?, ?, ?, ?, ?, ?)
+        (customer_id, make, color, model, year, vin, mileage, license_plate)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     """;
 
     public String EditVehicle = """
     UPDATE dev_autoserve.vehicles
     SET make = ?,
+        color = ?,
         model = ?,
         year = ?,
         vin = ?,
+        mileage = ?,
         license_plate = ?
     WHERE id = ?
       AND is_active = TRUE
@@ -249,7 +251,7 @@ public class CommonQueryServicesModel {
             """;
 
     public  String InsertRefreshtokens = """
-            INSERT INTO refresh_tokens (
+            INSERT INTO dev_autoserve.refresh_tokens (
                 user_id,
                 token_hash,
                 expires_at
@@ -258,7 +260,7 @@ public class CommonQueryServicesModel {
 
     public String ValidateAnActive= """
             SELECT id, user_id, expires_at
-            FROM refresh_tokens
+            FROM dev_autoserve.refresh_tokens
             WHERE token_hash = ?
               AND is_active = TRUE
               AND expires_at > CURRENT_TIMESTAMP(3);
@@ -266,15 +268,69 @@ public class CommonQueryServicesModel {
 
 
     public String DeactivateToken= """
-            UPDATE refresh_tokens
+            UPDATE dev_autoserve.refresh_tokens
             SET is_active = FALSE
             WHERE token_hash = ?;""";
 
 
     public String DeactivateUserRefreshTokens= """
             SELECT id, user_id, is_active, expires_at, created_at, updated_at
-            FROM refresh_tokens
+            FROM dev_autoserve.refresh_tokens
             WHERE user_id = ?
             ORDER BY created_at DESC;
             """;
+
+    public  String IsVehicleOwned = """
+                SELECT COUNT(*) FROM dev_autoserve.vehicles
+                WHERE id = ? AND customer_id = ? AND is_active = 1;
+                """;
+
+    public  String AreServiceTypesActive = """
+                SELECT COUNT(*) FROM dev_autoserve.service_types
+                WHERE is_active = 1 AND id IN ( ? );""";
+
+    public String  GetStatusId = """
+                SELECT id FROM dev_autoserve.statuses
+                WHERE table_code = ?
+                  AND code = ?
+                  AND is_active = 1
+                LIMIT 1;
+                """;
+
+    public  String InsertServiceRequest = """
+                INSERT INTO dev_autoserve.service_requests
+                (customer_id, vehicle_id, description, preferred_date, status_id)
+                VALUES (?, ?, ?, ?, ?);
+                """;
+
+    public  String InsertSelectedServicesTypes = """
+                INSERT INTO dev_autoserve.service_request_services
+                (service_request_id, service_type_id, is_active)
+                VALUES (?, ?, 1);
+                """;
+
+    public  String UpdateServiceRequests = """
+                UPDATE dev_autoserve.service_requests
+                SET vehicle_id = ?,
+                    description = ?,
+                    preferred_date = ?
+                WHERE id = ?
+                  AND customer_id = ?
+                  AND is_active = 1;
+                """;
+
+    public  String DeactivateOldTypes = """
+                UPDATE dev_autoserve.service_request_services
+                SET is_active = 0
+                WHERE service_request_id = ?
+                  AND is_active = 1;
+                """;
+
+    public  String DeleteServiceRequests = """
+                UPDATE dev_autoserve.service_requests
+                SET is_active = 0
+                WHERE id = ?
+                  AND customer_id = ?
+                  AND is_active = 1;
+                """;
 }

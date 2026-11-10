@@ -2,6 +2,7 @@ package com.example.DevAutoServ.Services;
 
 import com.example.DevAutoServ.AutoServeModel.Vehicle;
 import com.example.DevAutoServ.CommonModel.CommonQueryServicesModel;
+import com.example.DevAutoServ.Model.VehiclesModel;
 import com.example.DevAutoServ.Repository.VehiclesRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -34,7 +35,7 @@ public class VehiclesServices implements VehiclesRepository {
 
 
     @Override
-    public Map<String, Object> AddVehicles(Vehicle vehicle) {
+    public Map<String, Object> AddVehicles(VehiclesModel vehicle) {
         Map<String, Object> response = new HashMap<>();
 
         try {
@@ -48,9 +49,11 @@ public class VehiclesServices implements VehiclesRepository {
 
                 ps.setLong(1, vehicle.getCustomerId());
                 ps.setString(2, vehicle.getMake());
-                ps.setString(3, vehicle.getModel());
-                ps.setInt(4, vehicle.getYear());
-                ps.setString(5, vehicle.getVin());
+                ps.setString(3, vehicle.getColor());
+                ps.setString(4, vehicle.getModel());
+                ps.setInt(5, vehicle.getYear());
+                ps.setString(6, vehicle.getVin());
+                ps.setString(7, vehicle.getMileage());
                 ps.setString(6, vehicle.getLicensePlate());
 
                 return ps;
@@ -74,16 +77,18 @@ public class VehiclesServices implements VehiclesRepository {
     }
 
     @Override
-    public Map<String, Object> EditVehicles(Vehicle vehicle) {
+    public Map<String, Object> EditVehicles(VehiclesModel vehicle) {
         Map<String, Object> response = new HashMap<>();
 
         try {
             int rows = jdbcTemplate.update(
                     commonQueryServicesModel.EditVehicle,
                     vehicle.getMake(),
+                    vehicle.getColor(),
                     vehicle.getModel(),
                     vehicle.getYear(),
                     vehicle.getVin(),
+                    vehicle.getMileage(),
                     vehicle.getLicensePlate(),
                     vehicle.getId()
             );

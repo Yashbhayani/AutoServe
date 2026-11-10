@@ -1,6 +1,7 @@
 package com.example.DevAutoServ.Model;
 
-public class VehicleClass {
+public class VehiclesModel
+{
 
     private Long id;
     private Long customerId;
@@ -12,7 +13,7 @@ public class VehicleClass {
     private String mileage;
     private String licensePlate;
 
-    public VehicleClass(Long id, Long customerId, String make, String color, String model, Short year, String vin, String mileage, String licensePlate) {
+    public VehiclesModel(Long id, Long customerId, String make, String color, String model, Short year, String vin, String mileage, String licensePlate) {
         this.id = id;
         this.customerId = customerId;
         this.make = make;

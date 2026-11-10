@@ -86,5 +86,15 @@ public class ProjectCodes {
         SYSTEM
     }
 
+    public enum SERVICEREQUEST {
+        SUBMITTED,
+        UNDER_REVIEW,
+        APPROVED,
+        REJECTED,
+        IN_PROGRESS,
+        COMPLETED,
+        CANCELLED
+    }
+
 
 }
