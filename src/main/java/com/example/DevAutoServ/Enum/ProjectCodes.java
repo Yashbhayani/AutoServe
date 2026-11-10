@@ -18,6 +18,7 @@ public class ProjectCodes {
 
         PROFILE_VIEW,
         PROFILE_UPDATE,
+        PROFILE_DELETE,
 
         USER_VIEW_ALL,
         USER_CREATE,

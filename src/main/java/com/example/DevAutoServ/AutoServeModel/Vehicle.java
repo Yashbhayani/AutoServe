@@ -26,6 +26,9 @@ public class Vehicle {
     @Column(nullable = false)
     private Short year;
 
+    @Column(nullable = false, length = 50)
+    private String color;
+
     @Column(length = 17)
     private String vin;
 

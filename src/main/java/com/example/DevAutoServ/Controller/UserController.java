@@ -48,7 +48,7 @@ public class UserController {
     public Map<String, Object> EditUser(        @PathVariable Long id,
                                                 @RequestBody User userModel,
                                                 @RequestHeader(value = "Authorization", required = false)
-                                                    String authorization) {
+                                                        String authorization) {
         Map<String, Object> tokenResponse = authServices.VerifyToken(authorization);
 
         if (!Boolean.TRUE.equals(tokenResponse.get("success"))) {
@@ -56,11 +56,14 @@ public class UserController {
         }
         String loggedInUsername =
                 tokenResponse.get("username").toString();
+
         userModel.setId(id);
+
         Map<String, Object> getUserRole = authServices.CheckUserRole(loggedInUsername);
         if (!Boolean.TRUE.equals(getUserRole.get("success"))) {
             return getUserRole;
         }
+
         String userRole = getUserRole.get("userRole").toString();
 
 
@@ -69,7 +72,7 @@ public class UserController {
                 userRole.equalsIgnoreCase(ProjectCodes.RoleEnum.ADMIN.name())
                 &&
                 authServices.CheckthePermission(
-                            ProjectCodes.PermissionEnum.PROFILE_UPDATE.name(),
+                            ProjectCodes.PermissionEnum.USER_UPDATE_ALL.name(),
                             ProjectCodes.RoleEnum.ADMIN.name()
                     )) {
                 userModel.setId(id);
@@ -86,18 +89,29 @@ public class UserController {
                 || userRole.equalsIgnoreCase(
                 ProjectCodes.RoleEnum.TECHNICIAN.name())) {
 
+            // Check PROFILE_UPDATE permission for the user's role
+            boolean hasPermission = authServices.CheckthePermission(
+                    ProjectCodes.PermissionEnum.PROFILE_UPDATE.name(),
+                    userRole
+            );
+
+            if (!hasPermission) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "You do not have permission to update your profile");
+                return response;
+            }
+
             // Find the ID of the logged-in user
             Long loggedInUserId = queryHandlerServices.GetUserId
                     (commonQueryServicesModel.GetUserId,loggedInUsername);
 
-            // Prevent updating another user's details
-            if (!loggedInUserId.equals(id)) {
 
+            // Check ownership
+            if (!loggedInUserId.equals(id)) {
                 Map<String, Object> response = new HashMap<>();
                 response.put("success", false);
-                response.put("message",
-                        "You are not authorized to update this user");
-
+                response.put("message", "You can only update your own profile");
                 return response;
             }
 
@@ -118,20 +132,90 @@ public class UserController {
     }
 
     @DeleteMapping("/delete/{id}")
-    public Map<String, Object> deleteUser(@PathVariable Long id,
-                                          @RequestHeader(value = "Authorization", required = false)
-                                          String authorization) {
-        Map<String, Object> tokenResponse = authServices.VerifyToken(authorization);
+    public Map<String, Object> deleteUser(
+            @PathVariable Long id,
+            @RequestHeader(value = "Authorization", required = false)
+            String authorization) {
+
+        // 1. Verify access token
+        Map<String, Object> tokenResponse =
+                authServices.VerifyToken(authorization);
 
         if (!Boolean.TRUE.equals(tokenResponse.get("success"))) {
             return tokenResponse;
         }
 
+        String loggedInUsername =
+                tokenResponse.get("username").toString();
 
+        // 2. Get logged-in user's role
+        Map<String, Object> getUserRole =
+                authServices.CheckUserRole(loggedInUsername);
 
+        if (!Boolean.TRUE.equals(getUserRole.get("success"))) {
+            return getUserRole;
+        }
 
+        String userRole = getUserRole.get("userRole").toString();
+
+        // 3. ADMIN can delete any user
+        if (userRole.equalsIgnoreCase(
+                ProjectCodes.RoleEnum.ADMIN.name())) {
+
+            boolean hasPermission = authServices.CheckthePermission(
+                    ProjectCodes.PermissionEnum.USER_DELETE.name(),
+                    ProjectCodes.RoleEnum.ADMIN.name()
+            );
+
+            if (!hasPermission) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "You do not have permission to delete users");
+                return response;
+            }
 
             return userRepository.deleteUser(id);
+        }
+
+        // 4. CUSTOMER can delete only their own profile
+        if (userRole.equalsIgnoreCase(
+                ProjectCodes.RoleEnum.CUSTOMER.name())) {
+
+            boolean hasPermission = authServices.CheckthePermission(
+                    ProjectCodes.PermissionEnum.PROFILE_DELETE.name(),
+                    ProjectCodes.RoleEnum.CUSTOMER.name()
+            );
+
+            if (!hasPermission) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "You do not have permission to delete your profile");
+                return response;
+            }
+
+            // Get logged-in user's ID
+            Long loggedInUserId = queryHandlerServices.GetUserId(
+                    commonQueryServicesModel.GetUserId,
+                    loggedInUsername
+            );
+
+            // Check ownership
+            if (!loggedInUserId.equals(id)) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "You can only delete your own profile");
+                return response;
+            }
+
+            return userRepository.deleteUser(loggedInUserId);
+        }
+
+        // 5. TECHNICIAN and other roles are denied
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", false);
+        response.put("message", "Access denied");
+
+        return response;
     }
 
     @GetMapping("/user-list")
