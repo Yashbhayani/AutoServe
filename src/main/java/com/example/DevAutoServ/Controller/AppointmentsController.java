@@ -2,6 +2,9 @@
 package com.example.DevAutoServ.Controller;
 
 import com.example.DevAutoServ.Enum.ProjectCodes;
+import com.example.DevAutoServ.Model.ScheduledServiceAppointmentsModel;
+import com.example.DevAutoServ.Model.ServiceRequestModel;
+import com.example.DevAutoServ.Repository.AppointmentsRepository;
 import com.example.DevAutoServ.Services.AppointmentsServices;
 import com.example.DevAutoServ.Services.AuthServices;
 import com.example.DevAutoServ.Services.StatusServices;
@@ -17,7 +20,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("api/appointments")
-public class AppointmentsController {
+public class AppointmentsController  {
 
     private final Logger logger =
             LoggerFactory.getLogger(this.getClass());
@@ -271,6 +274,53 @@ public class AppointmentsController {
     // PUT: /api/appointments/assign/{id}
     // ADMIN ONLY
     // ---------------------------------------------------------
+
+    @PostMapping("/create")
+    public  Map<String, Object> CreateAppointments(
+            @RequestBody ScheduledServiceAppointmentsModel scheduledServiceAppointmentsModel,
+            @RequestHeader(
+            value = "Authorization",
+            required = false
+    ) String authorization)
+    {
+        try{
+
+            Map<String, Object> authResponse = authorize(
+                    authorization,
+                    ProjectCodes.PermissionEnum
+                            .APPOINTMENT_CREATE.name()
+            );
+
+            if (!Boolean.TRUE.equals(authResponse.get("success"))) {
+                return authResponse;
+            }
+
+/*            LocalDateTime appointmentDateTime;
+
+            try {
+
+                appointmentDateTime =
+                        LocalDateTime.parse(scheduledServiceAppointmentsModel.getScheduledDate());
+
+            } catch (Exception e) {
+
+                return response(
+                        false,
+                        "Invalid date format. Use yyyy-MM-ddTHH:mm:ss."
+                );
+            }*/
+            return appointmentsServices.CreateAppointment(scheduledServiceAppointmentsModel);
+        }catch (Exception e){
+            logger.error(
+                    "Assign technician error: {}",
+                    e.getMessage(),
+                    e
+            );
+
+            return response(false, "Unable to assign technician.");
+        }
+
+    }
 
     @PutMapping("/assign/{id}")
     public Map<String, Object> AssignTechnicianAndSchedule(

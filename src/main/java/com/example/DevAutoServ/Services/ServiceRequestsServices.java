@@ -185,6 +185,7 @@ public class ServiceRequestsServices
             );
         }
 
+/*
         // 3. Automatically create appointment.
         // scheduled_date = NULL until Admin schedules it.
         // technician_id = NULL until Admin assigns a technician.
@@ -193,14 +194,15 @@ public class ServiceRequestsServices
                 serviceRequestId,
                 scheduledStatusId
         );
+*/
 
         Map<String, Object> response = Result(
                 true,
-                "Service request submitted and appointment created successfully."
+                "Service request submitted created successfully."
         );
 
         response.put("serviceRequestId", serviceRequestId);
-        response.put("appointmentStatus", "SCHEDULED");
+//        response.put("appointmentStatus", "SCHEDULED");
         response.put("serviceRequestStatus", "SUBMITTED");
 
         return response;

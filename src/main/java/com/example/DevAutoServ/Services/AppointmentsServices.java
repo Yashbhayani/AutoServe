@@ -2,11 +2,16 @@ package com.example.DevAutoServ.Services;
 
 import com.example.DevAutoServ.CommonModel.CommonQueryServicesModel;
 
+import com.example.DevAutoServ.Enum.ProjectCodes;
+import com.example.DevAutoServ.Model.ScheduledServiceAppointmentsModel;
 import com.example.DevAutoServ.Repository.AppointmentsRepository;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,20 +21,76 @@ public class AppointmentsServices implements AppointmentsRepository {
 
     private final JdbcTemplate jdbcTemplate;
     private final StatusServices statusServices;
-
+    private final QueryHandlerServices queryHandlerServices;
     private final CommonQueryServicesModel queries =
             new CommonQueryServicesModel();
 
     public AppointmentsServices(
             JdbcTemplate jdbcTemplate,
-            StatusServices statusServices
+            StatusServices statusServices,
+            QueryHandlerServices queryHandlerServices
     ) {
         this.jdbcTemplate = jdbcTemplate;
         this.statusServices = statusServices;
+        this.queryHandlerServices = queryHandlerServices;
+    }
+
+    @Transactional
+    public  Map<String, Object> CreateAppointment(
+            ScheduledServiceAppointmentsModel scheduledServiceAppointmentsModel){
+
+        int ServiceTypeID = queryHandlerServices.GetServicsType(queries.GetServiceTypeID, ProjectCodes.AppointmentStatus.SCHEDULED.name());
+
+        if(ServiceTypeID <= 0){
+            return Result(false, "Service is required.");
+        }
+
+
+        //
+        KeyHolder keyHolderUserRole = new GeneratedKeyHolder();
+
+        jdbcTemplate.update(connection -> {
+
+            PreparedStatement ps = connection.prepareStatement(
+                    queries.CreateAppoinment,
+                    Statement.RETURN_GENERATED_KEYS
+            );
+
+            ps.setLong(1, scheduledServiceAppointmentsModel.getServiceRequestId());
+
+
+            if (scheduledServiceAppointmentsModel.getScheduledDate() == null) {
+                ps.setNull(3, Types.TIMESTAMP);
+            } else {
+                ps.setTimestamp(
+                        3,
+                        Timestamp.valueOf(scheduledServiceAppointmentsModel.getScheduledDate())
+                );
+            }
+
+            if (scheduledServiceAppointmentsModel.getScheduledTime() == null) {
+                ps.setNull(4, Types.TIME);
+            } else {
+                ps.setTime(
+                        4,
+                        Time.valueOf(scheduledServiceAppointmentsModel.getScheduledTime())
+                );
+            }
+
+            ps.setInt(5, ServiceTypeID);
+
+            return ps;
+
+        }, keyHolderUserRole);
+        Map<String, Object> response = Result(
+                true,
+                "appointment scheduled successfully."
+        );
+
+        return response;
     }
 
     // ADMIN ASSIGNS TECHNICIAN AND SETS ACTUAL APPOINTMENT DATE/TIME
-
     @Transactional
     public Map<String, Object> AssignTechnicianAndSchedule(
             Long appointmentId,
@@ -58,19 +119,7 @@ public class AppointmentsServices implements AppointmentsRepository {
 
         try {
             appointment = jdbcTemplate.queryForMap(
-                    """
-                    SELECT
-                        a.id,
-                        a.service_request_id,
-                        a.status_id,
-                        s.code AS appointment_status
-                    FROM dev_autoserve.appointments a
-                    INNER JOIN dev_autoserve.statuses s
-                        ON s.id = a.status_id
-                    WHERE a.id = ?
-                      AND a.is_active = 1
-                    FOR UPDATE
-                    """,
+                    queries.ATechSchdappointment,
                     appointmentId
             );
         } catch (org.springframework.dao.EmptyResultDataAccessException ex) {
@@ -82,15 +131,7 @@ public class AppointmentsServices implements AppointmentsRepository {
 
         // Service request must be approved before technician assignment.
         String requestStatus = jdbcTemplate.queryForObject(
-                """
-                SELECT s.code
-                FROM dev_autoserve.service_requests sr
-                INNER JOIN dev_autoserve.statuses s
-                    ON s.id = sr.status_id
-                WHERE sr.id = ?
-                  AND sr.is_active = 1
-                FOR UPDATE
-                """,
+                queries.ATechSchdrequestStatus,
                 String.class,
                 serviceRequestId
         );
@@ -133,16 +174,7 @@ public class AppointmentsServices implements AppointmentsRepository {
 
         // Set technician, actual date/time and confirmed status.
         jdbcTemplate.update(
-                """
-                UPDATE dev_autoserve.appointments
-                SET
-                    technician_id = ?,
-                    scheduled_date = ?,
-                    status_id = ?,
-                    is_appointed = 1
-                WHERE id = ?
-                  AND is_active = 1
-                """,
+                queries.ATechSchdupdate,
                 technicianId,
                 java.sql.Timestamp.valueOf(scheduledDate),
                 confirmedStatusId,
@@ -185,18 +217,7 @@ public class AppointmentsServices implements AppointmentsRepository {
 
         try {
             appointment = jdbcTemplate.queryForMap(
-                    """
-                    SELECT
-                        a.id,
-                        a.technician_id,
-                        s.code AS appointment_status
-                    FROM dev_autoserve.appointments a
-                    INNER JOIN dev_autoserve.statuses s
-                        ON s.id = a.status_id
-                    WHERE a.id = ?
-                      AND a.is_active = 1
-                    FOR UPDATE
-                    """,
+                    queries.RescheduleAppointment,
                     appointmentId
             );
         } catch (org.springframework.dao.EmptyResultDataAccessException ex) {
@@ -224,14 +245,7 @@ public class AppointmentsServices implements AppointmentsRepository {
         }
 
         jdbcTemplate.update(
-                """
-                UPDATE dev_autoserve.appointments
-                SET
-                    scheduled_date = ?,
-                    status_id = ?
-                WHERE id = ?
-                  AND is_active = 1
-                """,
+                queries.RescheduleAppointmentUpdate,
                 java.sql.Timestamp.valueOf(newScheduledDate),
                 rescheduledStatusId,
                 appointmentId

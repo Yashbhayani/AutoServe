@@ -63,6 +63,7 @@ public class CommonQueryServicesModel {
           AND r.code = ?
           AND p.is_active = 1
           AND r.is_active = 1
+          AND rp.is_active = 1
     )
     """;
    public String GetRole = """
@@ -136,14 +137,12 @@ public class CommonQueryServicesModel {
         """;
 
 
-/*
     public  String GetServiceTypeID = """
             SELECT 
                 id
             FROM dev_autoserve.statuses
             WHERE code = ?
             """;
-*/
 
 /*
     public  String GetStatusID= """
@@ -162,6 +161,7 @@ public class CommonQueryServicesModel {
             service_request_id,
             technician_id,
             scheduled_date,
+            scheduled_time,
             status_id,
             is_active,
             is_appointed
@@ -195,6 +195,7 @@ public class CommonQueryServicesModel {
         """;
 
 
+/*
     public String ConfirmAppointment = """
     UPDATE dev_autoserve.appointments
     SET status_id = (
@@ -280,6 +281,7 @@ public class CommonQueryServicesModel {
           LIMIT 1
       )
     """;
+*/
 
 
     public  String InsertRefreshtokens = """
@@ -354,7 +356,7 @@ public class CommonQueryServicesModel {
             preferred_date,
             status_id,
             is_active,
-            preferred_date
+            preferred_time
         )
         VALUES (?, ?, ?, NULL, ?, ?, 1, ?)
         """;
@@ -383,7 +385,7 @@ public class CommonQueryServicesModel {
             vehicle_id = ?,
             description = ?,
             preferred_date = ?
-            preferred_date 
+            preferred_time = ? 
         WHERE id = ?
           AND customer_id = ?
           AND is_active = 1
@@ -503,7 +505,7 @@ public class CommonQueryServicesModel {
         """;
 
     // ADMIN ASSIGNS TECHNICIAN AND ACTUAL DATE/TIME
-    public final String AssignTechnicianAndSchedule = """
+   /* public final String AssignTechnicianAndSchedule = """
         UPDATE dev_autoserve.appointments
         SET
             technician_id = ?,
@@ -512,7 +514,7 @@ public class CommonQueryServicesModel {
             status_id = ?
         WHERE id = ?
           AND is_active = 1
-        """;
+        """;*/
 
     // CHECK TECHNICIAN ROLE
     public final String IsTechnicianValid = """
@@ -611,4 +613,235 @@ public class CommonQueryServicesModel {
     FOR UPDATE
     """;
 
+    public  String CreateAppoinment = """
+            INSERT INTO dev_autoserve.appointments
+            (
+                service_request_id,
+                scheduled_date,
+                scheduled_time,
+                status_id
+            )
+            VALUES
+            (? ,? ,? ,?);
+            """;
+
+    public  String ATechSchdappointment = """
+                    SELECT
+                        a.id,
+                        a.service_request_id,
+                        a.status_id,
+                        s.code AS appointment_status
+                    FROM dev_autoserve.appointments a
+                    INNER JOIN dev_autoserve.statuses s
+                        ON s.id = a.status_id
+                    WHERE a.id = ?
+                      AND a.is_active = 1
+                    FOR UPDATE
+                    """;
+
+    public  String ATechSchdrequestStatus = """
+                SELECT s.code
+                FROM dev_autoserve.service_requests sr
+                INNER JOIN dev_autoserve.statuses s
+                    ON s.id = sr.status_id
+                WHERE sr.id = ?
+                  AND sr.is_active = 1
+                FOR UPDATE
+                """;
+
+    public  String ATechSchdupdate = """
+                UPDATE dev_autoserve.appointments
+                SET
+                    technician_id = ?,
+                    scheduled_date = ?,
+                    status_id = ?,
+                    is_appointed = 1
+                WHERE id = ?
+                  AND is_active = 1
+                """;
+
+    public String  RescheduleAppointment = """
+                    SELECT
+                        a.id,
+                        a.technician_id,
+                        s.code AS appointment_status
+                    FROM dev_autoserve.appointments a
+                    INNER JOIN dev_autoserve.statuses s
+                        ON s.id = a.status_id
+                    WHERE a.id = ?
+                      AND a.is_active = 1
+                    FOR UPDATE
+                    """;
+    public String  RescheduleAppointmentUpdate = """
+                UPDATE dev_autoserve.appointments
+                SET
+                    scheduled_date = ?,
+                    status_id = ?
+                WHERE id = ?
+                  AND is_active = 1
+                """;
+
+    public  String getCategories = """
+            SELECT
+                id,
+                code,
+                name,
+                description
+            FROM dev_autoserve.part_categories
+            ORDER BY name
+        """;
+
+    public  String checkCategory="""
+            SELECT COUNT(*)
+            FROM dev_autoserve.part_categories
+            WHERE id = ?
+        """;
+    public  String getPartsByCategory =  """
+            SELECT
+                p.id,
+                p.category_id,
+                c.code AS category_code,
+                c.name AS category_name,
+                p.code,
+                p.name,
+                pp.unit_price,
+                pi.stock_quantity,
+                pi.reorder_level
+            FROM dev_autoserve.parts p
+
+            INNER JOIN dev_autoserve.part_categories c
+                ON c.id = p.category_id
+
+            LEFT JOIN dev_autoserve.part_prices pp
+                ON pp.part_id = p.id
+                AND pp.current_flag = 1
+                AND pp.is_active = 1
+
+            LEFT JOIN dev_autoserve.part_inventory pi
+                ON pi.part_id = p.id
+                AND pi.is_active = 1
+
+            WHERE p.category_id = ?
+
+            ORDER BY p.name
+        """;
+
+    public  String getPartById = """
+            SELECT
+                p.id,
+                p.category_id,
+                c.code AS category_code,
+                c.name AS category_name,
+                p.code,
+                p.name,
+                p.sku,
+                pp.unit_price,
+                pi.stock_quantity,
+                pi.reorder_level
+
+            FROM dev_autoserve.parts p
+
+            INNER JOIN dev_autoserve.part_categories c
+                ON c.id = p.category_id
+
+            LEFT JOIN dev_autoserve.part_prices pp
+                ON pp.part_id = p.id
+                AND pp.current_flag = 1
+                AND pp.is_active = 1
+
+            LEFT JOIN dev_autoserve.part_inventory pi
+                ON pi.part_id = p.id
+                AND pi.is_active = 1
+
+            WHERE p.id = ?
+            LIMIT 1
+        """;
+
+    public  String checkPartCode = """
+            SELECT COUNT(*)
+            FROM dev_autoserve.parts
+            WHERE code = ?
+        """;
+
+    public  String insertPart = """
+            INSERT INTO dev_autoserve.parts
+            (
+                category_id,
+                code,
+                name,
+                sku
+            )
+            VALUES (?, ?, ?, ?)
+        """;
+
+    public  String insertPartPrice = """
+            INSERT INTO dev_autoserve.part_prices
+            (
+                part_id,
+                unit_price,
+                effective_from,
+                effective_to,
+                is_active
+            )
+            VALUES (?, ?, CURRENT_TIMESTAMP, NULL, 1)
+        """;
+
+    public  String getNextReorderLevel = """
+            SELECT reorder_level
+            FROM dev_autoserve.part_inventory
+            WHERE part_id = ?
+            ORDER BY id DESC
+            LIMIT 1
+            FOR UPDATE
+        """;
+
+    public  String savePartInventory = """
+            INSERT INTO dev_autoserve.part_inventory
+            (
+                part_id,
+                stock_quantity,
+                reorder_level,
+                is_active
+            )
+            VALUES (?, ?, ?, 1)
+
+            ON DUPLICATE KEY UPDATE
+                stock_quantity = VALUES(stock_quantity),
+                reorder_level = VALUES(reorder_level),
+                is_active = 1
+        """;
+
+    public  String updatePart= """
+            UPDATE dev_autoserve.parts
+            SET
+                category_id = ?,
+                code = ?,
+                name = ?,
+                sku = ?
+            WHERE id = ?
+        """;
+
+    public String getCurrentPrice =  """
+            SELECT unit_price
+            FROM dev_autoserve.part_prices
+            WHERE part_id = ?
+              AND current_flag = 1
+              AND is_active = 1
+            LIMIT 1
+        """;
+
+    public  String closeCurrentPrice =  """
+            UPDATE dev_autoserve.part_prices
+            SET effective_to = CURRENT_TIMESTAMP
+            WHERE part_id = ?
+              AND current_flag = 1
+        """;
+
+    public  String deletePart = """
+            UPDATE dev_autoserve.parts
+            SET
+                is_active = 0
+            WHERE id = ?
+        """;
 }
+

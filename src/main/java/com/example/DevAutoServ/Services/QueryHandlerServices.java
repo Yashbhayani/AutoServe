@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class QueryHandlerServices {
@@ -99,4 +100,45 @@ public class QueryHandlerServices {
 
         return statusIds.isEmpty() ? null : statusIds.get(0);
     }
+
+    // GET ALL CATEGORIES
+    public List<Map<String, Object>> getCategories(String query) {
+        return jdbcTemplate.queryForList(query);
+    }
+
+    // CHECK CATEGORY
+    public Integer checkCategory(String query,Long categoryId) {
+
+        return jdbcTemplate.queryForObject(
+                query,
+                Integer.class,
+                categoryId
+        );
+    }
+
+    // GET PARTS BY CATEGORY
+    public List<Map<String, Object>> getPartsByCategory(String query, Long categoryId) {
+        return jdbcTemplate.queryForList(query, categoryId);
+
+    }
+
+    // GET PART BY ID
+    public Map<String, Object> getPartById(String query, Long id) {
+
+        List<Map<String, Object>> result =
+                jdbcTemplate.queryForList(query, id);
+
+        return result.isEmpty() ? null : result.get(0);
+    }
+
+    // CHECK DUPLICATE PART CODE
+    public Integer checkPartCode(String query, String code) {
+
+        return jdbcTemplate.queryForObject(
+                query,
+                Integer.class,
+                code
+        );
+    }
+
 }
