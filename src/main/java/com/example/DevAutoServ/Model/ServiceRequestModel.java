@@ -1,6 +1,7 @@
 package com.example.DevAutoServ.Model;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 public class ServiceRequestModel {
@@ -11,8 +12,12 @@ public class ServiceRequestModel {
     private List<Integer> serviceTypeList ;
     private LocalDate preferredDate;
     private Integer statusId;
+    private LocalTime preferredTime;
 
-    public ServiceRequestModel(Long id, Long customerId, Long vehicleId, String description, List<Integer> serviceTypeList, LocalDate preferredDate, Integer statusId) {
+    public ServiceRequestModel() {
+    }
+
+    public ServiceRequestModel(Long id, Long customerId, Long vehicleId, String description, List<Integer> serviceTypeList, LocalDate preferredDate, Integer statusId, LocalTime preferredTime) {
         this.id = id;
         this.customerId = customerId;
         this.vehicleId = vehicleId;
@@ -20,6 +25,7 @@ public class ServiceRequestModel {
         this.serviceTypeList = serviceTypeList;
         this.preferredDate = preferredDate;
         this.statusId = statusId;
+        this.preferredTime = preferredTime;
     }
 
     public Long getId() {
@@ -76,5 +82,13 @@ public class ServiceRequestModel {
 
     public void setStatusId(Integer statusId) {
         this.statusId = statusId;
+    }
+
+    public LocalTime getPreferredTime() {
+        return preferredTime;
+    }
+
+    public void setPreferredTime(LocalTime preferredTime) {
+        this.preferredTime = preferredTime;
     }
 }

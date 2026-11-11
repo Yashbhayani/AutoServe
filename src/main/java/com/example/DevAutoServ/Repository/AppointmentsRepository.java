@@ -1,18 +1,19 @@
 package com.example.DevAutoServ.Repository;
 
-import com.example.DevAutoServ.Model.Appointment;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 public interface AppointmentsRepository {
-    Map<String, Object> CreateAppointment(Appointment appointment);
-
-    Map<String, Object> ConfirmAppointment(Long id);
+    Map<String, Object> AssignTechnicianAndSchedule(
+            Long appointmentId,
+            Long technicianId,
+            LocalDateTime scheduledDate
+    );
 
     Map<String, Object> RescheduleAppointment(
-            Long id, Appointment appointment);
+            Long appointmentId,
+            LocalDateTime newScheduledDate
+    );
 
-    Map<String, Object> CancelAppointment(Long id);
-
-    Map<String, Object> CompleteAppointment(Long id);
 }

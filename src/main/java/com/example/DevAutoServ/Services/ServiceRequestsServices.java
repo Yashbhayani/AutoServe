@@ -1,176 +1,447 @@
 package com.example.DevAutoServ.Services;
 
 import com.example.DevAutoServ.CommonModel.CommonQueryServicesModel;
-import com.example.DevAutoServ.Enum.ProjectCodes;
 import com.example.DevAutoServ.Model.ServiceRequestModel;
 import com.example.DevAutoServ.Repository.ServiceRequestsRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.PreparedStatement;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-public class ServiceRequestsServices implements ServiceRequestsRepository {
+@Service
+public class ServiceRequestsServices
+        implements ServiceRequestsRepository {
 
-    @Autowired
-    private  QueryHandlerServices queryHandlerServices;
-    private JdbcTemplate jdbcTemplate;
-    private PasswordServices passwordServices;
-    public String SpResult = null;
+    private final JdbcTemplate jdbcTemplate;
+    private final StatusServices statusServices;
 
-    CommonQueryServicesModel commonQueryServicesModel = new CommonQueryServicesModel();
+    private final CommonQueryServicesModel queries =
+            new CommonQueryServicesModel();
 
-    public  ServiceRequestsServices(
-            QueryHandlerServices queryHandlerServices,
-            JdbcTemplate jdbcTemplate){
-        this.queryHandlerServices  = queryHandlerServices;
+    public ServiceRequestsServices(
+            JdbcTemplate jdbcTemplate,
+            StatusServices statusServices
+    ) {
         this.jdbcTemplate = jdbcTemplate;
+        this.statusServices = statusServices;
     }
 
-
-    private Map<String, Object> Result(boolean success, String message) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", success);
-        response.put("message", message);
-        return response;
-    }
+    // CREATE SERVICE REQUEST + AUTOMATIC APPOINTMENT
 
     @Override
-    public Map<String, Object> createServiceRequests(ServiceRequestModel serviceRequestModel) {
-        if (serviceRequestModel == null) {
+    @Transactional
+    public Map<String, Object> createServiceRequests(
+            ServiceRequestModel model) {
+
+        if (model == null) {
             return Result(false, "Service request data is required.");
         }
 
-        Integer vehicleCount = queryHandlerServices.checkVehicleQuery(
-                commonQueryServicesModel.IsVehicleOwned,
-                serviceRequestModel.getCustomerId(),
-                serviceRequestModel.getVehicleId());
+        if (model.getVehicleId() == null) {
+            return Result(false, "Vehicle is required.");
+        }
+
+        if (model.getServiceTypeList() == null
+                || model.getServiceTypeList().isEmpty()) {
+            return Result(false, "Please select at least one service type.");
+        }
+
+        if (model.getDescription() == null
+                || model.getDescription().isBlank()) {
+            return Result(false, "Description is required.");
+        }
+
+        if (model.getDescription().length() > 5000) {
+            return Result(false, "Description is too long.");
+        }
+
+
+        // Validate vehicle ownership.
+        Integer vehicleCount = jdbcTemplate.queryForObject(
+                queries.IsVehicleOwned,
+                Integer.class,
+                model.getVehicleId(),
+                model.getCustomerId()
+        );
 
         if (vehicleCount == null || vehicleCount == 0) {
             return Result(false,
-                    "Selected vehicle does not exist or does not belong to you.");
+                    "The selected vehicle does not belong to this customer.");
         }
 
-        // 5. Validate selected service types
-        List<Integer> serviceTypeList =
-                serviceRequestModel.getServiceTypeList();
+        // Validate selected service types.
+        List<Integer> serviceTypeIds =
+                model.getServiceTypeList().stream()
+                        .filter(id -> id != null && id > 0)
+                        .distinct()
+                        .toList();
 
-        // Remove duplicate service type IDs
-        Set<Integer> uniqueServiceTypes = new HashSet<>(serviceTypeList);
-        if (uniqueServiceTypes.size() != serviceTypeList.size()) {
-            return Result(false, "Duplicate service types are not allowed.");
+        if (serviceTypeIds.isEmpty()
+                || serviceTypeIds.size() != model.getServiceTypeList().size()) {
+            return Result(false, "Invalid service type selection.");
         }
 
-        for (Integer serviceTypeId : serviceTypeList) {
+        for (Integer serviceTypeId : serviceTypeIds) {
 
-            if (serviceTypeId == null || serviceTypeId <= 0) {
-                return Result(false, "Invalid service type selected.");
+            Integer count = jdbcTemplate.queryForObject(
+                    queries.IsServiceTypeActive,
+                    Integer.class,
+                    serviceTypeId
+            );
+
+            if (count == null || count == 0) {
+                return Result(false,
+                        "Invalid or inactive service type: " + serviceTypeId);
             }
         }
 
-
-        String placeholders = String.join(
-                ",",
-                java.util.Collections.nCopies(serviceTypeList.size(), "?")
+        // Retrieve initial service request status dynamically.
+        Integer submittedStatusId = statusServices.GetStatusId(
+                "SERVICE_REQUEST",
+                "SUBMITTED"
         );
 
-        Integer activeServiceTypeCount = jdbcTemplate.queryForObject(
-                commonQueryServicesModel.AreServiceTypesActive,
-                Integer.class,
-                serviceTypeList.toArray()
-        );
-
-
-        if (activeServiceTypeCount == null ||
-                activeServiceTypeCount != serviceTypeList.size()) {
-
-            return Result(false,
-                    "One or more selected service types are invalid or inactive.");
+        if (submittedStatusId == null) {
+            throw new IllegalStateException(
+                    "SERVICE_REQUEST/SUBMITTED status was not found."
+            );
         }
 
-        //
-        List<Integer> statusIds = jdbcTemplate.query(
-                commonQueryServicesModel.GetStatusId,
-                (rs, rowNum) -> rs.getInt("id"),
-                ProjectCodes.StatusTableEnum.SERVICE_REQUEST.name(),
-                ProjectCodes.SERVICEREQUEST.SUBMITTED.name()
+        // Retrieve initial appointment status dynamically.
+        Integer scheduledStatusId = statusServices.GetStatusId(
+                "APPOINTMENT",
+                "SCHEDULED"
         );
 
-        if (statusIds.isEmpty()) {
-            return Result(false, "Submitted status not found.");
+        if (scheduledStatusId == null) {
+            throw new IllegalStateException(
+                    "APPOINTMENT/SCHEDULED status was not found."
+            );
         }
 
-        Integer statusId = statusIds.get(0);
-
-        KeyHolder keyHolder = new GeneratedKeyHolder();
+        // 1. Insert service request.
+        KeyHolder requestKeyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
 
             PreparedStatement ps = connection.prepareStatement(
-                    commonQueryServicesModel.InsertServiceRequest,
+                    queries.InsertServiceRequest,
                     Statement.RETURN_GENERATED_KEYS
             );
 
-            ps.setLong(1, serviceRequestModel.getCustomerId());
-            ps.setLong(2, serviceRequestModel.getVehicleId());
-            ps.setString(3, serviceRequestModel.getDescription());
+            ps.setLong(1, model.getCustomerId());
+            ps.setLong(2, model.getVehicleId());
+            ps.setString(3, model.getDescription());
 
-            if (serviceRequestModel.getPreferredDate() != null) {
-                ps.setObject(4, serviceRequestModel.getPreferredDate());
+            if (model.getPreferredDate() == null) {
+                ps.setNull(4, Types.DATE);
             } else {
-                ps.setNull(4, java.sql.Types.DATE);
+                ps.setDate(
+                        4,
+                        java.sql.Date.valueOf(model.getPreferredDate())
+                );
             }
 
-            ps.setInt(5, statusId);
-
+            ps.setInt(5, submittedStatusId);
+            if (model.getPreferredTime() == null) {
+                ps.setNull(6, Types.TIME);
+            } else {
+                ps.setTime(
+                        6,
+                        java.sql.Time.valueOf(model.getPreferredTime())
+                );
+            }
             return ps;
 
-        }, keyHolder);
+        }, requestKeyHolder);
 
-        Number generatedId = keyHolder.getKey();
+        Number requestKey = requestKeyHolder.getKey();
 
-        if (generatedId == null) {
-
-            return Result(
-                    false,
-                    "Unable to create service request."
+        if (requestKey == null) {
+            throw new IllegalStateException(
+                    "Could not retrieve the created service request ID."
             );
-
         }
 
-        Long serviceRequestId = generatedId.longValue();
+        Long serviceRequestId = requestKey.longValue();
 
-        for (Integer serviceTypeId : serviceTypeList) {
+        // 2. Insert selected service types.
+        for (Integer serviceTypeId : serviceTypeIds) {
 
             jdbcTemplate.update(
-                    commonQueryServicesModel.InsertSelectedServicesTypes,
+                    queries.InsertSelectedServicesTypes,
                     serviceRequestId,
                     serviceTypeId
             );
         }
 
-        // 9. Return response
+        // 3. Automatically create appointment.
+        // scheduled_date = NULL until Admin schedules it.
+        // technician_id = NULL until Admin assigns a technician.
+        jdbcTemplate.update(
+                queries.InsertAppointment,
+                serviceRequestId,
+                scheduledStatusId
+        );
+
         Map<String, Object> response = Result(
                 true,
-                "Service request created successfully."
+                "Service request submitted and appointment created successfully."
         );
+
+        response.put("serviceRequestId", serviceRequestId);
+        response.put("appointmentStatus", "SCHEDULED");
+        response.put("serviceRequestStatus", "SUBMITTED");
+
         return response;
     }
 
-    @Override
-    public Map<String, Object> EditServiceRequests(ServiceRequestModel serviceRequestModel) {
-        return Map.of();
-    }
+    // UPDATE SERVICE REQUEST
 
     @Override
-    public Map<String, Object> DeleteServiceRequests(Long id) {
-        return Map.of();
+    @Transactional
+    public Map<String, Object> EditServiceRequests(ServiceRequestModel model) {
+
+        Integer ownershipCount = jdbcTemplate.queryForObject(
+                queries.IsServiceRequestOwned,
+                Integer.class,
+                model.getId(),
+                model.getCustomerId()
+        );
+
+        if (ownershipCount == null || ownershipCount == 0) {
+            return Result(false,
+                    "Service request not found or access denied.");
+        }
+
+        if (model.getVehicleId() == null) {
+            return Result(false, "Vehicle is required.");
+        }
+
+        if (model.getDescription() == null
+                || model.getDescription().isBlank()
+                || model.getDescription().length() > 5000) {
+            return Result(false, "Valid description is required.");
+        }
+
+        // Only submitted requests can be edited by the customer.
+        String currentStatus = jdbcTemplate.queryForObject(
+                """
+                SELECT s.code
+                FROM dev_autoserve.service_requests sr
+                INNER JOIN dev_autoserve.statuses s
+                    ON s.id = sr.status_id
+                WHERE sr.id = ?
+                  AND sr.customer_id = ?
+                  AND sr.is_active = 1
+                """,
+                String.class,
+                model.getId(),
+                model.getCustomerId()
+        );
+
+        if (!"SUBMITTED".equals(currentStatus)) {
+            return Result(false,
+                    "Only submitted service requests can be edited.");
+        }
+
+        Integer vehicleCount = jdbcTemplate.queryForObject(
+                queries.IsVehicleOwned,
+                Integer.class,
+                model.getVehicleId(),
+                model.getCustomerId()
+        );
+
+        if (vehicleCount == null || vehicleCount == 0) {
+            return Result(false,
+                    "The selected vehicle does not belong to this customer.");
+        }
+
+        List<Integer> serviceTypeIds =
+                model.getServiceTypeList() == null
+                        ? List.of()
+                        : model.getServiceTypeList().stream()
+                        .filter(typeId ->
+                                typeId != null && typeId > 0)
+                        .distinct()
+                        .toList();
+
+        if (serviceTypeIds.isEmpty()) {
+            return Result(false,
+                    "Please select at least one service type.");
+        }
+
+        if (serviceTypeIds.size() != model.getServiceTypeList().size()) {
+            return Result(false, "Invalid service type selection.");
+        }
+
+        for (Integer serviceTypeId : serviceTypeIds) {
+
+            Integer count = jdbcTemplate.queryForObject(
+                    queries.IsServiceTypeActive,
+                    Integer.class,
+                    serviceTypeId
+            );
+
+            if (count == null || count == 0) {
+                return Result(false,
+                        "Invalid or inactive service type: " + serviceTypeId);
+            }
+        }
+
+        // Update request details.
+        jdbcTemplate.update(
+                connection -> {
+
+                    PreparedStatement ps = connection.prepareStatement(
+                            queries.UpdateServiceRequests
+                    );
+
+                    ps.setLong(1, model.getVehicleId());
+                    ps.setString(2, model.getDescription());
+
+                    if (model.getPreferredDate() == null) {
+                        ps.setNull(3, Types.DATE);
+                    } else {
+                        ps.setDate(
+                                3,
+                                java.sql.Date.valueOf(model.getPreferredDate())
+                        );
+                    }
+
+                    ps.setLong(4, model.getId());
+                    ps.setLong(5, model.getCustomerId());
+
+                    return ps;
+                }
+        );
+
+        // Deactivate previously selected services.
+        jdbcTemplate.update(
+                queries.DeactivateOldTypes,
+                model.getId()
+        );
+
+        // Reactivate or insert selected service types.
+        for (Integer serviceTypeId : serviceTypeIds) {
+
+            jdbcTemplate.update(
+                    queries.InsertSelectedServicesTypes,
+                    model.getId(),
+                    serviceTypeId
+            );
+        }
+
+        return Result(true, "Service request updated successfully.");
+    }
+
+    // DELETE SERVICE REQUEST
+
+    @Override
+    @Transactional
+    public Map<String, Object> DeleteServiceRequests(
+            Long id) {
+
+        if (id == null || id <= 0) {
+            return Result(false, "Valid service request ID is required.");
+        }
+
+        Integer ownershipCount = jdbcTemplate.queryForObject(
+                queries.IsServiceRequestOwned,
+                Integer.class,
+                id
+        );
+
+        if (ownershipCount == null || ownershipCount == 0) {
+            return Result(false,
+                    "Service request not found or access denied.");
+        }
+
+        String currentStatus = jdbcTemplate.queryForObject(
+                """
+                SELECT s.code
+                FROM dev_autoserve.service_requests sr
+                INNER JOIN dev_autoserve.statuses s
+                    ON s.id = sr.status_id
+                WHERE sr.id = ?
+                  AND sr.is_active = 1
+                """,
+                String.class,
+                id
+
+        );
+
+        if (!"SUBMITTED".equals(currentStatus)) {
+            return Result(false,
+                    "Only submitted service requests can be deleted.");
+        }
+
+        // Soft-delete service request.
+        jdbcTemplate.update(
+                queries.DeleteServiceRequests,
+                id);
+
+        // Deactivate its selected services.
+        jdbcTemplate.update(
+                queries.DeleteServiceRequestServices,
+                id
+        );
+
+        // Cancel its automatically created appointment.
+        Integer cancelledStatusId =
+                statusServices.GetStatusId("APPOINTMENT", "CANCELLED");
+
+        if (cancelledStatusId == null) {
+            throw new IllegalStateException(
+                    "APPOINTMENT/CANCELLED status was not found."
+            );
+        }
+
+        jdbcTemplate.update(
+                queries.CancelLinkedAppointment,
+                cancelledStatusId,
+                id
+        );
+
+        return Result(true,
+                "Service request and its appointment deleted successfully.");
+    }
+
+    // GET USER ID FROM AUTHENTICATED USERNAME
+
+    private Long getUserId(String username) {
+
+        try {
+            return jdbcTemplate.queryForObject(
+                    queries.GetUserId,
+                    Long.class,
+                    username
+            );
+        } catch (EmptyResultDataAccessException ex) {
+            return null;
+        }
+    }
+
+    private Map<String, Object> Result(
+            boolean success,
+            String message
+    ) {
+
+        Map<String, Object> response = new HashMap<>();
+
+        response.put("success", success);
+        response.put("message", message);
+
+        return response;
     }
 }

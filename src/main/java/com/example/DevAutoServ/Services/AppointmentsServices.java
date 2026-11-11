@@ -1,161 +1,255 @@
 package com.example.DevAutoServ.Services;
 
-import com.example.DevAutoServ.Enum.ProjectCodes;
 import com.example.DevAutoServ.CommonModel.CommonQueryServicesModel;
-import com.example.DevAutoServ.Model.Appointment;
-import com.example.DevAutoServ.Repository.AppointmentsRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.stereotype.Service;
 
-import java.sql.PreparedStatement;
-import java.sql.Statement;
-import java.sql.Timestamp;
+import com.example.DevAutoServ.Repository.AppointmentsRepository;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
-
 @Service
 public class AppointmentsServices implements AppointmentsRepository {
-    @Autowired
+
     private final JdbcTemplate jdbcTemplate;
+    private final StatusServices statusServices;
+
     private final CommonQueryServicesModel queries =
             new CommonQueryServicesModel();
 
-    private  QueryHandlerServices queryHandlerServices;
-    CommonQueryServicesModel commonQueryServicesModel = new CommonQueryServicesModel();
-
-    public AppointmentsServices(JdbcTemplate jdbcTemplate, QueryHandlerServices queryHandlerServices) {
+    public AppointmentsServices(
+            JdbcTemplate jdbcTemplate,
+            StatusServices statusServices
+    ) {
         this.jdbcTemplate = jdbcTemplate;
-        this.queryHandlerServices = queryHandlerServices;
+        this.statusServices = statusServices;
     }
 
-    private Map<String, Object> response(
-            boolean success, String message) {
-        Map<String, Object> result = new HashMap<>();
-        result.put("success", success);
-        result.put("message", message);
-        return result;
-    }
+    // ADMIN ASSIGNS TECHNICIAN AND SETS ACTUAL APPOINTMENT DATE/TIME
 
-    @Override
-    public Map<String, Object> CreateAppointment(
-            Appointment appointment) {
+    @Transactional
+    public Map<String, Object> AssignTechnicianAndSchedule(
+            Long appointmentId,
+            Long technicianId,
+            LocalDateTime scheduledDate
+    ) {
+
+        if (appointmentId == null || appointmentId <= 0) {
+            return Result(false, "Valid appointment ID is required.");
+        }
+
+        if (technicianId == null || technicianId <= 0) {
+            return Result(false, "Technician is required.");
+        }
+
+        if (scheduledDate == null) {
+            return Result(false, "Appointment date and time are required.");
+        }
+
+        if (!scheduledDate.isAfter(LocalDateTime.now())) {
+            return Result(false,
+                    "Appointment date and time must be in the future.");
+        }
+
+        Map<String, Object> appointment;
 
         try {
-
-
-
-            for(String app:appointment.getServiceRequest()){
-                GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
-
-                int SID = queryHandlerServices.GetServicsType(commonQueryServicesModel.GetServiceTypeID, app);
-
-                int rows = jdbcTemplate.update(connection -> {
-                    PreparedStatement ps = connection.prepareStatement(
-                            queries.InsertAppointment,
-                            Statement.RETURN_GENERATED_KEYS);
-                    ps.setLong(1, SID);
-                    ps.setTimestamp(2, Timestamp.valueOf(
-                            appointment.getScheduledDate()));
-                    int StatusID =   queryHandlerServices.GetServicsType(commonQueryServicesModel.GetStatusID, ProjectCodes.AppointmentStatus.SCHEDULED.name());
-                    ps.setLong(3, StatusID);
-
-                    return ps;
-                }, keyHolder);
-
-                if (rows > 0) {
-                    Map<String, Object> result =
-                            response(true, "Appointment scheduled successfully");
-                    result.put("appointmentId",
-                            keyHolder.getKey().longValue());
-                    return result;
-                }
-
-
-            }
-
-
-            return response(false, "Appointment was not created");
-
-        } catch (Exception e) {
-            return response(false, "Failed to create appointment");
+            appointment = jdbcTemplate.queryForMap(
+                    """
+                    SELECT
+                        a.id,
+                        a.service_request_id,
+                        a.status_id,
+                        s.code AS appointment_status
+                    FROM dev_autoserve.appointments a
+                    INNER JOIN dev_autoserve.statuses s
+                        ON s.id = a.status_id
+                    WHERE a.id = ?
+                      AND a.is_active = 1
+                    FOR UPDATE
+                    """,
+                    appointmentId
+            );
+        } catch (org.springframework.dao.EmptyResultDataAccessException ex) {
+            return Result(false, "Appointment not found.");
         }
+
+        Long serviceRequestId =
+                ((Number) appointment.get("service_request_id")).longValue();
+
+        // Service request must be approved before technician assignment.
+        String requestStatus = jdbcTemplate.queryForObject(
+                """
+                SELECT s.code
+                FROM dev_autoserve.service_requests sr
+                INNER JOIN dev_autoserve.statuses s
+                    ON s.id = sr.status_id
+                WHERE sr.id = ?
+                  AND sr.is_active = 1
+                FOR UPDATE
+                """,
+                String.class,
+                serviceRequestId
+        );
+
+        if (!"APPROVED".equals(requestStatus)) {
+            return Result(false,
+                    "The service request must be APPROVED before assigning a technician.");
+        }
+
+        // Appointment must not be cancelled or completed.
+        String appointmentStatus =
+                (String) appointment.get("appointment_status");
+
+        if ("CANCELLED".equals(appointmentStatus)
+                || "COMPLETED".equals(appointmentStatus)) {
+            return Result(false,
+                    "Cancelled or completed appointments cannot be scheduled.");
+        }
+
+        // Verify technician has the TECHNICIAN role.
+        Integer technicianCount = jdbcTemplate.queryForObject(
+                queries.IsTechnicianValid,
+                Integer.class,
+                technicianId
+        );
+
+        if (technicianCount == null || technicianCount == 0) {
+            return Result(false,
+                    "Selected user is not an active technician.");
+        }
+
+        Integer confirmedStatusId =
+                statusServices.GetStatusId("APPOINTMENT", "CONFIRMED");
+
+        if (confirmedStatusId == null) {
+            throw new IllegalStateException(
+                    "APPOINTMENT/CONFIRMED status was not found."
+            );
+        }
+
+        // Set technician, actual date/time and confirmed status.
+        jdbcTemplate.update(
+                """
+                UPDATE dev_autoserve.appointments
+                SET
+                    technician_id = ?,
+                    scheduled_date = ?,
+                    status_id = ?,
+                    is_appointed = 1
+                WHERE id = ?
+                  AND is_active = 1
+                """,
+                technicianId,
+                java.sql.Timestamp.valueOf(scheduledDate),
+                confirmedStatusId,
+                appointmentId
+        );
+
+        Map<String, Object> response = Result(
+                true,
+                "Technician assigned and appointment scheduled successfully."
+        );
+
+        response.put("appointmentId", appointmentId);
+        response.put("serviceRequestId", serviceRequestId);
+        response.put("technicianId", technicianId);
+        response.put("scheduledDate", scheduledDate);
+        response.put("appointmentStatus", "CONFIRMED");
+
+        return response;
     }
 
+    // RESCHEDULE APPOINTMENT
 
-    @Override
-    public Map<String, Object> ConfirmAppointment(Long id) {
-        try {
-            int rows = jdbcTemplate.update(
-                    queries.ConfirmAppointment, id);
-
-            return response(rows > 0,
-                    rows > 0
-                            ? "Appointment confirmed successfully"
-                            : "Appointment not found or cannot be confirmed");
-
-        } catch (Exception e) {
-            return response(false, "Failed to confirm appointment");
-        }
-    }
-
-    @Override
+    @Transactional
     public Map<String, Object> RescheduleAppointment(
-            Long id, Appointment appointment) {
-        try {
-         /*   if (id == null || appointment.getScheduledDate() == null) {
-                return response(false,
-                        "Appointment ID and new scheduled date are required");
-            }
+            Long appointmentId,
+            LocalDateTime newScheduledDate
+    ) {
 
-            int rows = jdbcTemplate.update(
-                    queries.RescheduleAppointment,
-                    Timestamp.valueOf(appointment.getScheduledDate()),
-                    id);
-
-            return response(rows > 0,
-                    rows > 0
-                            ? "Appointment rescheduled successfully"
-                            : "Appointment not found or cannot be rescheduled");*/
-
-            return response(false, "Failed to reschedule appointment");
-
-        } catch (Exception e) {
-            return response(false, "Failed to reschedule appointment");
+        if (appointmentId == null || appointmentId <= 0
+                || newScheduledDate == null) {
+            return Result(false, "Appointment ID and date are required.");
         }
+
+        if (!newScheduledDate.isAfter(LocalDateTime.now())) {
+            return Result(false,
+                    "New appointment date must be in the future.");
+        }
+
+        Map<String, Object> appointment;
+
+        try {
+            appointment = jdbcTemplate.queryForMap(
+                    """
+                    SELECT
+                        a.id,
+                        a.technician_id,
+                        s.code AS appointment_status
+                    FROM dev_autoserve.appointments a
+                    INNER JOIN dev_autoserve.statuses s
+                        ON s.id = a.status_id
+                    WHERE a.id = ?
+                      AND a.is_active = 1
+                    FOR UPDATE
+                    """,
+                    appointmentId
+            );
+        } catch (org.springframework.dao.EmptyResultDataAccessException ex) {
+            return Result(false, "Appointment not found.");
+        }
+
+        String currentStatus =
+                (String) appointment.get("appointment_status");
+
+        if (!statusServices.IsValidAppointmentTransition(
+                currentStatus,
+                "RESCHEDULED"
+        )) {
+            return Result(false,
+                    "This appointment cannot be rescheduled.");
+        }
+
+        Integer rescheduledStatusId =
+                statusServices.GetStatusId("APPOINTMENT", "RESCHEDULED");
+
+        if (rescheduledStatusId == null) {
+            throw new IllegalStateException(
+                    "APPOINTMENT/RESCHEDULED status was not found."
+            );
+        }
+
+        jdbcTemplate.update(
+                """
+                UPDATE dev_autoserve.appointments
+                SET
+                    scheduled_date = ?,
+                    status_id = ?
+                WHERE id = ?
+                  AND is_active = 1
+                """,
+                java.sql.Timestamp.valueOf(newScheduledDate),
+                rescheduledStatusId,
+                appointmentId
+        );
+
+        return Result(true, "Appointment rescheduled successfully.");
     }
 
-    @Override
-    public Map<String, Object> CancelAppointment(Long id) {
-        try {
-            int rows = jdbcTemplate.update(
-                    queries.CancelAppointment, id);
+    private Map<String, Object> Result(
+            boolean success,
+            String message
+    ) {
 
-            return response(rows > 0,
-                    rows > 0
-                            ? "Appointment cancelled successfully"
-                            : "Appointment not found or cannot be cancelled");
+        Map<String, Object> response = new HashMap<>();
 
-        } catch (Exception e) {
-            return response(false, "Failed to cancel appointment");
-        }
-    }
+        response.put("success", success);
+        response.put("message", message);
 
-    @Override
-    public Map<String, Object> CompleteAppointment(Long id) {
-        try {
-            int rows = jdbcTemplate.update(
-                    queries.CompleteAppointment, id);
-
-            return response(rows > 0,
-                    rows > 0
-                            ? "Appointment completed successfully"
-                            : "Appointment not found or cannot be completed");
-
-        } catch (Exception e) {
-            return response(false, "Failed to complete appointment");
-        }
+        return response;
     }
 }

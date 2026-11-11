@@ -1,6 +1,7 @@
 package com.example.DevAutoServ.Model;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 
 public class AppointmentModel {
@@ -11,8 +12,9 @@ public class AppointmentModel {
     private Integer statusId;
     private Boolean isActive;
     private Boolean isAppointed;
+    private LocalTime scheduledTime;
 
-    public AppointmentModel(Long id, Long serviceRequestId, Long technicianId, LocalDateTime scheduledDate, Integer statusId, Boolean isActive, Boolean isAppointed) {
+    public AppointmentModel(Long id, Long serviceRequestId, Long technicianId, LocalDateTime scheduledDate, Integer statusId, Boolean isActive, Boolean isAppointed, LocalTime scheduledTime) {
         this.id = id;
         this.serviceRequestId = serviceRequestId;
         this.technicianId = technicianId;
@@ -20,6 +22,7 @@ public class AppointmentModel {
         this.statusId = statusId;
         this.isActive = isActive;
         this.isAppointed = isAppointed;
+        this.scheduledTime = scheduledTime;
     }
 
     public Long getId() {
@@ -76,5 +79,13 @@ public class AppointmentModel {
 
     public void setAppointed(Boolean appointed) {
         isAppointed = appointed;
+    }
+
+    public LocalTime getScheduledTime() {
+        return scheduledTime;
+    }
+
+    public void setScheduledTime(LocalTime scheduledTime) {
+        this.scheduledTime = scheduledTime;
     }
 }

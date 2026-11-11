@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class QueryHandlerServices {
     @Autowired
@@ -61,5 +63,40 @@ public class QueryHandlerServices {
                 vehicleId,
                 customerId
         );
+    }
+
+    public boolean IsServiceRequestValid(String query,Long requestId, Long customerId) {
+
+        Integer count = jdbcTemplate.queryForObject(
+                query,
+                Integer.class,
+                requestId,
+                customerId
+        );
+
+        return count != null && count > 0;
+    }
+
+    public Integer GetStatusId(String query, String tableCode, String statusCode) {
+
+        List<Integer> statusIds = jdbcTemplate.query(
+                query,
+                (rs, rowNum) -> rs.getInt("id"),
+                tableCode,
+                statusCode
+        );
+
+        return statusIds.isEmpty() ? null : statusIds.get(0);
+    }
+
+    public Integer GetInitialStatusId(String query, String tableCode) {
+
+        List<Integer> statusIds = jdbcTemplate.query(
+                query,
+                (rs, rowNum) -> rs.getInt("id"),
+                tableCode
+        );
+
+        return statusIds.isEmpty() ? null : statusIds.get(0);
     }
 }
