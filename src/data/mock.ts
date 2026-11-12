@@ -1,4 +1,4 @@
-export type Role = "customer" | "technician" | "admin";
+import type { Account, RepairStage, RepairLine, TimelineEntry, Vehicle, ServiceRequest, Appointment, Part, Invoice, AppUser, Technician, ServiceAssignment, AppNotification, TimeLogEntry, PartRequest } from "../types";
 
 // Sample dates are relative to today so dashboards, date filters and Upcoming/Past look current.
 export const dayOffset = (n: number) => {
@@ -13,192 +13,30 @@ const stamp = (n: number, time: string) => {
 };
 
 /** Login directory: resolves an email/phone to a display name and the roles the account may access. */
-export type Account = { id?: string; name: string; email: string; phone: string; roles: Role[] };
 
 export const accounts: Account[] = [
-  { name: "John Doe", email: "john@example.com", phone: "(415) 555-0132", roles: ["customer"] },
-  { name: "Mike Johnson", email: "mike@example.com", phone: "(415) 555-0177", roles: ["technician"] },
-  { name: "Admin User", email: "admin@example.com", phone: "(415) 555-0100", roles: ["admin"] },
+  { id: "u1", name: "John Doe", email: "john@example.com", phone: "(415) 555-0132", roles: ["customer"] },
+  { id: "u2", name: "Mike Johnson", email: "mike@example.com", phone: "(415) 555-0177", roles: ["technician"] },
+  { id: "u4", name: "Admin User", email: "admin@example.com", phone: "(415) 555-0100", roles: ["admin"] },
   // Multi-role accounts — permissions from all roles are combined after sign-in.
-  { name: "Sarah Williams", email: "sarah@example.com", phone: "(415) 555-0198", roles: ["admin", "technician"] },
-  { name: "David Park", email: "david@example.com", phone: "(415) 555-0166", roles: ["technician", "customer"] },
+  { id: "u3", name: "Sarah Williams", email: "sarah@example.com", phone: "(415) 555-0198", roles: ["admin", "technician"] },
+  { id: "u6", name: "David Park", email: "david@example.com", phone: "(415) 555-0166", roles: ["technician", "customer"] },
 ];
 
-export type RepairStage =
-  | "Requested"
-  | "Checked In"
-  | "Diagnosed"
-  | "Pending Admin Review"
-  | "Awaiting Customer Approval"
-  | "In Repair"
-  | "Completed";
 
-export const STAGES: RepairStage[] = [
-  "Requested",
-  "Checked In",
-  "Diagnosed",
-  "Pending Admin Review",
-  "Awaiting Customer Approval",
-  "In Repair",
-  "Completed",
-];
 
-export type Vehicle = {
-  id: string;
-  customerId: string;
-  make: string;
-  model: string;
-  year: number;
-  vin: string;
-  mileage: number;
-  plate: string;
-  color: string;
-  image: string;
-};
 
-export type RepairLine = {
-  id: string;
-  item: string;
-  type: "Part" | "Labor";
-  /** Computed price. For inventory parts = qty × unit price; for labor = hours × labor rate. */
-  cost: number;
-  approved?: boolean;
-  /** Inventory part (price comes from inventory, never from the technician). */
-  partId?: string;
-  qty?: number;
-  /** Labor hours (price comes from the admin-managed labor rate). */
-  hours?: number;
-};
 
-export type TimelineEntry = {
-  at: string;
-  label: string;
-  kind: "info" | "ok" | "warn";
-  /** Who performed the step, and in which capacity. */
-  by?: string;
-  role?: string;
-  note?: string;
-  /** Work-progress stage after this step, if it changed. */
-  stage?: string;
-};
 
-export type ServiceRequest = {
-  id: string;
-  vehicleId: string;
-  serviceType: string;
-  /** Selected services; older demo records retain their single serviceType. */
-  services?: string[];
-  description: string;
-  stage: RepairStage;
-  createdAt: string;
-  preferredDate: string;
-  preferredTime: string;
-  technicianId?: string;
-  diagnosis?: string;
-  concern?: string;
-  mileageIn?: number;
-  exteriorCondition?: string;
-  interiorCondition?: string;
-  checkInNotes?: string;
-  repairs: RepairLine[];
-  timeline: TimelineEntry[];
-  total: number;
-};
 
-export type Appointment = {
-  id: string;
-  vehicleId: string;
-  serviceType: string;
-  services?: string[];
-  date: string;
-  time: string;
-  status: "Scheduled" | "Completed" | "Cancelled";
-  /** Related service request, if any. */
-  requestId?: string;
-};
 
-export type Part = {
-  id: string;
-  name: string;
-  number: string;
-  quantity: number;
-  price: number;
-  category: string;
-};
 
-export type Invoice = {
-  id: string;
-  requestId: string;
-  vehicleId: string;
-  date: string;
-  status: "Paid" | "Unpaid" | "Overdue";
-  taxRate: number;
-};
 
-export type AppUser = {
-  id: string;
-  name: string;
-  email: string;
-  role: "Customer" | "Technician" | "Service Manager" | "Admin";
-  status: "Active" | "Invited" | "Suspended";
-  phone: string;
-};
 
-export type Technician = {
-  id: string;
-  name: string;
-  email: string;
-  specialties: string[];
-  activeJobs: number;
-  completed: number;
-  rating: number;
-  status: "Available" | "Busy" | "Off";
-  phone?: string;
-};
 
-export type AssignmentStatus = "Assigned" | "In Progress" | "On Hold" | "Completed";
-export type ServiceAssignment = {
-  id: string;
-  technicianId: string;
-  requestId: string;
-  status: AssignmentStatus;
-  assignedAt: string;
-  notes: string;
-  holdReason?: string;
-  resumeStatus?: "Assigned" | "In Progress";
-};
 
-export type AppNotification = {
-  accountId?: string;
-  roles?: Role[];
-  id: string;
-  kind: "ok" | "info" | "warn" | "bell";
-  text: string;
-  at: string;
-  read: boolean;
-};
 
-export type TimeLogEntry = {
-  id: string;
-  requestId: string;
-  vehicle: string;
-  task: string;
-  date: string;
-  hours: number;
-  technicianId: string;
-};
 
-export type PartRequest = {
-  id: string;
-  requestId: string;
-  partId: string;
-  qty: number;
-  technicianId: string;
-  status: "Pending" | "Issued" | "Rejected";
-  at: string;
-  note: string;
-  resolvedBy?: string;
-};
 
 const img = (id: string) =>
   `https://images.unsplash.com/${id}?w=320&h=200&fit=crop&auto=format`;
@@ -400,11 +238,11 @@ export const assignments: ServiceAssignment[] = [
 ];
 
 export const notifications: AppNotification[] = [
-  { id: "n1", kind: "bell", text: `Your appointment on ${dayOffset(3)} at 10:00 AM is confirmed.`, at: stamp(-2, "09:00 AM"), read: false },
-  { id: "n2", kind: "ok", text: "Your vehicle diagnosis is ready for review.", at: stamp(-6, "03:45 PM"), read: false },
-  { id: "n3", kind: "info", text: "Your repairs have been approved.", at: stamp(-8, "05:00 PM"), read: true },
-  { id: "n4", kind: "warn", text: "Your vehicle repair is in progress.", at: stamp(-7, "10:20 AM"), read: true },
-  { id: "n5", kind: "ok", text: "Your vehicle repair is completed.", at: stamp(-4, "02:30 PM"), read: true },
+  { id: "n1", accountId: "u1", kind: "bell", text: `Your appointment on ${dayOffset(3)} at 10:00 AM is confirmed.`, at: stamp(-2, "09:00 AM"), read: false },
+  { id: "n2", accountId: "u1", kind: "ok", text: "Your vehicle diagnosis is ready for review.", at: stamp(-6, "03:45 PM"), read: false },
+  { id: "n3", accountId: "u1", kind: "info", text: "Your repairs have been approved.", at: stamp(-8, "05:00 PM"), read: true },
+  { id: "n4", accountId: "u1", kind: "warn", text: "Your vehicle repair is in progress.", at: stamp(-7, "10:20 AM"), read: true },
+  { id: "n5", accountId: "u1", kind: "ok", text: "Your vehicle repair is completed.", at: stamp(-4, "02:30 PM"), read: true },
 ];
 
 export const timeLogs: TimeLogEntry[] = [
@@ -419,42 +257,15 @@ export const timeLogs: TimeLogEntry[] = [
   { id: "tl8", requestId: "SR10022", vehicle: "Honda Accord 2020", task: "Second opinion — air intake", date: dayOffset(-1), hours: 1.5, technicianId: "t2" },
 ];
 
-export const revenueSeries = [
-  { month: "Jan", value: 3200 },
-  { month: "Feb", value: 4100 },
-  { month: "Mar", value: 3800 },
-  { month: "Apr", value: 4600 },
-  { month: "May", value: 5230 },
-];
 
-export const requestsSeries = [
-  { label: "Mon", value: 8 },
-  { label: "Tue", value: 5 },
-  { label: "Wed", value: 11 },
-  { label: "Thu", value: 6 },
-  { label: "Fri", value: 9 },
-  { label: "Sat", value: 4 },
-];
 
-export const serviceTypes = [
-  "General Service",
-  "Oil Change",
-  "Brake Service",
-  "Brake Inspection",
-  "AC Service",
-  "Tire Rotation",
-  "Engine Diagnostics",
-  "Battery Replacement",
-  "Transmission Service",
-];
 
 export const partRequests: PartRequest[] = [
   { id: "pr1", requestId: "SR10023", partId: "p1", qty: 1, technicianId: "t1", status: "Issued", at: stamp(-7, "09:40 AM"), note: "Front pads", resolvedBy: "Sarah Williams" },
   { id: "pr2", requestId: "SR10024", partId: "p2", qty: 1, technicianId: "t1", status: "Pending", at: stamp(-1, "02:15 PM"), note: "" },
 ];
 
-/** Default shop labor rate ($/hour). Admin-managed. */
-export const LABOR_RATE = 100;
+
 
 
 // Additive demo accounts and linked work across each workflow stage.
@@ -473,8 +284,6 @@ demoCustomers.forEach(([name, email, make, model, color], i) => {
   accounts.push({ id, name, email, phone, roles: ["customer"] });
   vehicles.push({ id: `v-demo-${i + 1}`, customerId: id, make, model, color, year: 2020 + i % 4, vin: `DEMOAUTO${String(i + 1).padStart(9, "0")}`, mileage: 28000 + i * 5300, plate: `DEMO${i + 1}`, image: vehicles[i % 3].image });
 });
-accounts.forEach((a) => { a.id ??= users.find((u) => u.email.toLowerCase() === a.email.toLowerCase())?.id ?? `account-${a.email.toLowerCase()}`; });
-notifications.forEach((n) => { n.accountId = "u1"; });
 const demoStages: RepairStage[] = ["Requested", "Checked In", "Diagnosed", "Pending Admin Review", "Awaiting Customer Approval", "In Repair", "Completed", "In Repair"];
 demoStages.forEach((stage, i) => {
   const id = `SR200${String(i + 1).padStart(2, "0")}`;

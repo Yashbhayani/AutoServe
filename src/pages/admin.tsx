@@ -3,6 +3,8 @@ import { useApp, vehicleLabel } from "../store/AppContext";
 import { Link, useNavigate, useQuery } from "../router";
 import { AssignmentHold, ActivityHistory, EstimateTable } from "../components/workflow";
 import { completedDate } from "./technician";
+import { invoiceAmounts } from "../lib/estimates";
+import { emailValid } from "../lib/accounts";
 import { RANGES, inRange, iso, parseStamp, rangeBounds, rangeBuckets, type Range } from "../lib/dates";
 import {
   Button,
@@ -49,18 +51,9 @@ import {
   IconCheck,
   IconChevronDown,
 } from "../components/icons";
-import { STAGES, requestsSeries, revenueSeries, type ServiceRequest, type AppUser, type AssignmentStatus, type Part, type ServiceAssignment, type Technician } from "../data/mock";
+import { STAGES, STAGE_COLORS, APPOINTMENT_TIMES } from "../lib/constants";
+import type { ServiceRequest, AppUser, AssignmentStatus, Part, ServiceAssignment, Technician } from "../types";
 
-/* ============ Admin Dashboard ============ */
-const STAGE_COLORS: Record<string, string> = {
-  Requested: "#94a3b8",
-  "Checked In": "#64748b",
-  Diagnosed: "#0ea5e9",
-  "Pending Admin Review": "#f59e0b",
-  "Awaiting Customer Approval": "#d97706",
-  "In Repair": "#2563eb",
-  Completed: "#16a34a",
-};
 
 export function AdminDashboard() {
   const { requests, appointments, technicians, assignments, parts, partRequests, eligibleRequests } = useApp();
@@ -109,7 +102,7 @@ export function AdminDashboard() {
         <StatCard icon={<IconAlert />} label="Pending Review" value={count("Pending Admin Review")} sub="Estimates to review" tone="warn" onClick={() => go("stage=Pending Admin Review")} />
         <StatCard icon={<IconClock />} label="Awaiting Customer" value={count("Awaiting Customer Approval")} sub="Approval needed" tone="warn" onClick={() => go("stage=Awaiting Customer Approval")} />
         <StatCard icon={<IconWrench />} label="In Repair" value={count("In Repair")} sub="Approved work" onClick={() => go("stage=In Repair")} />
-        <StatCard icon={<IconInvoice />} label="Revenue" value={money0(revenue)} sub={`${completed.length} completed · ${range}`} tone="ok" onClick={() => go("tab=Completed")} />
+        <StatCard icon={<IconInvoice />} label="Completed Work Value" value={money0(revenue)} sub={`${completed.length} completed · ${range}`} tone="ok" onClick={() => go("tab=Completed")} />
         <StatCard icon={<IconCalendar />} label="Upcoming Appointments" value={upcoming} sub="Scheduled" onClick={() => navigate("/admin/appointments")} />
         <StatCard icon={<IconBox />} label="Low Stock" value={lowStock} sub={pendingParts ? `${pendingParts} part request${pendingParts > 1 ? "s" : ""} pending` : "Below 10 units"} tone={lowStock ? "warn" : "ok"} onClick={() => navigate(pendingParts ? "/admin/inventory?filter=requests" : "/admin/inventory?filter=low")} />
       </div>
@@ -122,7 +115,7 @@ export function AdminDashboard() {
           </div>
         </Card>
         <Card>
-          <CardHeader title="Revenue Trend" action={<span className="text-[12px] text-ink-400">Completed jobs</span>} />
+          <CardHeader title="Completed Work Value" action={<span className="text-[12px] text-ink-400">Completed jobs</span>} />
           <div className="p-5"><LineChart data={revSeries} /></div>
         </Card>
       </div>
@@ -176,7 +169,6 @@ export function AdminDashboard() {
   );
 }
 
-/* ============ Service Requests (admin) — includes technician assignment ============ */
 const ASSIGN_STATUSES: AssignmentStatus[] = ["Assigned", "In Progress", "On Hold", "Completed"];
 const REQUEST_TABS = ["All Requests", "Unassigned", "Assigned", "Completed"];
 
@@ -272,7 +264,7 @@ export function AdminRequests() {
           </Select>
           <Select value={techFilter} onChange={(e) => { setTechFilter(e.target.value); t.setPage(1); }} className="max-w-[200px]" aria-label="Filter by technician">
             <option value="All">All technicians</option>
-            {technicians.filter((x) => x.status !== "Off" || x.id === editFor?.assignment?.technicianId).map((x) => <option key={x.id} value={x.id} disabled={x.status === "Off"}>{x.name}</option>)}
+            {technicians.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}
           </Select>
           {dates && (
             <button onClick={() => { setDates(null); t.setPage(1); }} className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-brand-50 px-3 text-[13px] font-medium text-brand-700 hover:bg-brand-100">
@@ -298,12 +290,7 @@ export function AdminRequests() {
                   <Td className="font-medium text-ink-900 tabular">{money0(r.total)}</Td>
                   <Td>
                     <div className="flex items-center gap-1">
-                      <Button size="sm" variant="ghost" onClick={() => {
-                        if (a) {
-                          const returnTo = `/admin/requests${q.size ? `?${q.toString()}` : ""}`;
-                          navigate(`/admin/work-orders/${r.id}?returnTo=${encodeURIComponent(returnTo)}`);
-                        } else setViewId(r.id);
-                      }}>View</Button>
+                      <Button size="sm" variant="ghost" onClick={() => setViewId(r.id)}>View</Button>
                       {isAdmin && (
                         <>
                           <Button size="sm" variant="secondary" disabled={isDone(r) || a?.status === "On Hold" || (!a && !eligibleRequests.some((x) => x.id === r.id))} onClick={() => openAssign(r.id)}>{a ? "Reassign" : "Assign"}</Button>
@@ -339,7 +326,7 @@ export function AdminRequests() {
             </Field>
             <Field label="Technician" required>
               <Select value={form.technicianId} onChange={(e) => { setForm({ ...form, technicianId: e.target.value }); setError(""); }}>
-                {technicians.map((x) => <option key={x.id} value={x.id}>{x.name} — {x.status}{x.specialties.length ? ` · ${x.specialties.join(", ")}` : ""}</option>)}
+                {technicians.filter((x) => x.status !== "Off" || x.id === editFor?.assignment?.technicianId).map((x) => <option key={x.id} value={x.id} disabled={x.status === "Off"}>{x.name} — {x.status}{x.specialties.length ? ` · ${x.specialties.join(", ")}` : ""}</option>)}
               </Select>
             </Field>
             <Field label="Assignment Status" required>
@@ -362,6 +349,10 @@ export function AdminRequests() {
         footer={
           <>
             <Button variant="secondary" onClick={() => setViewId(null)}>Close</Button>
+            {viewing && viewingAsg && <Button variant="secondary" onClick={() => {
+              const returnTo = `/admin/requests${q.size ? `?${q.toString()}` : ""}`;
+              navigate(`/admin/work-orders/${viewing.id}?returnTo=${encodeURIComponent(returnTo)}`);
+            }}>Open Work Order</Button>}
             {isAdmin && viewing && viewingAsg?.status !== "On Hold" && viewing.stage === "Requested" && <Button variant="secondary" onClick={() => { setCi({ mileageIn: 0, checkInNotes: "" }); setAction("checkin"); }}>Record Check-In</Button>}
             {isAdmin && viewing && viewingAsg?.status !== "On Hold" && viewing.stage === "Pending Admin Review" && <Button onClick={() => { setActionNote(""); setActionErr(""); setAction("review"); }}>Review Estimate</Button>}
             {isAdmin && viewing && viewingAsg?.status !== "On Hold" && viewing.stage === "Awaiting Customer Approval" && (
@@ -532,14 +523,12 @@ export function AdminRequests() {
   );
 }
 
-/* ============ Appointments (admin) ============ */
-const TIMES = ["09:00 AM", "10:00 AM", "11:00 AM", "01:00 PM", "02:00 PM", "03:00 PM"];
 
 export function AdminAppointments() {
   const { appointments, vehicles, requests, isAdmin, addAppointment, rescheduleAppointment, cancelAppointment } = useApp();
   const [tab, setTab] = useState("Upcoming");
   const list = appointments
-    .filter((a) => (tab === "Upcoming" ? a.status === "Scheduled" : a.status !== "Scheduled"))
+    .filter((a) => (tab === "Upcoming" ? a.status === "Scheduled" && a.date >= iso(new Date()) : a.status !== "Scheduled" || a.date < iso(new Date())))
     .sort((a, b) => (tab === "Upcoming" ? a.date.localeCompare(b.date) : b.date.localeCompare(a.date)));
   const t = useTableData(list, (a) => [a.date, a.time, vehicleLabel(vehicles.find((x) => x.id === a.vehicleId)), a.serviceType, a.status, a.requestId ?? ""].join(" "));
 
@@ -555,7 +544,8 @@ export function AdminAppointments() {
     const r = requests.find((x) => x.id === na.requestId);
     if (!r) return setNaErr("Select a service request.");
     if (!na.date) return setNaErr("Choose a date.");
-    addAppointment({ vehicleId: r.vehicleId, serviceType: r.serviceType, date: na.date, time: na.time, requestId: r.id });
+    const result = addAppointment({ vehicleId: r.vehicleId, serviceType: r.serviceType, services: r.services, date: na.date, time: na.time, requestId: r.id });
+    if (!result.ok) return setNaErr(result.error);
     setNewOpen(false);
   };
 
@@ -614,10 +604,10 @@ export function AdminAppointments() {
             </Select>
           </Field>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Field label="Date" required><Input type="date" value={na.date} onChange={(e) => { setNa({ ...na, date: e.target.value }); setNaErr(""); }} /></Field>
+            <Field label="Date" required><Input type="date" min={iso(new Date())} value={na.date} onChange={(e) => { setNa({ ...na, date: e.target.value }); setNaErr(""); }} /></Field>
             <Field label="Time">
               <Select value={na.time} onChange={(e) => setNa({ ...na, time: e.target.value })}>
-                {TIMES.map((x) => <option key={x}>{x}</option>)}
+                {APPOINTMENT_TIMES.map((x) => <option key={x}>{x}</option>)}
               </Select>
             </Field>
           </div>
@@ -629,13 +619,13 @@ export function AdminAppointments() {
         open={!!resId}
         onClose={() => setResId(null)}
         title="Reschedule Appointment"
-        footer={<><Button variant="secondary" onClick={() => setResId(null)}>Cancel</Button><Button onClick={() => { if (resId && res.date) rescheduleAppointment(resId, res.date, res.time); setResId(null); }}>Save</Button></>}
+        footer={<><Button variant="secondary" onClick={() => setResId(null)}>Cancel</Button><Button onClick={() => { if (resId && rescheduleAppointment(resId, res.date, res.time).ok) setResId(null); }}>Save</Button></>}
       >
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Field label="New Date"><Input type="date" value={res.date} onChange={(e) => setRes({ ...res, date: e.target.value })} /></Field>
+          <Field label="New Date" required><Input type="date" min={iso(new Date())} value={res.date} onChange={(e) => setRes({ ...res, date: e.target.value })} /></Field>
           <Field label="New Time">
             <Select value={res.time} onChange={(e) => setRes({ ...res, time: e.target.value })}>
-              {TIMES.map((x) => <option key={x}>{x}</option>)}
+              {APPOINTMENT_TIMES.map((x) => <option key={x}>{x}</option>)}
             </Select>
           </Field>
         </div>
@@ -645,7 +635,7 @@ export function AdminAppointments() {
         open={!!cancelId}
         onClose={() => setCancelId(null)}
         title="Cancel Appointment"
-        footer={<><Button variant="secondary" onClick={() => setCancelId(null)}>Keep</Button><Button variant="danger" onClick={() => { if (cancelId) cancelAppointment(cancelId); setCancelId(null); }}>Cancel Appointment</Button></>}
+        footer={<><Button variant="secondary" onClick={() => setCancelId(null)}>Keep</Button><Button variant="danger" onClick={() => { if (cancelId && cancelAppointment(cancelId).ok) setCancelId(null); }}>Cancel Appointment</Button></>}
       >
         <p className="text-sm text-ink-700">This appointment will move to Past as Cancelled.</p>
       </Modal>
@@ -653,20 +643,20 @@ export function AdminAppointments() {
   );
 }
 
-/* ============ User Management ============ */
 export function UserManagement() {
   const { users, addUser, updateUser, removeUser } = useApp();
   const [edit, setEdit] = useState<AppUser | null>(null);
   const [open, setOpen] = useState(false);
   const blank: AppUser = { id: "", name: "", email: "", role: "Customer", status: "Active", phone: "" };
   const [form, setForm] = useState<AppUser>(blank);
+  const [error, setError] = useState("");
   const t = useTableData(users, (u) => [u.name, u.email, u.role, u.status, u.phone].join(" "));
 
-  const openNew = () => { setForm(blank); setEdit(null); setOpen(true); };
-  const openEdit = (u: AppUser) => { setForm(u); setEdit(u); setOpen(true); };
+  const openNew = () => { setForm(blank); setEdit(null); setError(""); setOpen(true); };
+  const openEdit = (u: AppUser) => { setForm(u); setEdit(u); setError(""); setOpen(true); };
   const save = () => {
-    if (edit) updateUser(form);
-    else addUser(form);
+    const result = edit ? updateUser(form) : addUser(form);
+    if (!result.ok) return setError(result.error);
     setOpen(false);
   };
 
@@ -687,8 +677,8 @@ export function UserManagement() {
                 <Td><StatusBadge status={u.status} /></Td>
                 <Td>
                   <div className="flex gap-1">
-                    <button onClick={() => openEdit(u)} className="grid h-8 w-8 place-items-center rounded-lg text-brand-600 hover:bg-brand-50"><IconEdit size={16} /></button>
-                    <button onClick={() => removeUser(u.id)} className="grid h-8 w-8 place-items-center rounded-lg text-bad-500 hover:bg-bad-50"><IconTrash size={16} /></button>
+                    <button aria-label={`Edit ${u.name}`} onClick={() => openEdit(u)} className="grid h-8 w-8 place-items-center rounded-lg text-brand-600 hover:bg-brand-50"><IconEdit size={16} /></button>
+                    <button aria-label={`Remove ${u.name}`} onClick={() => removeUser(u.id)} className="grid h-8 w-8 place-items-center rounded-lg text-bad-500 hover:bg-bad-50"><IconTrash size={16} /></button>
                   </div>
                 </Td>
               </Tr>
@@ -705,6 +695,7 @@ export function UserManagement() {
         footer={<><Button variant="secondary" onClick={() => setOpen(false)}>Cancel</Button><Button onClick={save}>{edit ? "Save" : "Add User"}</Button></>}
       >
         <div className="space-y-4">
+          {error && <p role="alert" className="text-sm text-bad-700">{error}</p>}
           <Field label="Full Name"><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></Field>
           <Field label="Email"><Input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></Field>
           <Field label="Phone"><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></Field>
@@ -726,7 +717,6 @@ export function UserManagement() {
   );
 }
 
-/* ============ Admin-only guard ============ */
 function AdminOnly({ children }: { children: ReactNode }) {
   const { isAdmin } = useApp();
   if (!isAdmin) {
@@ -735,7 +725,6 @@ function AdminOnly({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
-/* ============ Specialty helpers ============ */
 export function SpecialtyChips({ list }: { list: string[] }) {
   if (!list.length) return <span className="text-ink-400">None</span>;
   return (
@@ -775,7 +764,8 @@ function SpecialtyMultiSelect({ value, onChange }: { value: string[]; onChange: 
 
   const create = () => {
     if (!isAdmin || query.length < 2 || exists) return;
-    addSpecialty(query);
+    const result = addSpecialty(query);
+    if (!result.ok) return setErr(result.error);
     onChange([...value, query]);
     setQ("");
   };
@@ -783,13 +773,15 @@ function SpecialtyMultiSelect({ value, onChange }: { value: string[]; onChange: 
     const to = draft.trim();
     if (to.length < 2) return setErr("Name must be 2+ characters.");
     if (specialties.some((s) => s.toLowerCase() === to.toLowerCase() && s !== from)) return setErr("Already exists.");
-    renameSpecialty(from, to);
+    const result = renameSpecialty(from, to);
+    if (!result.ok) return setErr(result.error);
     onChange(value.map((x) => (x === from ? to : x)));
     setEditing(null);
     setErr("");
   };
   const del = (s: string) => {
-    removeSpecialty(s);
+    const result = removeSpecialty(s);
+    if (!result.ok) return setErr(result.error);
     onChange(value.filter((x) => x !== s));
     setConfirmDel(null);
   };
@@ -878,22 +870,16 @@ function SpecialtyMultiSelect({ value, onChange }: { value: string[]; onChange: 
   );
 }
 
-/* ============ Technician Management ============ */
-type TechForm = { name: string; email: string; phone: string; password: string; status: Technician["status"]; specialties: string[] };
-const blankTech: TechForm = { name: "", email: "", phone: "", password: "", status: "Available", specialties: [] };
+type TechForm = { name: string; email: string; phone: string; status: Technician["status"]; specialties: string[] };
+const blankTech: TechForm = { name: "", email: "", phone: "", status: "Available", specialties: [] };
 
-function validateTech(f: TechForm, existingEmails: string[], isEdit: boolean) {
+function validateTech(f: TechForm, existingEmails: string[]) {
   const e: Partial<Record<keyof TechForm, string>> = {};
   if (!f.specialties.length) e.specialties = "Select at least one specialty.";
   if (f.name.trim().length < 2) e.name = "Enter the technician's full name.";
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email.trim())) e.email = "Enter a valid email address.";
+  if (!emailValid(f.email)) e.email = "Enter a valid email address.";
   else if (existingEmails.includes(f.email.trim().toLowerCase())) e.email = "This email is already in use.";
   if (f.phone.replace(/\D/g, "").length < 10) e.phone = "Enter a valid phone number (10+ digits).";
-  // Password is required on create; optional on edit (blank keeps the current one).
-  if (!isEdit || f.password) {
-    if (f.password.length < 8) e.password = "Password must be at least 8 characters.";
-    else if (!/[A-Za-z]/.test(f.password) || !/\d/.test(f.password)) e.password = "Use both letters and numbers.";
-  }
   return e;
 }
 
@@ -906,7 +892,7 @@ export function TechnicianManagement() {
 }
 
 function TechnicianManagementInner() {
-  const { technicians, users, addTechnician, updateTechnician } = useApp();
+  const { technicians, users, assignments, addTechnician, updateTechnician } = useApp();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Technician | null>(null);
   const [form, setForm] = useState<TechForm>(blankTech);
@@ -921,22 +907,24 @@ function TechnicianManagementInner() {
   const openNew = () => { setEditing(null); setForm(blankTech); setErrors({}); setOpen(true); };
   const openEdit = (x: Technician) => {
     setEditing(x);
-    setForm({ name: x.name, email: x.email, phone: x.phone ?? "", password: "", status: x.status, specialties: x.specialties });
+    setForm({ name: x.name, email: x.email, phone: x.phone ?? "", status: x.status, specialties: x.specialties });
     setErrors({});
     setOpen(true);
   };
   const submit = () => {
     const self = editing?.email.toLowerCase();
     const emails = [...technicians.map((x) => x.email), ...users.map((u) => u.email)].map((e) => e.toLowerCase()).filter((e) => e !== self);
-    const e = validateTech(form, emails, !!editing);
+    const e = validateTech(form, emails);
     setErrors(e);
     if (Object.keys(e).length) return;
     const data = { name: form.name.trim(), email: form.email.trim(), phone: form.phone.trim(), status: form.status, specialties: form.specialties };
     if (editing) {
-      updateTechnician({ ...editing, ...data });
+      const result = updateTechnician({ ...editing, ...data });
+      if (!result.ok) return setErrors({ email: result.error });
       setSaved(`${data.name} was updated.`);
     } else {
-      addTechnician(data);
+      const result = addTechnician(data);
+      if (!result.ok) return setErrors({ email: result.error });
       setSaved(`${data.name} was added as a technician.`);
     }
     setOpen(false);
@@ -946,7 +934,7 @@ function TechnicianManagementInner() {
     <>
       <PageHeader
         title="Technicians"
-        subtitle="Monitor technician workload and performance."
+        subtitle="Monitor technician workload. Ratings and historical completion counts are sample data."
         action={<Button onClick={openNew}><IconPlus size={16} /> Add Technician</Button>}
       />
       {saved && (
@@ -969,7 +957,7 @@ function TechnicianManagementInner() {
               <div className="ml-auto"><StatusBadge status={t.status} /></div>
             </div>
             <div className="mt-4 grid grid-cols-3 gap-2 border-t border-line pt-4 text-center">
-              <div><p className="text-lg font-bold text-ink-900 tabular">{t.activeJobs}</p><p className="text-[11px] text-ink-400">Active</p></div>
+              <div><p className="text-lg font-bold text-ink-900 tabular">{assignments.filter((a) => a.technicianId === t.id && a.status !== "Completed").length}</p><p className="text-[11px] text-ink-400">Active</p></div>
               <div><p className="text-lg font-bold text-ink-900 tabular">{t.completed}</p><p className="text-[11px] text-ink-400">Completed</p></div>
               <div><p className="text-lg font-bold text-ink-900 tabular">{t.rating || "—"}</p><p className="text-[11px] text-ink-400">Rating</p></div>
             </div>
@@ -990,7 +978,7 @@ function TechnicianManagementInner() {
                 <Td>{x.email}</Td>
                 <Td className="tabular">{x.phone ?? "—"}</Td>
                 <Td><SpecialtyChips list={x.specialties} /></Td>
-                <Td className="tabular">{x.activeJobs}</Td>
+                <Td className="tabular">{assignments.filter((a) => a.technicianId === x.id && a.status !== "Completed").length}</Td>
                 <Td><StatusBadge status={x.status} /></Td>
                 <Td>
                   <button onClick={() => openEdit(x)} aria-label={`Edit ${x.name}`} className="grid h-8 w-8 place-items-center rounded-lg text-brand-600 hover:bg-brand-50"><IconEdit size={16} /></button>
@@ -1019,10 +1007,7 @@ function TechnicianManagementInner() {
               </Select>
             </Field>
           </div>
-          <Field label="Password" required={!editing}>
-            <Input type="password" value={form.password} placeholder={editing ? "Leave blank to keep current" : "At least 8 characters"} onChange={(e) => set("password", e.target.value)} />
-            <FieldError msg={errors.password} />
-          </Field>
+          <p className="text-sm text-ink-500">Demo accounts sign in by email or phone. Password management requires backend integration.</p>
           <Field label="Specialties" required>
             <SpecialtyMultiSelect value={form.specialties} onChange={(v) => { setForm({ ...form, specialties: v }); setErrors({ ...errors, specialties: undefined }); }} />
             <FieldError msg={errors.specialties} />
@@ -1033,28 +1018,37 @@ function TechnicianManagementInner() {
   );
 }
 
-/* ============ Reports ============ */
-const serviceBreakdown: [string, number, number, string][] = [
-  ["Brake Service", 48, 12400, "2.5h"],
-  ["Oil Change", 92, 5520, "0.6h"],
-  ["AC Service", 34, 4080, "1.8h"],
-  ["Engine Diagnostics", 21, 6300, "3.1h"],
-];
-
 export function Reports() {
-  const t = useTableData(serviceBreakdown, (r) => r.join(" "));
+  const { requests, invoices, users, timeLogs } = useApp();
+  const completed = requests.filter((r) => r.stage === "Completed");
+  const invoiceTotal = (id: string) => invoices.filter((i) => i.status === "Paid" && i.requestId === id).reduce((total, invoice) => {
+    const request = requests.find((r) => r.id === id);
+    return total + (request ? invoiceAmounts(invoice, request).total : 0);
+  }, 0);
+  const revenue = requests.reduce((total, request) => total + invoiceTotal(request.id), 0);
+  const paidInvoices = invoices.filter((i) => i.status === "Paid").length;
+  const services = [...new Set(completed.map((r) => r.serviceType))];
+  const serviceBreakdown = services.map((service) => {
+    const jobs = completed.filter((r) => r.serviceType === service);
+    const ids = new Set(jobs.map((r) => r.id));
+    const hours = timeLogs.filter((log) => ids.has(log.requestId)).reduce((total, log) => total + log.hours, 0);
+    return { service, jobs: jobs.length, revenue: jobs.reduce((total, job) => total + invoiceTotal(job.id), 0), duration: hours ? `${(hours / jobs.length).toFixed(1)}h` : "—" };
+  });
+  const revenueSeries = rangeBuckets("All Time").map((bucket) => ({ month: bucket.label, value: requests.reduce((total, request) => total + invoices.filter((invoice) => invoice.requestId === request.id && invoice.status === "Paid" && inRange(invoice.date, bucket)).reduce((sum, invoice) => sum + invoiceAmounts(invoice, request).total, 0), 0) }));
+  const requestsSeries = rangeBuckets("This Week").map((bucket) => ({ label: bucket.label, value: requests.filter((r) => inRange(r.createdAt, bucket)).length }));
+  const t = useTableData(serviceBreakdown, (row) => [row.service, row.jobs, row.revenue, row.duration].join(" "));
   return (
     <>
-      <PageHeader title="Reports" subtitle="Business insights and performance analytics." action={<Button variant="secondary"><IconDownload size={16} /> Export</Button>} />
+      <PageHeader title="Reports" subtitle="Reports from this tab’s demo shop records. Paid invoice totals include tax." action={<Button variant="secondary" disabled title="Export requires backend integration"><IconDownload size={16} /> Export</Button>} />
       <div className="grid grid-cols-2 gap-5 lg:grid-cols-4">
-        <StatCard icon={<IconInvoice />} label="Total Revenue" value={money0(20930)} sub="Year to date" />
-        <StatCard icon={<IconClipboard />} label="Jobs Completed" value={214} sub="Year to date" tone="ok" />
-        <StatCard icon={<IconChart />} label="Avg Ticket" value={money0(310)} sub="Per job" tone="warn" />
-        <StatCard icon={<IconUsers />} label="New Customers" value={38} sub="This quarter" />
+        <StatCard icon={<IconInvoice />} label="Paid Invoice Total" value={money0(revenue)} sub="All demo records" />
+        <StatCard icon={<IconClipboard />} label="Jobs Completed" value={completed.length} sub="All demo records" tone="ok" />
+        <StatCard icon={<IconChart />} label="Avg Paid Invoice" value={money0(paidInvoices ? revenue / paidInvoices : 0)} sub="Includes tax" tone="warn" />
+        <StatCard icon={<IconUsers />} label="Customers" value={users.filter((u) => u.role === "Customer").length} sub="Demo user records" />
       </div>
       <div className="mt-6 grid grid-cols-1 gap-5 lg:grid-cols-2">
-        <Card><CardHeader title="Monthly Revenue" /><div className="p-5"><LineChart data={revenueSeries} height={230} /></div></Card>
-        <Card><CardHeader title="Requests by Day" /><div className="p-5"><BarChart data={requestsSeries} height={230} /></div></Card>
+        <Card><CardHeader title="Monthly Paid Invoices" /><div className="p-5"><LineChart data={revenueSeries} height={230} /></div></Card>
+        <Card><CardHeader title="Requests This Week" /><div className="p-5"><BarChart data={requestsSeries} height={230} /></div></Card>
       </div>
       <Card className="mt-5">
         <CardHeader title="Service Breakdown" />
@@ -1064,11 +1058,11 @@ export function Reports() {
           <tbody>
             {t.rows.length === 0 && <NoRows cols={4} />}
             {t.rows.map((row) => (
-              <Tr key={row[0] as string}>
-                <Td className="font-medium text-ink-900">{row[0]}</Td>
-                <Td className="tabular">{row[1]}</Td>
-                <Td className="tabular">{money0(row[2] as number)}</Td>
-                <Td className="tabular">{row[3]}</Td>
+              <Tr key={row.service}>
+                <Td className="font-medium text-ink-900">{row.service}</Td>
+                <Td className="tabular">{row.jobs}</Td>
+                <Td className="tabular">{money0(row.revenue)}</Td>
+                <Td className="tabular">{row.duration}</Td>
               </Tr>
             ))}
           </tbody>
@@ -1079,7 +1073,6 @@ export function Reports() {
   );
 }
 
-/* ============ Inventory ============ */
 export function Inventory() {
   const { parts, addPart, updatePart, removePart, partRequests, requests, technicians, resolvePartRequest, isAdmin, laborRate } = useApp();
   const q = useQuery();
@@ -1089,6 +1082,7 @@ export function Inventory() {
   const [edit, setEdit] = useState<Part | null>(null);
   const blank: Part = { id: "", name: "", number: "", quantity: 0, price: 0, category: "Engine" };
   const [form, setForm] = useState<Part>(blank);
+  const [error, setError] = useState("");
   const lowStock = parts.filter((p) => p.quantity < 10).length;
   const shownParts = stockFilter === "Low stock" ? parts.filter((p) => p.quantity < 10) : parts;
   const t = useTableData(shownParts, (p) => [p.name, p.number, p.category, p.quantity, p.price].join(" "));
@@ -1096,9 +1090,9 @@ export function Inventory() {
   const pt = useTableData(prList, (p) => [p.requestId, parts.find((x) => x.id === p.partId)?.name ?? "", technicians.find((x) => x.id === p.technicianId)?.name ?? "", p.status, p.note].join(" "));
   const pendingCount = partRequests.filter((p) => p.status === "Pending").length;
 
-  const openNew = () => { setForm(blank); setEdit(null); setOpen(true); };
-  const openEdit = (p: Part) => { setForm(p); setEdit(p); setOpen(true); };
-  const save = () => { if (edit) updatePart(form); else addPart(form); setOpen(false); };
+  const openNew = () => { setForm(blank); setEdit(null); setError(""); setOpen(true); };
+  const openEdit = (p: Part) => { setForm(p); setEdit(p); setError(""); setOpen(true); };
+  const save = () => { const result = edit ? updatePart(form) : addPart(form); if (!result.ok) return setError(result.error); setOpen(false); };
 
   return (
     <>
@@ -1133,8 +1127,8 @@ export function Inventory() {
                 <Td className="tabular">{money(p.price)}</Td>
                 <Td>
                   <div className="flex gap-1">
-                    <button onClick={() => openEdit(p)} className="grid h-8 w-8 place-items-center rounded-lg text-brand-600 hover:bg-brand-50"><IconEdit size={16} /></button>
-                    <button onClick={() => removePart(p.id)} className="grid h-8 w-8 place-items-center rounded-lg text-bad-500 hover:bg-bad-50"><IconTrash size={16} /></button>
+                    <button aria-label={`Edit ${p.name}`} onClick={() => openEdit(p)} className="grid h-8 w-8 place-items-center rounded-lg text-brand-600 hover:bg-brand-50"><IconEdit size={16} /></button>
+                    <button aria-label={`Remove ${p.name}`} onClick={() => removePart(p.id)} className="grid h-8 w-8 place-items-center rounded-lg text-bad-500 hover:bg-bad-50"><IconTrash size={16} /></button>
                   </div>
                 </Td>
               </Tr>
@@ -1190,6 +1184,7 @@ export function Inventory() {
         footer={<><Button variant="secondary" onClick={() => setOpen(false)}>Cancel</Button><Button onClick={save}>{edit ? "Save" : "Add Part"}</Button></>}
       >
         <div className="space-y-4">
+          {error && <p role="alert" className="text-sm text-bad-700">{error}</p>}
           <Field label="Part Name"><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></Field>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Field label="Part Number"><Input value={form.number} onChange={(e) => setForm({ ...form, number: e.target.value })} /></Field>
@@ -1198,8 +1193,8 @@ export function Inventory() {
                 {["Engine", "Brakes", "Fluids", "HVAC", "Exterior", "Electrical"].map((c) => <option key={c}>{c}</option>)}
               </Select>
             </Field>
-            <Field label="Quantity"><Input type="number" value={form.quantity} onChange={(e) => setForm({ ...form, quantity: +e.target.value })} /></Field>
-            <Field label="Unit Price"><Input type="number" value={form.price} onChange={(e) => setForm({ ...form, price: +e.target.value })} /></Field>
+            <Field label="Quantity"><Input type="number" min={0} step={1} value={form.quantity} onChange={(e) => setForm({ ...form, quantity: +e.target.value })} /></Field>
+            <Field label="Unit Price"><Input type="number" min={0} step="0.01" value={form.price} onChange={(e) => setForm({ ...form, price: +e.target.value })} /></Field>
           </div>
         </div>
       </Modal>
@@ -1207,27 +1202,27 @@ export function Inventory() {
   );
 }
 
-/* ============ Settings ============ */
 export function Settings() {
   const { laborRate, setLaborRate, isAdmin } = useApp();
   const [tab, setTab] = useState("General");
   const [rate, setRate] = useState(laborRate);
+  const [message, setMessage] = useState("");
   return (
     <>
-      <PageHeader title="Settings" subtitle="Configure your service center." />
+      <PageHeader title="Settings" subtitle="The demo supports labor-rate changes. Other settings require backend integration." />
       <div className="mb-5"><Tabs tabs={["General", "Notifications", "Billing"]} active={tab} onChange={setTab} /></div>
       <Card className="max-w-2xl p-6">
         {tab === "General" && (
           <div className="space-y-4">
-            <Field label="Service Center Name"><Input defaultValue="AutoServe — Downtown" /></Field>
+            <Field label="Service Center Name"><Input defaultValue="AutoServe — Downtown" readOnly /></Field>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <Field label="Phone"><Input defaultValue="(415) 555-0100" /></Field>
-              <Field label="Email"><Input defaultValue="hello@autoserve.com" /></Field>
+              <Field label="Phone"><Input defaultValue="(415) 555-0100" readOnly /></Field>
+              <Field label="Email"><Input defaultValue="hello@autoserve.com" readOnly /></Field>
             </div>
-            <Field label="Address"><Input defaultValue="123 Service Lane, San Francisco, CA" /></Field>
+            <Field label="Address"><Input defaultValue="123 Service Lane, San Francisco, CA" readOnly /></Field>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <Field label="Opening Time"><Input type="time" defaultValue="08:00" /></Field>
-              <Field label="Closing Time"><Input type="time" defaultValue="18:00" /></Field>
+              <Field label="Opening Time"><Input type="time" defaultValue="08:00" readOnly /></Field>
+              <Field label="Closing Time"><Input type="time" defaultValue="18:00" readOnly /></Field>
             </div>
           </div>
         )}
@@ -1236,7 +1231,7 @@ export function Settings() {
             {["Email notifications", "SMS alerts", "Appointment reminders", "Marketing updates"].map((l, i) => (
               <label key={l} className="flex items-center justify-between rounded-lg border border-line px-4 py-3">
                 <span className="text-sm font-medium text-ink-700">{l}</span>
-                <input type="checkbox" defaultChecked={i < 3} className="h-4 w-4 rounded border-line accent-brand-500" />
+                <input type="checkbox" defaultChecked={i < 3} disabled className="h-4 w-4 rounded border-line accent-brand-500" />
               </label>
             ))}
           </div>
@@ -1247,14 +1242,15 @@ export function Settings() {
               <Input type="number" min={0} step={5} value={rate} disabled={!isAdmin} onChange={(e) => setRate(+e.target.value)} />
               <p className="mt-1.5 text-[12px] text-ink-400">Used to price technician labor hours on every estimate.</p>
             </Field>
-            <Field label="Tax Rate (%)"><Input type="number" defaultValue={8} /></Field>
-            <Field label="Currency"><Select defaultValue="USD"><option>USD</option><option>EUR</option><option>GBP</option></Select></Field>
-            <Field label="Invoice Prefix"><Input defaultValue="INV" /></Field>
+            <Field label="Tax Rate (%)"><Input type="number" defaultValue={8} readOnly /></Field>
+            <Field label="Currency"><Select defaultValue="USD" disabled><option>USD</option><option>EUR</option><option>GBP</option></Select></Field>
+            <Field label="Invoice Prefix"><Input defaultValue="INV" readOnly /></Field>
           </div>
         )}
         <div className="mt-6 flex justify-end gap-3 border-t border-line pt-5">
-          <Button variant="secondary">Cancel</Button>
-          <Button onClick={() => { if (rate !== laborRate) setLaborRate(rate); }}>Save Changes</Button>
+          {message && <p role="status" className="mr-auto text-sm text-ink-700">{message}</p>}
+          <Button variant="secondary" disabled={tab !== "Billing"} onClick={() => { setRate(laborRate); setMessage(""); }}>Cancel</Button>
+          <Button disabled={tab !== "Billing" || !isAdmin || rate === laborRate} onClick={() => { const result = setLaborRate(rate); setMessage(result.ok ? "Labor rate saved for this demo tab." : result.error); }}>Save Changes</Button>
         </div>
       </Card>
     </>

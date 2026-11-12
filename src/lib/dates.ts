@@ -6,6 +6,9 @@ export function fromIso(s: string) {
   const [y, m, d] = s.split("-").map(Number);
   return new Date(y, (m || 1) - 1, d || 1);
 }
+export function isIsoDate(value: string) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(value) && iso(fromIso(value)) === value;
+}
 export function addDays(d: Date, n: number) {
   const x = new Date(d);
   x.setDate(x.getDate() + n);
@@ -25,8 +28,8 @@ export function fmtDay(d: Date) {
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 export function fmtRange(a: Date, b: Date) {
-  const sameYear = a.getFullYear() === b.getFullYear();
-  return `${fmtDay(a)} – ${b.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}${sameYear ? "" : ""}`;
+  const start = a.getFullYear() === b.getFullYear() ? fmtDay(a) : a.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  return `${start} – ${b.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`;
 }
 /** Parse activity stamps like "May 18, 2025 09:10 AM" or "May 18, 2025, 9:10 AM". */
 export function parseStamp(at: string) {
@@ -63,7 +66,8 @@ export function rangeBuckets(r: Range): { label: string; from: string; to: strin
     let start = first;
     let n = 1;
     while (start <= last) {
-      const end = addDays(startOfWeek(start), 6) > last ? last : addDays(startOfWeek(start), 6);
+      const sunday = addDays(startOfWeek(start), 6);
+      const end = sunday > last ? last : sunday;
       out.push({ label: `W${n++}`, from: iso(start), to: iso(end) });
       start = addDays(end, 1);
     }

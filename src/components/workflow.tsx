@@ -1,7 +1,6 @@
-// Shared work-order workflow UI: estimate breakdown and attributed activity history.
 import { useState } from "react";
 import { useApp } from "../store/AppContext";
-import type { RepairLine, ServiceRequest, ServiceAssignment } from "../data/mock";
+import type { RepairLine, ServiceRequest, ServiceAssignment } from "../types";
 import { Button, Card, CardHeader, Field, Modal, Textarea, Table, Td, Thead, Timeline, Tr, money } from "./ui";
 
 export function AssignmentHold({
@@ -99,11 +98,11 @@ export function EstimateTable({
   selected?: string[];
   onToggle?: (id: string) => void;
 }) {
-  const { parts, laborRate } = useApp();
+  const { parts } = useApp();
   if (!lines.length) return <p className="px-1 py-3 text-sm text-ink-400">No estimate lines yet.</p>;
-  const partsTotal = lines.filter((l) => l.type === "Part").reduce((a, b) => a + b.cost, 0);
-  const laborTotal = lines.filter((l) => l.type === "Labor").reduce((a, b) => a + b.cost, 0);
   const shown = selectable ? lines.filter((l) => selected.includes(l.id)) : lines;
+  const partsTotal = shown.filter((l) => l.type === "Part").reduce((a, b) => a + b.cost, 0);
+  const laborTotal = shown.filter((l) => l.type === "Labor").reduce((a, b) => a + b.cost, 0);
   return (
     <>
       <Table>
@@ -112,7 +111,7 @@ export function EstimateTable({
           {lines.map((l) => {
             const part = parts.find((p) => p.id === l.partId);
             const qty = l.partId ? `${l.qty ?? 1}` : l.hours != null ? `${l.hours} h` : "—";
-            const unit = part ? money(part.price) : l.hours != null ? `${money(laborRate)}/h` : "Fixed";
+            const unit = part || l.hours != null ? `${money(l.cost / (l.qty ?? l.hours ?? 1))}${l.hours != null ? "/h" : ""}` : "Fixed";
             return (
               <Tr key={l.id}>
                 {selectable && (

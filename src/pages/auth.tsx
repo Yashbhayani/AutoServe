@@ -1,10 +1,9 @@
-// Auth screens: email/phone-based sign in (no social providers).
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link, slugify, useNavigate } from "../router";
 import { useApp } from "../store/AppContext";
 import { Button, Field, Input } from "../components/ui";
 import { IconWrench } from "../components/icons";
-import { accounts } from "../data/mock";
+import { accountForIdentifier, emailValid } from "../lib/accounts";
 
 function AuthLayout({ children }: { children: ReactNode }) {
   return (
@@ -41,38 +40,28 @@ function AuthLayout({ children }: { children: ReactNode }) {
   );
 }
 
-// Resolve an account from its email or phone (as a backend would).
-function accountForIdentifier(identifier: string) {
-  const id = identifier.trim().toLowerCase();
-  if (!id) return null;
-  return (
-    accounts.find(
-      (a) => a.email.toLowerCase() === id || a.phone.replace(/\D/g, "") === id.replace(/\D/g, ""),
-    ) ?? null
-  );
-}
-
 export function LoginPage() {
   const navigate = useNavigate();
-  const { signIn } = useApp();
+  const { signIn, accounts } = useApp();
   const [identifier, setIdentifier] = useState("john@example.com");
   const [error, setError] = useState("");
 
   const go = (e: React.FormEvent) => {
     e.preventDefault();
-    const account = accountForIdentifier(identifier);
+    const account = accountForIdentifier(accounts, identifier);
     if (!account) {
       setError("We couldn't find an account for that email or phone.");
       return;
     }
-    signIn(account.name, account.roles, account.id);
+    const result = signIn(identifier);
+    if (!result.ok) return setError(result.error);
     navigate(`/${slugify(account.name)}/dashboard`);
   };
 
   return (
     <AuthLayout>
       <h1 className="text-[26px] font-bold text-ink-900">Welcome Back</h1>
-      <p className="mt-1 text-sm text-ink-500">Please sign in to continue.</p>
+      <p className="mt-1 text-sm text-ink-500">Demo sign-in uses an email or phone only. No passwords are checked; use fictional details.</p>
 
       <form onSubmit={go} className="mt-7 space-y-4">
         <Field label="Email or Phone">
@@ -87,7 +76,7 @@ export function LoginPage() {
           />
         </Field>
         <Field label="Password">
-          <Input type="password" placeholder="••••••••" defaultValue="password" />
+          <Input type="password" placeholder="Unavailable in demo" disabled autoComplete="off" />
         </Field>
 
         {error && (
@@ -98,8 +87,8 @@ export function LoginPage() {
 
         <div className="flex items-center justify-between text-[13px]">
           <label className="flex items-center gap-2 text-ink-500">
-            <input type="checkbox" className="h-4 w-4 rounded border-line accent-brand-500" defaultChecked />
-            Remember me
+            <input type="checkbox" className="h-4 w-4 rounded border-line accent-brand-500" disabled title="Demo sessions last for this tab only" />
+            Remember me (unavailable)
           </label>
           <Link to="/forgot-password" className="font-medium text-brand-600 hover:underline">
             Forgot password?
@@ -119,7 +108,6 @@ export function LoginPage() {
   );
 }
 
-/* ---------------- Email OTP (mock delivery) ---------------- */
 const OTP_TTL = 120; // seconds
 const newCode = () => String(Math.floor(100000 + Math.random() * 900000));
 
@@ -132,7 +120,6 @@ function Alert({ tone, children }: { tone: "ok" | "bad" | "info"; children: Reac
   return <div className={`rounded-lg px-3.5 py-2.5 text-[13px] ring-1 ring-inset ${cls}`}>{children}</div>;
 }
 
-/** 6-digit code entry with a 2-minute expiry, resend, and error/success states. */
 function OtpStep({ email, onVerified, onBack }: { email: string; onVerified: () => void; onBack: () => void }) {
   const [code, setCode] = useState(newCode);
   const [expiresAt, setExpiresAt] = useState(() => Date.now() + OTP_TTL * 1000);
@@ -140,7 +127,6 @@ function OtpStep({ email, onVerified, onBack }: { email: string; onVerified: () 
   const [digits, setDigits] = useState<string[]>(Array(6).fill(""));
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
-  const [verified, setVerified] = useState(false);
   const refs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
@@ -155,8 +141,7 @@ function OtpStep({ email, onVerified, onBack }: { email: string; onVerified: () 
   const setDigit = (i: number, v: string) => {
     const clean = v.replace(/\D/g, "");
     if (clean.length > 1) {
-      // Paste of the full code
-      const next = clean.slice(0, 6).split("");
+        const next = clean.slice(0, 6).split("");
       setDigits([...next, ...Array(6 - next.length).fill("")]);
       refs.current[Math.min(next.length, 5)]?.focus();
     } else {
@@ -174,8 +159,7 @@ function OtpStep({ email, onVerified, onBack }: { email: string; onVerified: () 
     if (entered.length < 6) return setError("Enter all 6 digits of the code.");
     if (expired) return setError("This code has expired. Please request a new one.");
     if (entered !== code) return setError("Incorrect code. Please check and try again.");
-    setVerified(true);
-    setTimeout(onVerified, 900);
+    onVerified();
   };
 
   const resend = () => {
@@ -184,16 +168,15 @@ function OtpStep({ email, onVerified, onBack }: { email: string; onVerified: () 
     setNow(Date.now());
     setDigits(Array(6).fill(""));
     setError("");
-    setNotice(`A new code was sent to ${email}.`);
+    setNotice(`A new local demo code is ready.`);
     refs.current[0]?.focus();
   };
 
   return (
     <form onSubmit={verify} className="mt-7 space-y-4">
       <p className="text-sm text-ink-500">
-        We sent a 6-digit code to <span className="font-semibold text-ink-900">{email}</span>.
+        Demo verification for <span className="font-semibold text-ink-900">{email}</span>. No email is sent.
       </p>
-      {/* Demo only: no email backend, so surface the code here. */}
       <Alert tone="info">
         Demo code: <span className="font-mono font-semibold tracking-widest">{code}</span>
       </Alert>
@@ -208,11 +191,10 @@ function OtpStep({ email, onVerified, onBack }: { email: string; onVerified: () 
             autoComplete={i === 0 ? "one-time-code" : "off"}
             maxLength={6}
             aria-label={`Digit ${i + 1}`}
-            disabled={verified}
             onChange={(e) => setDigit(i, e.target.value)}
             onKeyDown={(e) => { if (e.key === "Backspace" && !digits[i] && i > 0) refs.current[i - 1]?.focus(); }}
             className={`h-12 w-12 rounded-lg border bg-white text-center font-mono text-lg font-semibold text-ink-900 focus:outline-none focus:ring-2 ${
-              error ? "border-bad-500 focus:ring-bad-500/15" : verified ? "border-ok-500" : "border-line focus:border-brand-500 focus:ring-brand-500/15"
+              error ? "border-bad-500 focus:ring-bad-500/15" : "border-line focus:border-brand-500 focus:ring-brand-500/15"
             }`}
           />
         ))}
@@ -222,16 +204,15 @@ function OtpStep({ email, onVerified, onBack }: { email: string; onVerified: () 
         <span className={expired ? "font-medium text-bad-700" : "text-ink-500"}>
           {expired ? "Code expired" : <>Code expires in <span className="font-mono font-semibold text-ink-900">{mmss}</span></>}
         </span>
-        <button type="button" onClick={resend} disabled={verified} className="font-medium text-brand-600 hover:underline disabled:opacity-50">
+        <button type="button" onClick={resend} className="font-medium text-brand-600 hover:underline disabled:opacity-50">
           Resend code
         </button>
       </div>
 
       {error && <Alert tone="bad">{error}</Alert>}
-      {notice && !error && !verified && <Alert tone="ok">{notice}</Alert>}
-      {verified && <Alert tone="ok">Code verified successfully.</Alert>}
+      {notice && !error && <Alert tone="ok">{notice}</Alert>}
 
-      <Button type="submit" className="w-full" disabled={verified}>Verify Code</Button>
+      <Button type="submit" className="w-full">Verify Code</Button>
       <button type="button" onClick={onBack} className="w-full text-center text-[13px] font-medium text-ink-500 hover:text-ink-900">
         Use a different email
       </button>
@@ -242,13 +223,12 @@ function OtpStep({ email, onVerified, onBack }: { email: string; onVerified: () 
 function FieldErr({ msg }: { msg?: string }) {
   return msg ? <p className="mt-1.5 text-[12px] text-bad-700">{msg}</p> : null;
 }
-const emailOk = (e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e.trim());
 
 export function SignUpPage() {
   const navigate = useNavigate();
-  const { signIn } = useApp();
+  const { registerCustomer, accounts } = useApp();
   const [step, setStep] = useState<"form" | "verify">("form");
-  const [form, setForm] = useState({ name: "", email: "", phone: "", password: "" });
+  const [form, setForm] = useState({ name: "", email: "", phone: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const set = (k: keyof typeof form, v: string) => { setForm({ ...form, [k]: v }); setErrors({ ...errors, [k]: "" }); };
@@ -257,9 +237,9 @@ export function SignUpPage() {
     e.preventDefault();
     const er: Record<string, string> = {};
     if (form.name.trim().length < 2) er.name = "Enter your full name.";
-    if (!emailOk(form.email)) er.email = "Enter a valid email address.";
-    else if (accountForIdentifier(form.email)) er.email = "An account with this email already exists.";
-    if (form.password.length < 8) er.password = "Password must be at least 8 characters.";
+    if (!emailValid(form.email)) er.email = "Enter a valid email address.";
+    else if (accountForIdentifier(accounts, form.email)) er.email = "An account with this email already exists.";
+    if (form.phone && form.phone.replace(/\D/g, "").length < 10) er.phone = "Enter a phone number with at least 10 digits.";
     setErrors(er);
     if (Object.values(er).some(Boolean)) return;
     setStep("verify");
@@ -267,9 +247,12 @@ export function SignUpPage() {
 
   const finish = () => {
     const displayName = form.name.trim();
-    const id = `account-${crypto.randomUUID()}`;
-    accounts.push({ id, name: displayName, email: form.email.trim(), phone: form.phone.trim(), roles: ["customer"] });
-    signIn(displayName, ["customer"], id);
+    const result = registerCustomer(form);
+    if (!result.ok) {
+      setErrors({ email: result.error });
+      setStep("form");
+      return;
+    }
     navigate(`/${slugify(displayName)}/dashboard`);
   };
 
@@ -277,7 +260,7 @@ export function SignUpPage() {
     <AuthLayout>
       <h1 className="text-[26px] font-bold text-ink-900">{step === "form" ? "Create Account" : "Verify Your Email"}</h1>
       <p className="mt-1 text-sm text-ink-500">
-        {step === "form" ? "Join AutoServe in a few seconds." : "Enter the code to activate your account."}
+        {step === "form" ? "Create a local demo account using fictional contact details." : "Use the displayed demo code. Email verification requires a backend."}
       </p>
       {step === "form" ? (
         <form onSubmit={submit} className="mt-7 space-y-4" noValidate>
@@ -291,10 +274,10 @@ export function SignUpPage() {
           </Field>
           <Field label="Phone">
             <Input placeholder="(415) 555-0132" value={form.phone} onChange={(e) => set("phone", e.target.value)} />
+            <FieldErr msg={errors.phone} />
           </Field>
-          <Field label="Password" required>
-            <Input type="password" placeholder="••••••••" value={form.password} onChange={(e) => set("password", e.target.value)} />
-            <FieldErr msg={errors.password} />
+          <Field label="Password">
+            <Input type="password" placeholder="Unavailable in demo" disabled autoComplete="off" />
           </Field>
           <Button type="submit" className="w-full">Create Account</Button>
         </form>
@@ -312,84 +295,15 @@ export function SignUpPage() {
 }
 
 export function ForgotPasswordPage() {
-  const navigate = useNavigate();
-  const [step, setStep] = useState<"email" | "verify" | "reset" | "done">("email");
-  const [email, setEmail] = useState("");
-  const [emailErr, setEmailErr] = useState("");
-  const [pw, setPw] = useState({ next: "", confirm: "" });
-  const [pwErr, setPwErr] = useState<Record<string, string>>({});
-
-  const sendCode = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!emailOk(email)) return setEmailErr("Enter a valid email address.");
-    if (!accountForIdentifier(email)) return setEmailErr("We couldn't find an account with that email.");
-    setStep("verify");
-  };
-
-  const reset = (e: React.FormEvent) => {
-    e.preventDefault();
-    const er: Record<string, string> = {};
-    if (pw.next.length < 8) er.next = "Password must be at least 8 characters.";
-    else if (!/[A-Za-z]/.test(pw.next) || !/\d/.test(pw.next)) er.next = "Use both letters and numbers.";
-    if (!pw.confirm) er.confirm = "Please confirm your new password.";
-    else if (pw.confirm !== pw.next) er.confirm = "Passwords do not match.";
-    setPwErr(er);
-    if (Object.keys(er).length) return;
-    setStep("done");
-  };
-
-  const subtitle = {
-    email: "Enter your email and we'll send a 6-digit code.",
-    verify: "Enter the code we emailed you.",
-    reset: "Choose a new password for your account.",
-    done: "Your password has been updated.",
-  }[step];
-
   return (
     <AuthLayout>
-      <h1 className="text-[26px] font-bold text-ink-900">{step === "reset" ? "Set New Password" : "Reset Password"}</h1>
-      <p className="mt-1 text-sm text-ink-500">{subtitle}</p>
-
-      {step === "email" && (
-        <form onSubmit={sendCode} className="mt-7 space-y-4" noValidate>
-          <Field label="Email" required>
-            <Input type="email" placeholder="john@example.com" value={email} onChange={(e) => { setEmail(e.target.value); setEmailErr(""); }} />
-            <FieldErr msg={emailErr} />
-          </Field>
-          <Button type="submit" className="w-full">Send Code</Button>
-        </form>
-      )}
-
-      {step === "verify" && <OtpStep email={email.trim()} onVerified={() => setStep("reset")} onBack={() => setStep("email")} />}
-
-      {step === "reset" && (
-        <form onSubmit={reset} className="mt-7 space-y-4" noValidate>
-          <Field label="New Password" required>
-            <Input type="password" placeholder="At least 8 characters" value={pw.next} onChange={(e) => { setPw({ ...pw, next: e.target.value }); setPwErr({ ...pwErr, next: "" }); }} />
-            <FieldErr msg={pwErr.next} />
-          </Field>
-          <Field label="Confirm Password" required>
-            <Input type="password" placeholder="Re-enter new password" value={pw.confirm} onChange={(e) => { setPw({ ...pw, confirm: e.target.value }); setPwErr({ ...pwErr, confirm: "" }); }} />
-            <FieldErr msg={pwErr.confirm} />
-          </Field>
-          <Button type="submit" className="w-full">Reset Password</Button>
-        </form>
-      )}
-
-      {step === "done" && (
-        <div className="mt-7 space-y-4">
-          <Alert tone="ok">Password reset successfully. You can now sign in with your new password.</Alert>
-          <Button className="w-full" onClick={() => navigate("/login")}>Back to Sign In</Button>
-        </div>
-      )}
-
-      {step !== "done" && (
-        <p className="mt-6 text-center text-sm text-ink-500">
-          <Link to="/login" className="font-semibold text-brand-600 hover:underline">
-            Back to Sign In
-          </Link>
-        </p>
-      )}
+      <h1 className="text-[26px] font-bold text-ink-900">Reset Password</h1>
+      <p className="mt-3 text-sm text-ink-500">Password reset is unavailable until authentication and email delivery are connected. Demo sign-in uses an email or phone without a password.</p>
+      <div className="mt-7 space-y-4">
+        <Field label="Email"><Input type="email" placeholder="Unavailable in demo" disabled /></Field>
+        <Button className="w-full" disabled>Send Code</Button>
+      </div>
+      <p className="mt-6 text-center text-sm"><Link to="/login" className="font-semibold text-brand-600 hover:underline">Back to Sign In</Link></p>
     </AuthLayout>
   );
 }

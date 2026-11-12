@@ -39,18 +39,11 @@ import {
   IconTrash,
   IconChevronRight,
 } from "../components/icons";
-import { STAGES, type RepairLine, type ServiceRequest } from "../data/mock";
-import { DAY_NAMES, RANGES, addDays, fmtDay, fmtRange, fromIso, inRange, iso, parseStamp, rangeBounds, rangeBuckets, startOfWeek, weekDays, type Range } from "../lib/dates";
+import { STAGES, STAGE_COLORS } from "../lib/constants";
+import type { RepairLine, ServiceRequest } from "../types";
+import { estimateError } from "../lib/estimates";
+import { DAY_NAMES, isIsoDate, RANGES, addDays, fmtDay, fmtRange, fromIso, inRange, iso, parseStamp, rangeBounds, rangeBuckets, startOfWeek, weekDays, type Range } from "../lib/dates";
 
-const STAGE_COLORS: Record<string, string> = {
-  Requested: "#94a3b8",
-  "Checked In": "#64748b",
-  Diagnosed: "#0ea5e9",
-  "Pending Admin Review": "#f59e0b",
-  "Awaiting Customer Approval": "#d97706",
-  "In Repair": "#2563eb",
-  Completed: "#16a34a",
-};
 
 /** Jobs assigned to the signed-in technician (shared data, no hardcoded IDs). */
 function useMyJobs() {
@@ -66,9 +59,8 @@ function NotATechnician() {
   );
 }
 
-/* ============ Technician Dashboard ============ */
 export function TechDashboard() {
-  const { userName, vehicles, timeLogs, myTechId, partRequests, parts } = useApp();
+  const { userName, vehicles, timeLogs, myTechId, partRequests } = useApp();
   const navigate = useNavigate();
   const jobs = useMyJobs();
   const [range, setRange] = useState<Range>("This Week");
@@ -163,7 +155,6 @@ export function TechDashboard() {
               </button>
             ))}
           </div>
-          {parts.length > 0 && null}
         </Card>
       </div>
     </>
@@ -177,7 +168,6 @@ export function completedDate(r: ServiceRequest) {
   return ts ? iso(new Date(ts)) : r.createdAt;
 }
 
-/* ============ Assigned Jobs ============ */
 export function AssignedJobs() {
   const { vehicles, assignments, myTechId } = useApp();
   const navigate = useNavigate();
@@ -212,7 +202,6 @@ export function AssignedJobs() {
   );
 }
 
-/* ============ Work Orders list ============ */
 export function WorkOrders() {
   const { vehicles, myTechId, isAdmin, requests } = useApp();
   const navigate = useNavigate();
@@ -257,7 +246,6 @@ export function WorkOrders() {
   );
 }
 
-/* ============ Work Order / Diagnosis & Estimate ============ */
 export function WorkOrderDetail() {
   const pathname = useLogicalPath();
   const navigate = useNavigate();
@@ -295,22 +283,13 @@ export function WorkOrderDetail() {
   const jobPartReqs = partRequests.filter((p) => p.requestId === req.id);
 
   const change = (fn: (s: RepairLine[]) => RepairLine[]) => { setLines(fn); setDirty(true); setMsg(""); setErr(""); };
-  const addPart = () => change((s) => [...s, { id: `r${Date.now()}`, item: parts[0]?.name ?? "", type: "Part", partId: parts[0]?.id, qty: 1, cost: 0 }]);
-  const addLabor = () => change((s) => [...s, { id: `r${Date.now()}`, item: "", type: "Labor", hours: 1, cost: 0 }]);
+  const addPart = () => change((s) => [...s, { id: `r-${crypto.randomUUID()}`, item: parts[0]?.name ?? "", type: "Part", partId: parts[0]?.id, qty: 1, cost: 0 }]);
+  const addLabor = () => change((s) => [...s, { id: `r-${crypto.randomUUID()}`, item: "", type: "Labor", hours: 1, cost: 0 }]);
   const setLine = (id: string, patch: Partial<RepairLine>) => change((s) => s.map((r) => (r.id === id ? { ...r, ...patch } : r)));
   const delLine = (id: string) => change((s) => s.filter((r) => r.id !== id));
 
-  const validate = () => {
-    if (!diagnosis.trim()) return "Enter your diagnosis.";
-    for (const l of lines) {
-      if (l.type === "Labor" && !l.item.trim()) return "Describe each labor line.";
-      if (l.partId && (!l.qty || l.qty < 1)) return "Part quantities must be at least 1.";
-      if (l.type === "Labor" && l.hours != null && !(l.hours > 0 && l.hours <= 40)) return "Labor hours must be between 0 and 40.";
-    }
-    return "";
-  };
   const save = () => {
-    const e = validate();
+    const e = estimateError(diagnosis, lines, parts, laborRate);
     if (e) return setErr(e);
     const result = saveEstimate(req.id, diagnosis.trim(), lines);
     if (!result.ok) return setErr(result.error ?? "Unable to save.");
@@ -318,7 +297,7 @@ export function WorkOrderDetail() {
     setMsg("Draft saved.");
   };
   const submit = () => {
-    const e = validate() || (lines.length === 0 ? "Add at least one part or labor line." : "");
+    const e = estimateError(diagnosis, lines, parts, laborRate, true);
     if (e) return setErr(e);
     const result = saveEstimate(req.id, diagnosis.trim(), lines, { submit: true, note: submitNote.trim() || undefined });
     if (!result.ok) return setErr(result.error ?? "Unable to submit.");
@@ -395,7 +374,7 @@ export function WorkOrderDetail() {
                   <h4 className="text-sm font-semibold text-ink-900">Repair Estimate</h4>
                   {editable && (
                     <div className="flex gap-2">
-                      <Button size="sm" variant="secondary" onClick={addPart}><IconBox size={15} /> Add Part</Button>
+                      <Button size="sm" variant="secondary" onClick={addPart} disabled={!parts.length}><IconBox size={15} /> Add Part</Button>
                       <Button size="sm" variant="secondary" onClick={addLabor}><IconPlus size={15} /> Add Labor</Button>
                     </div>
                   )}
@@ -521,7 +500,6 @@ export function WorkOrderDetail() {
   );
 }
 
-/* ============ Part request modal (technician) ============ */
 function PartRequestModal({
   open,
   onClose,
@@ -549,7 +527,7 @@ function PartRequestModal({
   const submit = () => {
     if (!rid) return setErr("Select one of your open jobs.");
     if (!part) return setErr("Select a part.");
-    if (!(qty >= 1)) return setErr("Quantity must be at least 1.");
+    if (!Number.isInteger(qty) || qty < 1) return setErr("Quantity must be at least 1.");
     if (qty > part.quantity) return setErr(`Only ${part.quantity} in stock.`);
     const result = onSubmit(rid, pid, qty, note.trim());
     if (!result.ok) return setErr(result.error ?? "Unable to request parts.");
@@ -592,14 +570,13 @@ function PartRequestModal({
   );
 }
 
-/* ============ Parts (technician: view + request; no editing) ============ */
 export function TechParts() {
-  const { parts, partRequests, myTechId, requests, requestPart } = useApp();
+  const { parts, partRequests, myTechId, requests, assignments, requestPart } = useApp();
   const t = useTableData(parts, (p) => [p.name, p.number, p.category, p.price].join(" "));
   const mine = partRequests.filter((p) => p.technicianId === myTechId);
   const mt = useTableData(mine, (p) => [p.requestId, parts.find((x) => x.id === p.partId)?.name ?? "", p.status, p.note].join(" "));
   const [reqPart, setReqPart] = useState<string | null>(null);
-  const hasJobs = !!myTechId && requests.some((r) => r.technicianId === myTechId && r.stage !== "Completed");
+  const hasJobs = !!myTechId && requests.some((r) => r.technicianId === myTechId && r.stage !== "Completed" && !assignments.some((a) => a.requestId === r.id && a.status === "On Hold"));
   return (
     <>
       <PageHeader title="Parts" subtitle="Check availability and request parts for your assigned jobs." />
@@ -655,12 +632,11 @@ export function TechParts() {
   );
 }
 
-/* ============ Weekly Time Log (technician: own; admin: all) ============ */
 export function TimeLog() {
   const { timeLogs, technicians, requests, vehicles, myTechId, isAdmin, assignments, addTimeLog, removeTimeLog } = useApp();
   const q = useQuery();
   const canLog = !!myTechId;
-  const [monday, setMonday] = useState(() => startOfWeek(q.get("week") ? fromIso(q.get("week")!) : new Date()));
+  const [monday, setMonday] = useState(() => startOfWeek(q.get("week") && isIsoDate(q.get("week")!) ? fromIso(q.get("week")!) : new Date()));
   const [tech, setTech] = useState(q.get("tech") ?? (isAdmin ? "all" : myTechId ?? ""));
   const [day, setDay] = useState<string | null>(null);
   const days = weekDays(monday);
@@ -714,7 +690,7 @@ export function TimeLog() {
           <p className="text-sm font-semibold text-ink-900 tabular">{fmtRange(days[0], days[6])}</p>
           <p className="text-[12px] text-ink-400">Monday – Sunday</p>
         </div>
-        <Input type="date" value={from} onChange={(e) => e.target.value && (setMonday(startOfWeek(fromIso(e.target.value))), setDay(null))} className="!h-9 max-w-[170px]" aria-label="Pick a week" />
+        <Input type="date" value={from} onChange={(e) => { if (isIsoDate(e.target.value)) setMonday(startOfWeek(fromIso(e.target.value))); setDay(null); }} className="!h-9 max-w-[170px]" aria-label="Pick a week" />
         {!thisWeek && <Button size="sm" variant="ghost" onClick={() => { setMonday(startOfWeek(new Date())); setDay(null); }}>This week</Button>}
         {isAdmin && (
           <Select value={tech} onChange={(e) => { setTech(e.target.value); t.setPage(1); }} className="!h-9 max-w-[220px] sm:ml-auto" aria-label="Technician">

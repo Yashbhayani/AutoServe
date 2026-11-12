@@ -22,7 +22,8 @@ import {
   IconMenu,
   IconX,
 } from "./icons";
-import type { Role } from "../data/mock";
+import type { Role } from "../types";
+import { ROLE_PRIORITY } from "../lib/constants";
 
 /** `feature` groups equivalent pages across roles so multi-role users see one entry. */
 type NavItem = { label: string; to: string; icon: ReactNode; feature?: string };
@@ -60,16 +61,12 @@ const navByRole: Record<Role, NavItem[]> = {
   ],
 };
 
-const roleUser: Record<Role, { name: string; sub: string; roles: Role[] }> = {
-  customer: { name: "John Doe", sub: "Customer", roles: ["customer"] },
-  technician: { name: "Mike Johnson", sub: "Technician", roles: ["technician"] },
-  admin: { name: "Sarah Williams", sub: "Service Manager", roles: ["admin"] },
-};
-
-const roleMeta: Record<Role, { label: string; icon: ReactNode }> = {
-  customer: { label: "Customer", icon: <IconUser size={16} /> },
-  technician: { label: "Technician", icon: <IconWrench size={16} /> },
-  admin: { label: "Admin / Manager", icon: <IconUsers size={16} /> },
+const roleLabels: Record<Role, string> = { customer: "Customer", technician: "Technician", admin: "Admin / Manager" };
+const navGroups = {
+  Overview: ["Dashboard"],
+  Operations: ["Service Requests", "Work Orders", "Appointments", "Time Logs", "My Jobs", "My Vehicles", "Service History", "Invoices"],
+  Management: ["Technicians", "Users", "Inventory", "Parts", "Reports"],
+  Account: ["Settings", "Profile"],
 };
 
 /**
@@ -80,7 +77,7 @@ const roleMeta: Record<Role, { label: string; icon: ReactNode }> = {
 function unifiedNav(roles: Role[]): NavItem[] {
   const seen = new Set<string>();
   const out: NavItem[] = [];
-  for (const r of ["admin", "technician", "customer"] as Role[]) {
+  for (const r of ROLE_PRIORITY) {
     if (!roles.includes(r)) continue;
     for (const it of navByRole[r]) {
       const key = it.feature ?? it.to.split("/").slice(2).join("/");
@@ -89,7 +86,7 @@ function unifiedNav(roles: Role[]): NavItem[] {
       out.push(it);
     }
   }
-  return [...out.filter((i) => i.label !== "Profile"), ...out.filter((i) => i.label === "Profile")];
+  return out;
 }
 
 function Sidebar({ role, onNavigate }: { role: Role; onNavigate?: () => void }) {
@@ -117,10 +114,8 @@ function Sidebar({ role, onNavigate }: { role: Role; onNavigate?: () => void }) 
       </div>
 
       <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-3">
-        {["Overview", "Operations", "Management", "Account"].map((group) => {
-          const groupFor = (label: string) => label === "Dashboard" ? "Overview" : ["Settings", "Profile"].includes(label) ? "Account" : ["Technicians", "Users", "Inventory", "Reports", "Parts"].includes(label) ? "Management" : "Operations";
-          const order = ["Dashboard", "Service Requests", "Work Orders", "Appointments", "Time Logs", "My Jobs", "My Vehicles", "Service History", "Invoices", "Technicians", "Users", "Inventory", "Parts", "Reports", "Settings", "Profile"];
-          const entries = items.filter((it) => groupFor(it.label) === group).sort((a, b) => order.indexOf(a.label) - order.indexOf(b.label));
+        {Object.entries(navGroups).map(([group, labels]) => {
+          const entries = labels.flatMap((label) => items.filter((item) => item.label === label));
           if (!entries.length && group !== "Account") return null;
           return <div key={group} className="space-y-1 pb-3">
             <div className="px-3 pb-1 pt-3 text-xs font-semibold uppercase tracking-wider text-slate-400">{group}</div>
@@ -154,8 +149,7 @@ function Sidebar({ role, onNavigate }: { role: Role; onNavigate?: () => void }) 
 
 function Topbar({ role, title, onMenu }: { role: Role; title: string; onMenu: () => void }) {
   const { unreadCount, markAllRead, notifications, userName, availableRoles } = useApp();
-  const fallback = roleUser[role];
-  const name = userName ?? fallback.name;
+  const name = userName ?? "";
   return (
     <header className="flex h-16 shrink-0 items-center justify-between gap-3 border-b border-line bg-white/90 px-4 backdrop-blur sm:px-6 lg:px-8">
       <div className="flex min-w-0 items-center gap-2.5">
@@ -173,12 +167,16 @@ function Topbar({ role, title, onMenu }: { role: Role; title: string; onMenu: ()
         <div className="relative hidden lg:block">
           <IconSearch size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-400" />
           <input
-            placeholder="Search..."
+            aria-label="Global search unavailable; use search within lists"
+            placeholder="Use search within lists"
+            disabled
+            title="Global search requires backend integration"
             className="h-9 w-56 rounded-lg border border-line bg-slate-50 pl-9 pr-3 text-sm text-ink-900 placeholder:text-ink-400 focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/15"
           />
         </div>
 
         <Menu
+          label="Notifications"
           trigger={
             <span className="relative grid h-9 w-9 place-items-center rounded-lg border border-line bg-white text-ink-500 hover:bg-slate-50">
               <IconBell size={18} />
@@ -197,6 +195,7 @@ function Topbar({ role, title, onMenu }: { role: Role; title: string; onMenu: ()
             </button>
           </div>
           <div className="max-h-72 overflow-y-auto">
+            {!notifications.length && <p className="px-3 py-2 text-sm text-ink-400">No notifications.</p>}
             {notifications.slice(0, 5).map((n) => (
               <div key={n.id} className="flex gap-2.5 rounded-lg px-3 py-2 hover:bg-slate-50">
                 <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${n.read ? "bg-line" : "bg-brand-500"}`} />
@@ -209,12 +208,11 @@ function Topbar({ role, title, onMenu }: { role: Role; title: string; onMenu: ()
           </div>
         </Menu>
 
-        {/* Display-only profile; Profile, Logout and role switching live in the sidebar. */}
           <span className="flex items-center gap-2 rounded-lg border border-line bg-white py-1 pl-1 pr-2.5">
               <Avatar name={name} size={30} />
               <span className="hidden text-left sm:block">
                 <span className="block text-[13px] font-semibold leading-tight text-ink-900">{name}</span>
-                <span className="block text-[11px] leading-tight text-ink-400">{(availableRoles.length ? availableRoles.map((r) => roleUser[r].sub).join(" + ") : fallback.sub)}</span>
+                <span className="block text-[11px] leading-tight text-ink-400">{(availableRoles.length ? availableRoles : [role]).map((r) => roleLabels[r]).join(" + ")}</span>
               </span>
             </span>
       </div>
@@ -242,15 +240,19 @@ export function AppShell({
   // Lock body scroll while the drawer is open.
   useEffect(() => {
     if (!mobileOpen) return;
+    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") setMobileOpen(false); };
+    window.addEventListener("keydown", onKey);
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = prev;
+      window.removeEventListener("keydown", onKey);
     };
   }, [mobileOpen]);
 
   return (
     <div className="flex h-screen overflow-hidden bg-page">
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:rounded-lg focus:bg-white focus:p-3">Skip to content</a>
       {/* Desktop sidebar */}
       <div className="hidden lg:flex">
         <Sidebar role={role} />
@@ -272,7 +274,7 @@ export function AppShell({
 
       <div className="flex min-w-0 flex-1 flex-col">
         <Topbar role={role} title={title} onMenu={() => setMobileOpen(true)} />
-        <main className="flex-1 overflow-y-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-7">
+        <main id="main-content" className="flex-1 overflow-y-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-7">
           <div className="mx-auto max-w-[1180px] animate-in">{children}</div>
         </main>
       </div>

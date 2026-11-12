@@ -1,5 +1,8 @@
 import {
+  createContext,
+  useContext,
   useEffect,
+  useId,
   useRef,
   useState,
   type ButtonHTMLAttributes,
@@ -11,9 +14,9 @@ import {
 import { IconChevronRight, IconX } from "./icons";
 import { Link } from "../router";
 
-/* ---------------- Button ---------------- */
 type BtnVariant = "primary" | "secondary" | "danger" | "ghost" | "success";
 export function Button({
+  type = "button",
   variant = "primary",
   size = "md",
   className = "",
@@ -34,13 +37,12 @@ export function Button({
     ghost: "text-ink-500 hover:text-ink-900 hover:bg-slate-100",
   };
   return (
-    <button className={`${base} ${sizes[size]} ${variants[variant]} ${className}`} {...rest}>
+    <button type={type} className={`${base} ${sizes[size]} ${variants[variant]} ${className}`} {...rest}>
       {children}
     </button>
   );
 }
 
-/* ---------------- Card ---------------- */
 export function Card({
   className = "",
   children,
@@ -74,10 +76,9 @@ export function CardHeader({
   );
 }
 
-/* ---------------- Field wrappers ---------------- */
-export function Label({ children, required }: { children: ReactNode; required?: boolean }) {
+export function Label({ children, required, htmlFor, id }: { children: ReactNode; required?: boolean; htmlFor?: string; id?: string }) {
   return (
-    <label className="mb-1.5 block text-[13px] font-medium text-ink-700">
+    <label id={id} htmlFor={htmlFor} className="mb-1.5 block text-[13px] font-medium text-ink-700">
       {children}
       {required && <span className="text-bad-500"> *</span>}
     </label>
@@ -87,21 +88,27 @@ export function Label({ children, required }: { children: ReactNode; required?: 
 const fieldBase =
   "w-full rounded-lg border border-line bg-white px-3.5 text-sm text-ink-900 placeholder:text-ink-400 transition-colors focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/15";
 
+const FieldContext = createContext<string | undefined>(undefined);
+
 export function Input(props: InputHTMLAttributes<HTMLInputElement>) {
-  return <input {...props} className={`${fieldBase} h-10 ${props.className ?? ""}`} />;
+  const fieldId = useContext(FieldContext);
+  return <input id={props.type === "checkbox" || props.type === "radio" ? undefined : fieldId} {...props} className={`${fieldBase} h-10 ${props.className ?? ""}`} />;
 }
 
 export function Textarea(props: TextareaHTMLAttributes<HTMLTextAreaElement>) {
-  return <textarea {...props} className={`${fieldBase} py-2.5 resize-none ${props.className ?? ""}`} />;
+  const fieldId = useContext(FieldContext);
+  return <textarea id={fieldId} {...props} className={`${fieldBase} py-2.5 resize-none ${props.className ?? ""}`} />;
 }
 
 export function Select({
   children,
   ...props
 }: SelectHTMLAttributes<HTMLSelectElement>) {
+  const fieldId = useContext(FieldContext);
   return (
     <div className="relative">
       <select
+        id={fieldId}
         {...props}
         className={`${fieldBase} h-10 appearance-none pr-9 ${props.className ?? ""}`}
       >
@@ -128,15 +135,15 @@ export function Field({
   children: ReactNode;
   className?: string;
 }) {
+  const id = useId();
   return (
-    <div className={className}>
-      <Label required={required}>{label}</Label>
-      {children}
+    <div className={className} role="group" aria-labelledby={`${id}-label`}>
+      <Label id={`${id}-label`} htmlFor={id} required={required}>{label}</Label>
+      <FieldContext.Provider value={id}>{children}</FieldContext.Provider>
     </div>
   );
 }
 
-/* ---------------- Status badge ---------------- */
 type Tone = "ok" | "warn" | "bad" | "info" | "neutral";
 const toneMap: Record<string, Tone> = {
   Completed: "ok",
@@ -195,7 +202,6 @@ export function StatusBadge({ status }: { status: string }) {
   );
 }
 
-/* ---------------- Table ---------------- */
 export function Table({ children }: { children: ReactNode }) {
   return (
     <div className="overflow-x-auto">
@@ -230,7 +236,6 @@ export function Td({ children, className = "" }: { children: ReactNode; classNam
   return <td className={`px-5 py-3.5 text-ink-700 align-middle ${className}`}>{children}</td>;
 }
 
-/* ---------------- Stat card ---------------- */
 export function StatCard({
   icon,
   label,
@@ -273,7 +278,8 @@ export function StatCard({
   );
 }
 
-/* ---------------- Modal ---------------- */
+const openDialogs: HTMLElement[] = [];
+
 export function Modal({
   open,
   onClose,
@@ -281,7 +287,7 @@ export function Modal({
   children,
   footer,
   width = "max-w-lg",
-  scrollable = false,
+  scrollable = true,
 }: {
   open: boolean;
   onClose: () => void;
@@ -291,12 +297,35 @@ export function Modal({
   width?: string;
   scrollable?: boolean;
 }) {
+  const dialog = useRef<HTMLDivElement>(null);
+  const close = useRef(onClose);
+  close.current = onClose;
+  const titleId = useId();
   useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    if (!open || !dialog.current) return;
+    const element = dialog.current;
+    const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    openDialogs.push(element);
+    const focusable = () => Array.from(element.querySelectorAll<HTMLElement>('button, a[href], input, select, textarea, [tabindex]'))
+      .filter((control) => !control.hasAttribute("disabled") && control.tabIndex >= 0 && control.getClientRects().length > 0);
+    (focusable()[0] ?? element).focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (openDialogs[openDialogs.length - 1] !== element) return;
+      if (e.key === "Escape") { e.preventDefault(); close.current(); }
+      if (e.key !== "Tab") return;
+      const controls = focusable();
+      const first = controls[0] ?? element;
+      const last = controls[controls.length - 1] ?? element;
+      if (e.shiftKey && (document.activeElement === first || document.activeElement === element)) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      openDialogs.splice(openDialogs.indexOf(element), 1);
+      if (previous?.isConnected) previous.focus();
+    };
+  }, [open]);
 
   if (!open) return null;
   return (
@@ -306,11 +335,16 @@ export function Modal({
     >
       <div className="absolute inset-0 bg-navy-900/50 backdrop-blur-[2px]" onClick={onClose} />
       <div
+        ref={dialog}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        tabIndex={-1}
         className={`relative w-full ${width} rounded-2xl bg-card shadow-2xl border border-line ${scrollable ? "flex max-h-full flex-col" : ""}`}
         style={{ animation: "modal-in .2s ease-out" }}
       >
         <div className={`flex items-center justify-between px-6 py-4 border-b border-line ${scrollable ? "shrink-0" : ""}`}>
-          <h3 className="text-base font-semibold text-ink-900">{title}</h3>
+          <h3 id={titleId} className="text-base font-semibold text-ink-900">{title}</h3>
           <button
             type="button"
             aria-label="Close dialog"
@@ -322,7 +356,7 @@ export function Modal({
         </div>
         <div className={`px-6 py-5 ${scrollable ? "min-h-0 overflow-y-auto" : ""}`}>{children}</div>
         {footer && (
-          <div className={`flex justify-end gap-3 px-6 py-4 border-t border-line bg-slate-50/50 rounded-b-2xl ${scrollable ? "shrink-0" : ""}`}>
+          <div className={`flex flex-wrap justify-end gap-3 px-6 py-4 border-t border-line bg-slate-50/50 rounded-b-2xl ${scrollable ? "shrink-0" : ""}`}>
             {footer}
           </div>
         )}
@@ -331,7 +365,6 @@ export function Modal({
   );
 }
 
-/* ---------------- Tabs ---------------- */
 export function Tabs({
   tabs,
   active,
@@ -345,6 +378,8 @@ export function Tabs({
     <div className="inline-flex rounded-lg bg-slate-100 p-1">
       {tabs.map((t) => (
         <button
+          type="button"
+          aria-pressed={active === t}
           key={t}
           onClick={() => onChange(t)}
           className={`rounded-md px-4 py-1.5 text-sm font-semibold transition-colors ${
@@ -358,7 +393,6 @@ export function Tabs({
   );
 }
 
-/* ---------------- Timeline (repair status) ---------------- */
 export function StageTracker({
   stages,
   current,
@@ -439,7 +473,6 @@ export function Timeline({
   );
 }
 
-/* ---------------- Page header / breadcrumbs ---------------- */
 export function PageHeader({
   crumbs = [],
   title,
@@ -478,7 +511,6 @@ export function PageHeader({
   );
 }
 
-/* ---------------- Empty state ---------------- */
 export function EmptyState({ icon, title, text }: { icon: ReactNode; title: string; text?: string }) {
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -489,10 +521,9 @@ export function EmptyState({ icon, title, text }: { icon: ReactNode; title: stri
   );
 }
 
-/* ---------------- Avatar ---------------- */
 export function Avatar({ name, size = 36 }: { name: string; size?: number }) {
   const initials = name
-    .split(" ")
+    .trim().split(/\s+/)
     .map((w) => w[0])
     .slice(0, 2)
     .join("");
@@ -506,22 +537,29 @@ export function Avatar({ name, size = 36 }: { name: string; size?: number }) {
   );
 }
 
-/* ---------------- Simple dropdown menu ---------------- */
-export function Menu({ trigger, children }: { trigger: ReactNode; children: ReactNode }) {
+export function Menu({ trigger, children, label = "Open actions" }: { trigger: ReactNode; children: ReactNode; label?: string }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const id = useId();
   useEffect(() => {
+    if (!open) return;
     const onClick = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") { setOpen(false); triggerRef.current?.focus(); }
+    };
     document.addEventListener("mousedown", onClick);
-    return () => document.removeEventListener("mousedown", onClick);
-  }, []);
+    document.addEventListener("keydown", onKey);
+    return () => { document.removeEventListener("mousedown", onClick); document.removeEventListener("keydown", onKey); };
+  }, [open]);
   return (
     <div className="relative" ref={ref}>
-      <button onClick={() => setOpen((o) => !o)}>{trigger}</button>
+      <button type="button" ref={triggerRef} aria-label={label} aria-expanded={open} aria-controls={open ? id : undefined} onClick={() => setOpen((o) => !o)}>{trigger}</button>
       {open && (
         <div
+          id={id}
           className="absolute right-0 top-full z-40 mt-2 min-w-[200px] rounded-xl border border-line bg-white p-1.5 shadow-xl animate-in"
           onClick={() => setOpen(false)}
         >
@@ -549,7 +587,6 @@ export function money0(n: number) {
   return `$${n.toLocaleString("en-US")}`;
 }
 
-/* ---------------- Table search + pagination ---------------- */
 export const PAGE_SIZES = [1, 20, 50];
 
 /** Filters ALL records by the query first, then paginates the filtered result. */

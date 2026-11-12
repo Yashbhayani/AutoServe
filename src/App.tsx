@@ -37,7 +37,8 @@ import {
   TechnicianManagement,
   UserManagement,
 } from "./pages/admin";
-import type { Role } from "./data/mock";
+import type { Role } from "./types";
+import { ROLE_PRIORITY } from "./lib/constants";
 
 type Route = { pattern: string; title: string; el: ReactNode };
 
@@ -90,7 +91,7 @@ const routesByRole: Record<Role, Route[]> = {
   customer: customerRoutes,
 };
 /** Highest privilege first: when two roles share a URL (dashboard, profile...), the higher one wins. */
-export const ROLE_PRIORITY: Role[] = ["admin", "technician", "customer"];
+
 
 /** Find the route for a slug URL across ALL of the user's roles (merged access). */
 function resolveRoute(pathname: string, roles: Role[]) {

@@ -1,3 +1,5 @@
+import { useId } from "react";
+
 export function BarChart({
   data,
   height = 200,
@@ -15,7 +17,7 @@ export function BarChart({
   const max = Math.max(...data.map((d) => d.value), 1);
   const gap = 14;
   const barW = 34;
-  const width = data.length * (barW + gap);
+  const width = Math.max(data.length, 1) * (barW + gap);
   const chartH = height - 28;
   return (
     <svg width="100%" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid meet">
@@ -36,6 +38,10 @@ export function BarChart({
         return (
           <g
             key={d.label + i}
+            role={onSelect ? "button" : undefined}
+            tabIndex={onSelect ? 0 : undefined}
+            aria-label={`${d.label}: ${format(d.value)}`}
+            onKeyDown={onSelect ? (event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); onSelect(i); } } : undefined}
             onClick={onSelect ? () => onSelect(i) : undefined}
             className={onSelect ? "cursor-pointer [&:hover>rect]:opacity-100" : undefined}
           >
@@ -74,20 +80,21 @@ export function LineChart({
   height?: number;
   color?: string;
 }) {
+  const gradientId = useId();
   const width = 460;
   const pad = 28;
   const chartH = height - 28;
   const max = Math.max(...data.map((d) => d.value), 1) * 1.1;
-  const min = Math.min(...data.map((d) => d.value)) * 0.8;
+  const min = data.length ? Math.min(...data.map((d) => d.value)) * 0.8 : 0;
   const stepX = (width - pad) / Math.max(data.length - 1, 1);
   const px = (i: number) => pad / 2 + i * stepX;
   const py = (v: number) => chartH - ((v - min) / (max - min || 1)) * (chartH - 10) - 5;
   const points = data.map((d, i) => `${px(i)},${py(d.value)}`);
-  const area = `M ${px(0)},${chartH} L ${points.join(" L ")} L ${px(data.length - 1)},${chartH} Z`;
+  const area = data.length ? `M ${px(0)},${chartH} L ${points.join(" L ")} L ${px(data.length - 1)},${chartH} Z` : "";
   return (
     <svg width="100%" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid meet">
       <defs>
-        <linearGradient id="lg" x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor={color} stopOpacity={0.22} />
           <stop offset="100%" stopColor={color} stopOpacity={0} />
         </linearGradient>
@@ -95,7 +102,7 @@ export function LineChart({
       {[0.25, 0.5, 0.75, 1].map((t) => (
         <line key={t} x1={0} x2={width} y1={chartH - chartH * t} y2={chartH - chartH * t} stroke="#eef1f6" strokeWidth={1} />
       ))}
-      <path d={area} fill="url(#lg)" />
+      <path d={area} fill={`url(#${gradientId})`} />
       <polyline points={points.join(" ")} fill="none" stroke={color} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
       {data.map((d, i) => (
         <g key={d.month + i}>
@@ -119,7 +126,7 @@ export function DonutChart({
   size?: number;
   onSelect?: (label: string) => void;
 }) {
-  const total = segments.reduce((a, b) => a + b.value, 0) || 1;
+  const total = segments.reduce((a, b) => a + b.value, 0);
   const r = size / 2 - 14;
   const c = size / 2;
   const circ = 2 * Math.PI * r;
@@ -129,7 +136,7 @@ export function DonutChart({
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
         <circle cx={c} cy={c} r={r} fill="none" stroke="#eef1f6" strokeWidth={18} />
         {segments.map((s) => {
-          const len = (s.value / total) * circ;
+          const len = (s.value / (total || 1)) * circ;
           const el = (
             <circle
               key={s.label}
@@ -143,6 +150,10 @@ export function DonutChart({
               strokeDashoffset={-offset}
               transform={`rotate(-90 ${c} ${c})`}
               strokeLinecap="butt"
+              role={onSelect ? "button" : undefined}
+              tabIndex={onSelect ? 0 : undefined}
+              aria-label={`${s.label}: ${s.value}`}
+              onKeyDown={onSelect ? (event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); onSelect(s.label); } } : undefined}
               onClick={onSelect ? () => onSelect(s.label) : undefined}
               className={onSelect ? "cursor-pointer transition-opacity hover:opacity-80" : undefined}
             >
