@@ -111,4 +111,8 @@
         }
 
 
+        public  enum  WORKORDER{
+            IN_PROGRESS,
+            COMPLETED
+        }
     }

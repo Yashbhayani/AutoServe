@@ -846,6 +846,57 @@ public class CommonQueryServicesModel {
             WHERE id = ?
         """;
 
+    public  String getGetServiceAndTechID = """
+            Select  
+                service_request_id,
+                technician_id
+            From dev_autoserve.appointments
+            Where 
+                id = ?
+            """;
+
+    public  String InsertWorkOrders = """
+            INSERT INTO dev_autoserve.work_orders (
+                service_request_id,
+                technician_id,
+                status_id
+            ) VALUES (?, ?, ?)
+            """;
+
+    public String getAvailableStock = """
+            SELECT stock_quantity
+            FROM dev_autoserve.part_inventory
+            WHERE part_id = ?
+              AND is_active = 1
+            FOR UPDATE
+        """;
+
+    public  String checkPart = """
+            SELECT COUNT(*)
+            FROM dev_autoserve.parts
+            WHERE id = ?
+              AND is_active = 1
+        """;
+
+    public  String deductInventory = """
+            UPDATE dev_autoserve.part_inventory
+            SET stock_quantity = stock_quantity - ?
+            WHERE part_id = ?
+              AND is_active = 1
+              AND stock_quantity >= ?
+        """;
+
+    public  String insertPartUsage =  """
+            INSERT INTO dev_autoserve.part_usages
+            (
+                work_order_id,
+                part_id,
+                quantity
+            )
+            VALUES (?, ?, ?)
+        """;
+
+
     public  String SP = """
             Select 
                 Name
@@ -853,5 +904,40 @@ public class CommonQueryServicesModel {
             Where 
                 Code = ?
             """;
+
+    // Get existing assigned quantity
+    public String getAssignedPart = """
+    SELECT quantity
+    FROM dev_autoserve.part_usages
+    WHERE work_order_id = ?
+      AND part_id = ?
+    LIMIT 1
+    FOR UPDATE
+""";
+
+    // Update assigned quantity
+    public String updatePartUsage = """
+    UPDATE dev_autoserve.part_usages
+    SET quantity = ?
+    WHERE work_order_id = ?
+      AND part_id = ?
+""";
+
+    // Delete assigned part
+    public String deletePartUsage = """
+    DELETE FROM dev_autoserve.part_usages
+    WHERE work_order_id = ?
+      AND part_id = ?
+""";
+
+    // Add stock back to inventory
+    public String restoreInventory = """
+    UPDATE dev_autoserve.part_inventory
+    SET stock_quantity = stock_quantity + ?
+    WHERE part_id = ?
+      AND is_active = 1
+""";
+
+
 }
 

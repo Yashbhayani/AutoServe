@@ -263,7 +263,46 @@ public class AppointmentsServices implements AppointmentsRepository {
     @Override
     public Map<String, Object> AcceptAppointment(Long id) {
 
-        return Map.of();
+        Map<String, Object> appointment;
+        try {
+            appointment = jdbcTemplate.queryForMap(
+                    queries.getGetServiceAndTechID,
+                    id
+            );
+        } catch (org.springframework.dao.EmptyResultDataAccessException ex) {
+            return Result(false, "Appointment not found.");
+        }
+
+        Long service_request_id =
+                (Long) appointment.get("service_request_id");
+        Long technician_id = (Long)  appointment.get("technician_id");
+
+        int ServiceTypeID = queryHandlerServices.GetServicsType(queries.GetServiceTypeID, ProjectCodes.WORKORDER.IN_PROGRESS.name());
+
+        if(ServiceTypeID <= 0){
+            return Result(false, "Service is required.");
+        }
+
+        //Insert Work Orders
+        KeyHolder keyHolderUserRole = new GeneratedKeyHolder();
+
+        jdbcTemplate.update(connection -> {
+
+            PreparedStatement ps = connection.prepareStatement(
+                    queries.InsertWorkOrders,
+                    Statement.RETURN_GENERATED_KEYS
+            );
+            ps.setLong(1, service_request_id);
+            ps.setLong(2, technician_id);
+            ps.setLong(3, ServiceTypeID);
+            return ps;
+
+        }, keyHolderUserRole);
+        Map<String, Object> response = Result(
+                true,
+                "appointment accept successfully."
+        );
+            return response;
     }
 
 
