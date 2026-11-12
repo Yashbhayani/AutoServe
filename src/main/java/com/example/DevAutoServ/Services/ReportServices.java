@@ -20,7 +20,6 @@ public class ReportServices {
 
     CommonQueryServicesModel query = new CommonQueryServicesModel();
 
-    @Override
     public Map<String, Object> fetchDeta(String Code, String report) {
 
         Map<String, Object> response = new HashMap<>();
