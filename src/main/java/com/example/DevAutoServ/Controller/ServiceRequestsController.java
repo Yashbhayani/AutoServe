@@ -306,6 +306,9 @@ public class ServiceRequestsController {
         }
     }
 
+    //AsignTech
+
+
 
 /*
     PUT /api/service-requests/status/15?status=UNDER_REVIEW
@@ -315,7 +318,7 @@ public class ServiceRequestsController {
     PUT /api/service-requests/status/15?status=CANCELLED
     */
 
-    @PutMapping("/status/{id}")
+/*    @PutMapping("/status/{id}")
     public Map<String, Object> UpdateServiceRequestStatus(
             @PathVariable Long id,
             @RequestParam String status,
@@ -491,6 +494,6 @@ public class ServiceRequestsController {
             return Result(false,
                     "Something went wrong while updating service request status.");
         }
-    }
+    }*/
 
 }

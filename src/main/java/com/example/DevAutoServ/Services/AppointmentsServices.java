@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.*;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -57,6 +58,7 @@ public class AppointmentsServices implements AppointmentsRepository {
             );
 
             ps.setLong(1, scheduledServiceAppointmentsModel.getServiceRequestId());
+            ps.setLong(2, scheduledServiceAppointmentsModel.getTechnicianId());
 
 
             if (scheduledServiceAppointmentsModel.getScheduledDate() == null) {
@@ -91,6 +93,7 @@ public class AppointmentsServices implements AppointmentsRepository {
     }
 
     // ADMIN ASSIGNS TECHNICIAN AND SETS ACTUAL APPOINTMENT DATE/TIME
+/*
     @Transactional
     public Map<String, Object> AssignTechnicianAndSchedule(
             Long appointmentId,
@@ -194,13 +197,15 @@ public class AppointmentsServices implements AppointmentsRepository {
 
         return response;
     }
+*/
 
     // RESCHEDULE APPOINTMENT
 
     @Transactional
     public Map<String, Object> RescheduleAppointment(
             Long appointmentId,
-            LocalDateTime newScheduledDate
+            LocalDateTime newScheduledDate,
+            LocalTime newLocalTime
     ) {
 
         if (appointmentId == null || appointmentId <= 0
@@ -247,12 +252,20 @@ public class AppointmentsServices implements AppointmentsRepository {
         jdbcTemplate.update(
                 queries.RescheduleAppointmentUpdate,
                 java.sql.Timestamp.valueOf(newScheduledDate),
+                java.sql.Time.valueOf(newLocalTime),
                 rescheduledStatusId,
                 appointmentId
         );
 
         return Result(true, "Appointment rescheduled successfully.");
     }
+
+    @Override
+    public Map<String, Object> AcceptAppointment(Long id) {
+
+        return Map.of();
+    }
+
 
     private Map<String, Object> Result(
             boolean success,

@@ -617,12 +617,13 @@ public class CommonQueryServicesModel {
             INSERT INTO dev_autoserve.appointments
             (
                 service_request_id,
+                technician_id,
                 scheduled_date,
                 scheduled_time,
                 status_id
             )
             VALUES
-            (? ,? ,? ,?);
+            (? ,? ,? ,? ,?);
             """;
 
     public  String ATechSchdappointment = """
@@ -676,6 +677,7 @@ public class CommonQueryServicesModel {
                 UPDATE dev_autoserve.appointments
                 SET
                     scheduled_date = ?,
+                    scheduled_time = ?,
                     status_id = ?
                 WHERE id = ?
                   AND is_active = 1
@@ -843,5 +845,13 @@ public class CommonQueryServicesModel {
                 is_active = 0
             WHERE id = ?
         """;
+
+    public  String SP = """
+            Select 
+                Name
+            FROM dev_autoserve.SpTable
+            Where 
+                Code = ?
+            """;
 }
 

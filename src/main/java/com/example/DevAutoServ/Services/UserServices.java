@@ -23,6 +23,11 @@ import java.util.Map;
 import java.sql.Statement;
 import java.util.*;
 
+
+/*CALL dev_autoserve.GetUsersWithPagination(
+    '{"page_number":1,"page_size":10}'
+);*/
+
 @Service
 public class UserServices implements UserRepository {
     @Autowired

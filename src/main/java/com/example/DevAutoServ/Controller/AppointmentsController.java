@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -322,7 +323,7 @@ public class AppointmentsController  {
 
     }
 
-    @PutMapping("/assign/{id}")
+/*    @PutMapping("/assign/{id}")
     public Map<String, Object> AssignTechnicianAndSchedule(
             @PathVariable Long id,
             @RequestParam Long technicianId,
@@ -376,7 +377,7 @@ public class AppointmentsController  {
 
             return response(false, "Unable to assign technician.");
         }
-    }
+    }*/
 
     // ---------------------------------------------------------
     // RESCHEDULE APPOINTMENT
@@ -389,6 +390,7 @@ public class AppointmentsController  {
     public Map<String, Object> RescheduleAppointment(
             @PathVariable Long id,
             @RequestParam String scheduledDate,
+            @RequestParam String scheduledTime,
             @RequestHeader(
                     value = "Authorization",
                     required = false
@@ -422,9 +424,24 @@ public class AppointmentsController  {
                 );
             }
 
+            LocalTime newLocalTime;
+            try {
+
+                newLocalTime =
+                        LocalTime.parse(scheduledTime);
+
+            } catch (Exception e) {
+
+                return response(
+                        false,
+                        "Invalid date format. Use yyyy-MM-ddTHH:mm:ss."
+                );
+            }
+
             return appointmentsServices.RescheduleAppointment(
                     id,
-                    newScheduledDate
+                    newScheduledDate,
+                    newLocalTime
             );
 
         } catch (Exception e) {
@@ -493,6 +510,46 @@ public class AppointmentsController  {
             return response(false, "Unable to cancel appointment.");
         }
     }
+
+
+    @PutMapping("/accept/{id}")
+    public Map<String, Object> AcceptAppointment(
+            @PathVariable Long id,
+            @RequestHeader(
+                    value = "Authorization",
+                    required = false
+            ) String authorization
+    ) {
+
+        try {
+
+            Map<String, Object> authResponse = authorize(
+                    authorization,
+                    ProjectCodes.PermissionEnum
+                            .APPOINTMENT_RESCHEDULE.name()
+            );
+
+            if (!Boolean.TRUE.equals(authResponse.get("success"))) {
+                return authResponse;
+            }
+
+
+            return appointmentsServices.AcceptAppointment(
+                    id
+            );
+
+        } catch (Exception e) {
+
+            logger.error(
+                    "Reschedule appointment error: {}",
+                    e.getMessage(),
+                    e
+            );
+
+            return response(false, "Unable to reschedule appointment.");
+        }
+    }
+
 
     // ---------------------------------------------------------
     // COMPLETE APPOINTMENT

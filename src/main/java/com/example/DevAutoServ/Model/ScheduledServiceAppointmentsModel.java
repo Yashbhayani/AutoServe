@@ -5,14 +5,16 @@ import java.time.LocalTime;
 
 public class ScheduledServiceAppointmentsModel {
     private Long serviceRequestId;
+    private Long technicianId;
     private LocalDateTime scheduledDate;
     private LocalTime scheduledTime;
 
     public ScheduledServiceAppointmentsModel() {
     }
 
-    public ScheduledServiceAppointmentsModel(Long serviceRequestId, LocalDateTime scheduledDate, LocalTime scheduledTime) {
+    public ScheduledServiceAppointmentsModel(Long serviceRequestId, Long technicianId, LocalDateTime scheduledDate, LocalTime scheduledTime) {
         this.serviceRequestId = serviceRequestId;
+        this.technicianId = technicianId;
         this.scheduledDate = scheduledDate;
         this.scheduledTime = scheduledTime;
     }
@@ -23,6 +25,14 @@ public class ScheduledServiceAppointmentsModel {
 
     public void setServiceRequestId(Long serviceRequestId) {
         this.serviceRequestId = serviceRequestId;
+    }
+
+    public Long getTechnicianId() {
+        return technicianId;
+    }
+
+    public void setTechnicianId(Long technicianId) {
+        this.technicianId = technicianId;
     }
 
     public LocalDateTime getScheduledDate() {
