@@ -69,7 +69,7 @@ public class UserServices implements UserRepository {
 
             System.out.println(EncryptedPass.toString());
             KeyHolder keyHolderForUser = new GeneratedKeyHolder();
-
+            
             jdbcTemplate.update(connection -> {
                 PreparedStatement ps = connection.prepareStatement(commonQueryServicesModel.InsertUser, Statement.RETURN_GENERATED_KEYS);
                 ps.setString(1, userModel.getEmail().replaceAll("@.*", "").toLowerCase());
@@ -197,6 +197,7 @@ public class UserServices implements UserRepository {
             saveRefreshToken(userId, refreshToken);
 
             user.remove("password_hash");
+            user.put("roles", jdbcTemplate.queryForList("SELECT r.code FROM dev_autoserve.user_roles ur JOIN dev_autoserve.roles r ON r.id=ur.role_id WHERE ur.user_id=? AND r.is_active=1",String.class,userId));
 
             response.put("success", true);
             response.put("message", "Login successful");

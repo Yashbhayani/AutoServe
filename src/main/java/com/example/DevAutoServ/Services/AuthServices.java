@@ -52,6 +52,8 @@ public class AuthServices implements AuthRepository {
 
     CommonQueryServicesModel commonQueryServicesModel = new CommonQueryServicesModel();
 
+    public AuthServices(QueryHandlerServices queryHandlerServices) { this.queryHandlerServices=queryHandlerServices; }
+
     // INITIALIZE JWT SIGNING KEY
     @PostConstruct
     public void init() {
@@ -132,6 +134,7 @@ public class AuthServices implements AuthRepository {
         );
 
         return Jwts.builder()
+                .id(java.util.UUID.randomUUID().toString())
                 .subject(username)
                 .issuedAt(now)
                 .expiration(expiryDate)

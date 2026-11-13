@@ -22,6 +22,12 @@ public class PartUsagesServices implements PartUsagesRepository {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    // These legacy methods have no authenticated actor/revision in their contract.
+    // Keep the routes compatible, but direct all stock mutations through operations/parts.set.
+    private void guardLegacyChanges(Long order) {
+        if(order!=null && order>0) throw new IllegalStateException("Edit parts from the work order diagnosis so stock, customer approval and invoice prices stay synchronized.");
+    }
+
     private Map<String, Object> Result(
             boolean success,
             String message
@@ -34,12 +40,15 @@ public class PartUsagesServices implements PartUsagesRepository {
 
 
     @Override
+    @Transactional
     public Map<String, Object> assignParts(
             Long workOrderId,
             List<AssignPartModel> parts
     ) {
 
         try {
+
+            guardLegacyChanges(workOrderId);
 
             if (workOrderId == null || workOrderId <= 0) {
                 return Result(false, "Valid work order ID is required.");
@@ -160,12 +169,15 @@ public class PartUsagesServices implements PartUsagesRepository {
     }
 
     @Override
+    @Transactional
     public Map<String, Object> updateParts(
             Long workOrderId,
             AssignPartModel part
     ) {
 
         try {
+
+            guardLegacyChanges(workOrderId);
 
             if (workOrderId == null || workOrderId <= 0) {
                 return Result(false, "Valid work order ID is required.");
@@ -298,12 +310,15 @@ public class PartUsagesServices implements PartUsagesRepository {
     }
 
     @Override
+    @Transactional
     public Map<String, Object> deleteParts(
             Long workOrderId,
             Long partId
     ) {
 
         try {
+
+            guardLegacyChanges(workOrderId);
 
             if (workOrderId == null || workOrderId <= 0) {
                 return Result(false, "Valid work order ID is required.");

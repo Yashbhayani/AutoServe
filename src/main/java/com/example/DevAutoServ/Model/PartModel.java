@@ -12,6 +12,13 @@ public class PartModel {
     private String sku;
     private BigDecimal unitPrice;
     private Integer stockQuantity;
+    private Integer reorderLevel=5;
+    private Integer expectedStockQuantity;
+    public Integer getReorderLevel(){return reorderLevel;}
+    public void setReorderLevel(Integer value){reorderLevel=value;}
+    public Integer getExpectedStockQuantity(){return expectedStockQuantity;}
+    public void setExpectedStockQuantity(Integer value){expectedStockQuantity=value;}
+
 
     public PartModel(){}
 
