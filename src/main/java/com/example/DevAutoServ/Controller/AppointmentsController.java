@@ -1,18 +1,19 @@
 
 package com.example.DevAutoServ.Controller;
 
+import com.example.DevAutoServ.CommonModel.CommonQueryServicesModel;
 import com.example.DevAutoServ.Enum.ProjectCodes;
 import com.example.DevAutoServ.Model.ScheduledServiceAppointmentsModel;
 import com.example.DevAutoServ.Model.ServiceRequestModel;
 import com.example.DevAutoServ.Repository.AppointmentsRepository;
-import com.example.DevAutoServ.Services.AppointmentsServices;
-import com.example.DevAutoServ.Services.AuthServices;
-import com.example.DevAutoServ.Services.StatusServices;
+import com.example.DevAutoServ.Services.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.web.bind.annotation.*;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -29,15 +30,21 @@ public class AppointmentsController  {
     private final AppointmentsServices appointmentsServices;
     private final AuthServices authServices;
     private final StatusServices statusServices;
+    private final QueryHandlerServices queryHandlerServices;
+    private final ReportsServices reportsServices;
+
+    CommonQueryServicesModel query = new CommonQueryServicesModel();
 
     public AppointmentsController(
             AppointmentsServices appointmentsServices,
             AuthServices authServices,
-            StatusServices statusServices
+            StatusServices statusServices, QueryHandlerServices queryHandlerServices, ReportsServices reportsServices
     ) {
         this.appointmentsServices = appointmentsServices;
         this.authServices = authServices;
         this.statusServices = statusServices;
+        this.queryHandlerServices = queryHandlerServices;
+        this.reportsServices = reportsServices;
     }
 
     // ---------------------------------------------------------
@@ -605,4 +612,89 @@ public class AppointmentsController  {
             return response(false, "Unable to complete appointment.");
         }
     }
+
+    @GetMapping("/get")
+    public Map<String, Object> GetUserList(
+            @RequestParam String queryString,
+            @RequestHeader(value = "Authorization", required = false)
+            String authorization) {
+        try {
+
+            // 1. Verify token
+            Map<String, Object> tokenResponse =
+                    authServices.VerifyToken(authorization);
+
+            if (!Boolean.TRUE.equals(tokenResponse.get("success"))) {
+                return tokenResponse;
+            }
+
+            // 2. Get username
+            Object usernameObject = tokenResponse.get("username");
+
+            if (usernameObject == null) {
+                return response(false, "Username not found in token.");
+            }
+
+            String loggedInUsername = usernameObject.toString();
+
+            // 3. Get user role
+            Map<String, Object> getUserRole =
+                    authServices.CheckUserRole(loggedInUsername);
+
+            if (!Boolean.TRUE.equals(getUserRole.get("success"))) {
+                return getUserRole;
+            }
+
+            Object roleObject = getUserRole.get("userRole");
+
+            if (roleObject == null) {
+                return response(false, "User role not found.");
+            }
+
+            String userRole = roleObject.toString();
+
+
+            if(!userRole.toLowerCase().equals(ProjectCodes.RoleEnum.ADMIN.name().toLowerCase())){
+
+                Long customerID = queryHandlerServices.GetUserId(query.GetUserId,loggedInUsername);
+
+                if (customerID == null) {
+                    return response(false, "Logged-in user was not found.");
+                }
+
+                return reportsServices.fetchDeta(ProjectCodes.SPTableName.GET_APPOINTMENTS_WITH_PAGINATION.name(), queryString);
+            }
+
+            Long customerID = queryHandlerServices.GetUserId(query.GetUserId,loggedInUsername);
+
+            // Convert queryString into JSON
+            ObjectMapper objectMapper = new ObjectMapper();
+
+            Map<String, Object> queryJson = objectMapper.readValue(
+                    queryString,
+                    new TypeReference<Map<String, Object>>() {}
+            );
+
+            // Add Customer ID
+            queryJson.put("customer_id", customerID);
+
+            // Convert JSON back into String
+            String finalQueryString = objectMapper.writeValueAsString(queryJson);
+
+            // 4. Check permission
+            if(userRole.equals(ProjectCodes.RoleEnum.CUSTOMER.name())){
+                return reportsServices.fetchDeta(ProjectCodes.SPTableName.GET_CUSTOMER_APPOINTMENTS_WITH_PAGINATION.name(), finalQueryString);
+            }
+
+            return response(false, "Service request is not authorization by this User.");
+
+        } catch (Exception exception) {
+
+            logger.error("Error while updating service request", exception);
+
+            return response(false,
+                    "Something went wrong while updating the service request.");
+        }
+    }
+
 }

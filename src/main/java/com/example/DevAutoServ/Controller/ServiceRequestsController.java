@@ -5,16 +5,15 @@ import com.example.DevAutoServ.CommonModel.CommonQueryServicesModel;
 import com.example.DevAutoServ.Enum.ProjectCodes;
 import com.example.DevAutoServ.Model.ServiceRequestModel;
 import com.example.DevAutoServ.Repository.UserRepository;
-import com.example.DevAutoServ.Services.AuthServices;
-import com.example.DevAutoServ.Services.QueryHandlerServices;
-import com.example.DevAutoServ.Services.ServiceRequestsServices;
-import com.example.DevAutoServ.Services.StatusServices;
+import com.example.DevAutoServ.Services.*;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.bind.annotation.*;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -30,15 +29,17 @@ public class ServiceRequestsController {
     private  final ServiceRequestsServices serviceRequestsServices;
     private  final AuthServices authServices;
     private final StatusServices statusServices;
+    private final ReportsServices reportsServices;
     CommonQueryServicesModel commonQueryServicesModel = new CommonQueryServicesModel();
 
 
     public  ServiceRequestsController(ServiceRequestsServices serviceRequestsServices,
-                           AuthServices authServices,
-                                      StatusServices statusServices){
+                                      AuthServices authServices,
+                                      StatusServices statusServices, ReportsServices reportsServices){
         this.serviceRequestsServices = serviceRequestsServices;
         this.authServices = authServices;
         this.statusServices = statusServices;
+        this.reportsServices = reportsServices;
     }
 
     private Map<String, Object> Result(boolean success, String message) {
@@ -306,10 +307,94 @@ public class ServiceRequestsController {
         }
     }
 
-    //AsignTech
 
 
+    @GetMapping("/get")
+    public Map<String, Object> GetUserList(
+            @RequestParam String queryString,
+            @RequestHeader(value = "Authorization", required = false)
+            String authorization) {
+        try {
 
+            // 1. Verify token
+            Map<String, Object> tokenResponse =
+                    authServices.VerifyToken(authorization);
+
+            if (!Boolean.TRUE.equals(tokenResponse.get("success"))) {
+                return tokenResponse;
+            }
+
+            // 2. Get username
+            Object usernameObject = tokenResponse.get("username");
+
+            if (usernameObject == null) {
+                return Result(false, "Username not found in token.");
+            }
+
+            String loggedInUsername = usernameObject.toString();
+
+            // 3. Get user role
+            Map<String, Object> getUserRole =
+                    authServices.CheckUserRole(loggedInUsername);
+
+            if (!Boolean.TRUE.equals(getUserRole.get("success"))) {
+                return getUserRole;
+            }
+
+            Object roleObject = getUserRole.get("userRole");
+
+            if (roleObject == null) {
+                return Result(false, "User role not found.");
+            }
+
+            String userRole = roleObject.toString();
+
+
+            if(!userRole.toLowerCase().equals(ProjectCodes.RoleEnum.ADMIN.name().toLowerCase())){
+
+                Long customerID = queryHandlerServices.GetUserId(commonQueryServicesModel.GetUserId,loggedInUsername);
+
+                if (customerID == null) {
+                    return Result(false, "Logged-in user was not found.");
+                }
+
+                return reportsServices.fetchDeta(ProjectCodes.SPTableName.GET_SERVICE_REQUESTS_WITH_PAGINATION.name(), queryString);
+            }
+
+            Long customerID = queryHandlerServices.GetUserId(commonQueryServicesModel.GetUserId,loggedInUsername);
+
+            // Convert queryString into JSON
+            ObjectMapper objectMapper = new ObjectMapper();
+
+            Map<String, Object> queryJson = objectMapper.readValue(
+                    queryString,
+                    new TypeReference<Map<String, Object>>() {}
+            );
+
+            // Add Customer ID
+            queryJson.put("customer_id", customerID);
+
+            // Convert JSON back into String
+            String finalQueryString = objectMapper.writeValueAsString(queryJson);
+
+            // 4. Check permission
+            if(userRole.equals(ProjectCodes.RoleEnum.CUSTOMER.name())){
+                return reportsServices.fetchDeta(ProjectCodes.SPTableName.GET_CUSTOMER_SERVICE_REQUESTS_WITH_PAGINATION.name(), finalQueryString);
+            }
+
+            return Result(false, "Service request is not authorization by this User.");
+
+        } catch (Exception exception) {
+
+            logger.error("Error while updating service request", exception);
+
+            return Result(false,
+                    "Something went wrong while updating the service request.");
+        }
+    }
+
+
+//AsignTech
 /*
     PUT /api/service-requests/status/15?status=UNDER_REVIEW
     PUT /api/service-requests/status/15?status=REJECTED

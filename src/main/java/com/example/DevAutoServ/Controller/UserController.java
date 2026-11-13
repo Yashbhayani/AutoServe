@@ -7,6 +7,7 @@ import com.example.DevAutoServ.Enum.ProjectCodes;
 import com.example.DevAutoServ.Repository.UserRepository;
 import com.example.DevAutoServ.Services.AuthServices;
 import com.example.DevAutoServ.Services.QueryHandlerServices;
+import com.example.DevAutoServ.Services.ReportsServices;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,12 +27,14 @@ public class UserController {
     private QueryHandlerServices queryHandlerServices;
     private  final UserRepository userRepository;
     private  final AuthServices authServices;
-    CommonQueryServicesModel commonQueryServicesModel = new CommonQueryServicesModel();
+    private  final ReportsServices reportsServices;
+     CommonQueryServicesModel commonQueryServicesModel = new CommonQueryServicesModel();
 
     public  UserController(UserRepository userRepository,
-                           AuthServices authServices){
+                           AuthServices authServices, ReportsServices reportsServices){
         this.userRepository = userRepository;
         this.authServices = authServices;
+        this.reportsServices = reportsServices;
     }
 
     @PostMapping("/add")
@@ -220,11 +223,44 @@ public class UserController {
 
     @GetMapping("/user-list")
     public Map<String, Object> GetUserList(
+            @RequestParam String queryString,
             @RequestHeader(value = "Authorization", required = false)
             String authorization) {
+        // 1. Verify access token
+        Map<String, Object> tokenResponse =
+                authServices.VerifyToken(authorization);
+
+        if (!Boolean.TRUE.equals(tokenResponse.get("success"))) {
+            return tokenResponse;
+        }
+
+        String loggedInUsername =
+                tokenResponse.get("username").toString();
+
+        // 2. Get logged-in user's role
+        Map<String, Object> getUserRole =
+                authServices.CheckUserRole(loggedInUsername);
+
+        if (!Boolean.TRUE.equals(getUserRole.get("success"))) {
+            return getUserRole;
+        }
+
+        String userRole = getUserRole.get("userRole").toString();
 
 
+        boolean hasPermission = authServices.CheckthePermission(
+                ProjectCodes.PermissionEnum.USER_VIEW_ALL.name(),
+                userRole
+        );
 
-        return null;
+        if (!hasPermission) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "You do not have permission to delete users");
+            return response;
+        }
+
+
+        return reportsServices.fetchDeta(ProjectCodes.SPTableName.GET_USERS_WITH_PAGINATION.name(), queryString );
     }
 }
