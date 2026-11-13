@@ -2,41 +2,10 @@ import { Fragment, useEffect, type ReactNode } from "react";
 import { RouteRoleProvider, matchPath, slugify, toLogical, useLocation, useNavigate } from "./router";
 import { useApp } from "./store/AppContext";
 import { AppShell } from "./components/AppShell";
-import { ForgotPasswordPage, LoginPage, SignUpPage } from "./pages/auth";
-import {
-  CreateServiceRequest,
-  CustomerApproval,
-  CustomerAppointments,
-  CustomerCheckIn,
-  CustomerDashboard,
-  CustomerInvoices,
-  CustomerRequests,
-  InvoiceDetail,
-  MyVehicles,
-  NotificationsPage,
-  ProfilePage,
-  RepairStatus,
-  ServiceHistory,
-  VehicleForm,
-} from "./pages/customer";
-import {
-  AssignedJobs,
-  TechDashboard,
-  TechParts,
-  TimeLog,
-  WorkOrderDetail,
-  WorkOrders,
-} from "./pages/technician";
-import {
-  AdminAppointments,
-  AdminDashboard,
-  AdminRequests,
-  Inventory,
-  Reports,
-  Settings,
-  TechnicianManagement,
-  UserManagement,
-} from "./pages/admin";
+import { ForgotPasswordPage, LoginPage, SignUpPage, ResetPasswordPage } from "./pages/auth";
+import {CreateServiceRequest,CustomerApproval,CustomerAppointments,CustomerCheckIn,CustomerInvoices,CustomerRequests,InvoiceDetail,MyVehicles,ProfilePage,RepairStatus,ServiceHistory,VehicleForm,AdminAppointments,AdminRequests,Settings,TechnicianManagement,WorkOrderDetail,WorkOrders} from "./pages/operations";
+import {CustomerDashboard,AdminDashboard,TechDashboard,Inventory,Reports,NotificationsPage,TechParts} from "./pages/live";
+import {UserManagement} from "./pages/users";
 import type { Role } from "./types";
 import { ROLE_PRIORITY } from "./lib/constants";
 
@@ -46,9 +15,9 @@ const customerRoutes: Route[] = [
   { pattern: "/customer/dashboard", title: "Dashboard", el: <CustomerDashboard /> },
   { pattern: "/customer/vehicles", title: "My Vehicles", el: <MyVehicles /> },
   { pattern: "/customer/vehicles/:id", title: "Vehicle", el: <VehicleForm /> },
-  { pattern: "/customer/requests", title: "Service Requests", el: <CustomerRequests /> },
+  { pattern: "/customer/requests", title: "Service Requests & Appointments", el: <CustomerRequests /> },
   { pattern: "/customer/requests/new", title: "New Request", el: <CreateServiceRequest /> },
-  { pattern: "/customer/appointments", title: "Appointments", el: <CustomerAppointments /> },
+  { pattern: "/customer/appointments", title: "Service Requests & Appointments", el: <CustomerRequests /> },
   { pattern: "/customer/check-in/:id", title: "Check-In", el: <CustomerCheckIn /> },
   { pattern: "/customer/approval/:id", title: "Approval", el: <CustomerApproval /> },
   { pattern: "/customer/repair-status/:id", title: "Repair Status", el: <RepairStatus /> },
@@ -61,16 +30,16 @@ const customerRoutes: Route[] = [
 
 const technicianRoutes: Route[] = [
   { pattern: "/technician/dashboard", title: "Dashboard", el: <TechDashboard /> },
-  { pattern: "/technician/jobs", title: "My Jobs", el: <AssignedJobs /> },
+  { pattern: "/technician/jobs", title: "Work Orders", el: <WorkOrders /> },
   { pattern: "/technician/work-orders", title: "Work Orders", el: <WorkOrders /> },
   { pattern: "/technician/work-orders/:id", title: "Work Order", el: <WorkOrderDetail /> },
   { pattern: "/technician/parts", title: "Parts", el: <TechParts /> },
-  { pattern: "/technician/time-log", title: "Time Log", el: <TimeLog /> },
   { pattern: "/technician/notifications", title: "Notifications", el: <NotificationsPage /> },
   { pattern: "/technician/profile", title: "Profile", el: <ProfilePage /> },
 ];
 
 const adminRoutes: Route[] = [
+  { pattern: "/admin/notifications", title: "Notifications", el: <NotificationsPage /> },
   { pattern: "/admin/work-orders", title: "Work Orders", el: <WorkOrders /> },
   { pattern: "/admin/work-orders/:id", title: "Work Order", el: <WorkOrderDetail /> },
   { pattern: "/admin/dashboard", title: "Dashboard", el: <AdminDashboard /> },
@@ -79,7 +48,6 @@ const adminRoutes: Route[] = [
   { pattern: "/admin/users", title: "User Management", el: <UserManagement /> },
   { pattern: "/admin/technicians", title: "Technicians", el: <TechnicianManagement /> },
   { pattern: "/admin/reports", title: "Reports", el: <Reports /> },
-  { pattern: "/admin/time-log", title: "Time Logs", el: <TimeLog /> },
   { pattern: "/admin/inventory", title: "Inventory", el: <Inventory /> },
   { pattern: "/admin/settings", title: "Settings", el: <Settings /> },
   { pattern: "/admin/profile", title: "Profile", el: <ProfilePage /> },
@@ -108,18 +76,19 @@ function resolveRoute(pathname: string, roles: Role[]) {
 export default function App() {
   const { pathname, search } = useLocation();
   const navigate = useNavigate();
-  const { role, userName, availableRoles } = useApp();
+  const { role, userName, availableRoles, authLoading } = useApp();
 
   const authed = !!userName;
   const slug = userName ? slugify(userName) : null;
   const isAuthRoute =
-    pathname === "/login" || pathname === "/signup" || pathname === "/forgot-password";
+    pathname === "/login" || pathname === "/signup" || pathname === "/forgot-password" || pathname === "/reset-password";
   const urlSlug = pathname.split("/")[1];
 
   // The role is taken from the authenticated session, NOT the URL — so a URL can't
   // grant access to a role the signed-in user doesn't have.
   let redirectTo: string | null = null;
-  if (pathname === "/") redirectTo = authed ? `/${slug}/dashboard` : "/login";
+  if (authLoading) redirectTo = null;
+  else if (pathname === "/") redirectTo = authed ? `/${slug}/dashboard` : "/login";
   else if (!authed && !isAuthRoute) redirectTo = "/login";
   else if (authed && !isAuthRoute && urlSlug !== slug) redirectTo = "/login"; // URL/user mismatch
 
@@ -127,9 +96,12 @@ export default function App() {
     if (redirectTo) navigate(redirectTo, { replace: true });
   }, [redirectTo, navigate]);
 
+  if (authLoading) return <div role="status" className="grid min-h-screen place-items-center text-sm text-ink-500">Restoring your session…</div>;
+
   // Auth screens (no shell)
   if (pathname === "/login") return <LoginPage />;
   if (pathname === "/signup") return <SignUpPage />;
+  if (pathname === "/reset-password") return <ResetPasswordPage />;
   if (pathname === "/forgot-password") return <ForgotPasswordPage />;
   if (redirectTo || !authed) return null;
 

@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, useLocation, useLogicalPath, useNavigate } from "../router";
+import { useNotifications } from "../store/NotificationsContext";
 import { useApp } from "../store/AppContext";
 import { Avatar, Button, Menu } from "./ui";
 import {
@@ -32,18 +33,17 @@ const navByRole: Record<Role, NavItem[]> = {
   customer: [
     { label: "Dashboard", to: "/customer/dashboard", icon: <IconGauge /> },
     { label: "My Vehicles", to: "/customer/vehicles", icon: <IconCar /> },
-    { label: "Service Requests", to: "/customer/requests", icon: <IconClipboard /> },
-    { label: "Appointments", to: "/customer/appointments", icon: <IconCalendar /> },
+    { label: "Service Requests & Appointments", to: "/customer/requests", icon: <IconClipboard /> },
     { label: "Service History", to: "/customer/history", icon: <IconHistory /> },
     { label: "Invoices", to: "/customer/invoices", icon: <IconInvoice /> },
+    { label: "Notifications", to: "/customer/notifications", icon: <IconBell /> },
     { label: "Profile", to: "/customer/profile", icon: <IconUser /> },
   ],
   technician: [
     { label: "Dashboard", to: "/technician/dashboard", icon: <IconGauge /> },
-    { label: "My Jobs", to: "/technician/jobs", icon: <IconClipboard /> },
     { label: "Work Orders", to: "/technician/work-orders", icon: <IconWrench /> },
     { label: "Parts", to: "/technician/parts", icon: <IconBox />, feature: "parts" },
-    { label: "Time Logs", to: "/technician/time-log", icon: <IconClock /> },
+    { label: "Notifications", to: "/technician/notifications", icon: <IconBell /> },
     { label: "Profile", to: "/technician/profile", icon: <IconUser /> },
   ],
   admin: [
@@ -54,9 +54,9 @@ const navByRole: Record<Role, NavItem[]> = {
     { label: "Users", to: "/admin/users", icon: <IconUsers /> },
     { label: "Technicians", to: "/admin/technicians", icon: <IconWrench /> },
     { label: "Reports", to: "/admin/reports", icon: <IconChart /> },
-    { label: "Time Logs", to: "/admin/time-log", icon: <IconClock /> },
     { label: "Inventory", to: "/admin/inventory", icon: <IconBox />, feature: "parts" },
     { label: "Settings", to: "/admin/settings", icon: <IconSettings /> },
+    { label: "Notifications", to: "/admin/notifications", icon: <IconBell /> },
     { label: "Profile", to: "/admin/profile", icon: <IconUser /> },
   ],
 };
@@ -64,9 +64,9 @@ const navByRole: Record<Role, NavItem[]> = {
 const roleLabels: Record<Role, string> = { customer: "Customer", technician: "Technician", admin: "Admin / Manager" };
 const navGroups = {
   Overview: ["Dashboard"],
-  Operations: ["Service Requests", "Work Orders", "Appointments", "Time Logs", "My Jobs", "My Vehicles", "Service History", "Invoices"],
+  Operations: ["Service Requests & Appointments", "Service Requests", "Work Orders", "Appointments", "My Vehicles", "Service History", "Invoices"],
   Management: ["Technicians", "Users", "Inventory", "Parts", "Reports"],
-  Account: ["Settings", "Profile"],
+  Account: ["Settings", "Notifications", "Profile"],
 };
 
 /**
@@ -148,7 +148,9 @@ function Sidebar({ role, onNavigate }: { role: Role; onNavigate?: () => void }) 
 }
 
 function Topbar({ role, title, onMenu }: { role: Role; title: string; onMenu: () => void }) {
-  const { unreadCount, markAllRead, notifications, userName, availableRoles } = useApp();
+  const { userName, availableRoles } = useApp();
+  const {data, error, loading, refresh, markRead} = useNotifications();
+  const {unreadCount, items: notifications} = data;
   const name = userName ?? "";
   return (
     <header className="flex h-16 shrink-0 items-center justify-between gap-3 border-b border-line bg-white/90 px-4 backdrop-blur sm:px-6 lg:px-8">
@@ -190,22 +192,25 @@ function Topbar({ role, title, onMenu }: { role: Role; title: string; onMenu: ()
         >
           <div className="flex items-center justify-between px-3 py-2">
             <span className="text-sm font-semibold text-ink-900">Notifications</span>
-            <button onClick={markAllRead} className="text-[12px] font-medium text-brand-600 hover:underline">
+            <button onClick={() => {void markRead().catch(() => {});}} className="text-[12px] font-medium text-brand-600 hover:underline">
               Mark all read
             </button>
           </div>
           <div className="max-h-72 overflow-y-auto">
-            {!notifications.length && <p className="px-3 py-2 text-sm text-ink-400">No notifications.</p>}
+            {error && <p role="alert" className="px-3 py-2 text-xs text-red-700">{error} <button onClick={refresh}>Retry</button></p>}
+            {loading && <p role="status" className="px-3 py-2 text-xs text-ink-400">Updating…</p>}
+            {!loading && !error && !notifications.length && <p className="px-3 py-2 text-sm text-ink-400">No notifications.</p>}
             {notifications.slice(0, 5).map((n) => (
               <div key={n.id} className="flex gap-2.5 rounded-lg px-3 py-2 hover:bg-slate-50">
-                <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${n.read ? "bg-line" : "bg-brand-500"}`} />
+                <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${n.is_read ? "bg-line" : "bg-brand-500"}`} />
                 <div>
-                  <p className="text-[13px] leading-snug text-ink-700">{n.text}</p>
-                  <p className="text-[11px] text-ink-400">{n.at}</p>
+                  <p className="text-[13px] leading-snug text-ink-700">{n.message}</p>
+                  <p className="text-[11px] text-ink-400">{n.created_at.replace("T", " ")}</p>
                 </div>
               </div>
             ))}
           </div>
+          <Link to={`/${role}/notifications`} className="block px-3 py-2 text-sm text-brand-600 hover:underline">View all notifications</Link>
         </Menu>
 
           <span className="flex items-center gap-2 rounded-lg border border-line bg-white py-1 pl-1 pr-2.5">

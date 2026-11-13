@@ -52,7 +52,7 @@ export function Card({
 }) {
   return (
     <div
-      className={`rounded-xl bg-card border border-line shadow-[0_1px_2px_rgba(16,24,40,0.04),0_1px_3px_rgba(16,24,40,0.03)] ${className}`}
+      className={`min-w-0 rounded-xl bg-card border border-line shadow-[0_1px_2px_rgba(16,24,40,0.04),0_1px_3px_rgba(16,24,40,0.03)] ${className}`}
     >
       {children}
     </div>
@@ -151,15 +151,14 @@ const toneMap: Record<string, Tone> = {
   Active: "ok",
   Available: "ok",
   Approved: "ok",
-  "In Repair": "info",
+  "Repair": "info",
   "In Progress": "info",
-  Diagnosed: "info",
+  Diagnosis: "info",
   Scheduled: "info",
-  Requested: "neutral",
-  "Checked In": "info",
+  "Service Requested": "neutral",
+  "Vehicle Checked In": "info",
   "Awaiting Approval": "warn",
-  "Pending Admin Review": "warn",
-  "Awaiting Customer Approval": "warn",
+  "Customer Approval": "warn",
   Issued: "ok",
   "Low Stock": "warn",
   "Out of Stock": "bad",

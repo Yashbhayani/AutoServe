@@ -5,12 +5,11 @@ export type Account = { id: string; name: string; email: string; phone: string; 
 
 
 export type RepairStage =
-  | "Requested"
-  | "Checked In"
-  | "Diagnosed"
-  | "Pending Admin Review"
-  | "Awaiting Customer Approval"
-  | "In Repair"
+  | "Service Requested"
+  | "Vehicle Checked In"
+  | "Diagnosis"
+  | "Customer Approval"
+  | "Repair"
   | "Completed";
 
 
@@ -130,7 +129,6 @@ export type Technician = {
   specialties: string[];
   activeJobs: number;
   completed: number;
-  rating: number;
   status: "Available" | "Busy" | "Off";
   phone?: string;
 };

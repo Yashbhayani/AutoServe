@@ -54,7 +54,7 @@ function snapshotShape(value: unknown): value is ShopSnapshot {
     parts: (p) => strings(p, ["name", "number", "category"]) && numbers(p, ["quantity", "price"]) && Number.isInteger(p.quantity),
     invoices: (i) => strings(i, ["requestId", "vehicleId", "date"]) && positive(i.taxRate) && i.taxRate <= 1 && member(i.status, ["Paid", "Unpaid", "Overdue"]),
     users: (u) => strings(u, ["name", "email", "phone"]) && member(u.role, ["Customer", "Technician", "Service Manager", "Admin"]) && member(u.status, ["Active", "Invited", "Suspended"]),
-    technicians: (t) => strings(t, ["name", "email"]) && optionalStrings(t, ["phone"]) && numbers(t, ["activeJobs", "completed", "rating"]) && member(t.status, ["Available", "Busy", "Off"]) && stringList(t.specialties),
+    technicians: (t) => strings(t, ["name", "email"]) && optionalStrings(t, ["phone"]) && numbers(t, ["activeJobs", "completed"]) && member(t.status, ["Available", "Busy", "Off"]) && stringList(t.specialties),
     assignments: (a) => strings(a, ["requestId", "technicianId", "assignedAt", "notes"]) && member(a.status, ["Assigned", "In Progress", "On Hold", "Completed"]) &&
       optionalStrings(a, ["holdReason"]) && (a.resumeStatus === undefined || member(a.resumeStatus, ["Assigned", "In Progress"])),
     notifications: (n) => strings(n, ["text", "at"]) && optionalStrings(n, ["accountId"]) && typeof n.read === "boolean" && member(n.kind, ["ok", "info", "warn", "bell"]) &&
@@ -68,6 +68,15 @@ function snapshotShape(value: unknown): value is ShopSnapshot {
 export function parseSnapshot(raw: string): ShopSnapshot | null {
   let data: unknown;
   try { data = JSON.parse(raw); } catch { return null; }
+  if (record(data) && Array.isArray(data.requests)) {
+    const stages: Record<string,string> = {Requested:"Service Requested", "Checked In":"Vehicle Checked In", Diagnosed:"Diagnosis", "Pending Admin Review":"Customer Approval", "Awaiting Customer Approval":"Customer Approval", "In Repair":"Repair"};
+    data.requests = data.requests.map(row => {
+      if (!record(row)) return row;
+      return {...row, stage: stages[String(row.stage)] ?? row.stage,
+        timeline: Array.isArray(row.timeline) ? row.timeline.map(entry => record(entry) ? {...entry,stage: stages[String(entry.stage)] ?? entry.stage} : entry) : row.timeline};
+    });
+    if (Array.isArray(data.technicians)) data.technicians = data.technicians.map(row => {if (!record(row))return row;const {rating, ...remaining}=row;return remaining;});
+  }
   if (!snapshotShape(data)) return null;
   const accounts = new Set(data.accounts.map((a) => a.id));
   if (new Set(data.accounts.map((a) => a.email.toLowerCase())).size !== data.accounts.length) return null;

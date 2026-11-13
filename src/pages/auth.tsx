@@ -1,9 +1,12 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
-import { Link, slugify, useNavigate } from "../router";
+import {clearSession} from "../api/session";
+import {apiRequest} from "../api/request";
+import { useRef, useState, type ReactNode } from "react";
+import { Link, slugify, useNavigate, useLocation } from "../router";
 import { useApp } from "../store/AppContext";
 import { Button, Field, Input } from "../components/ui";
 import { IconWrench } from "../components/icons";
-import { accountForIdentifier, emailValid } from "../lib/accounts";
+import { emailValid } from "../lib/accounts";
+import { registrationErrors, type RegistrationData, type RegistrationErrors } from "../lib/registration";
 
 function AuthLayout({ children }: { children: ReactNode }) {
   return (
@@ -42,60 +45,76 @@ function AuthLayout({ children }: { children: ReactNode }) {
 
 export function LoginPage() {
   const navigate = useNavigate();
-  const { signIn, accounts } = useApp();
-  const [identifier, setIdentifier] = useState("john@example.com");
+  const { signIn, authError } = useApp();
+  const { search } = useLocation();
+  const registered = new URLSearchParams(search).get("registered") === "1";
+  const reset = new URLSearchParams(search).get("reset") === "1";
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [pending, setPending] = useState(false);
+  const submitting = useRef(false);
   const [error, setError] = useState("");
 
-  const go = (e: React.FormEvent) => {
+  const go = async (e: React.FormEvent) => {
     e.preventDefault();
-    const account = accountForIdentifier(accounts, identifier);
-    if (!account) {
-      setError("We couldn't find an account for that email or phone.");
-      return;
+    if (submitting.current) return;
+    if (!emailValid(email) || !password) return setError("Enter your email address and password.");
+    submitting.current = true;
+    setPending(true);
+    setError("");
+    try {
+      const result = await signIn(email, password);
+      if (!result.ok) return setError(result.error);
+      setPassword("");
+      navigate(`/${slugify(result.account.name)}/dashboard`, { replace: true });
+    } finally {
+      submitting.current = false;
+      setPending(false);
     }
-    const result = signIn(identifier);
-    if (!result.ok) return setError(result.error);
-    navigate(`/${slugify(account.name)}/dashboard`);
   };
 
   return (
     <AuthLayout>
       <h1 className="text-[26px] font-bold text-ink-900">Welcome Back</h1>
-      <p className="mt-1 text-sm text-ink-500">Demo sign-in uses an email or phone only. No passwords are checked; use fictional details.</p>
+      <p className="mt-1 text-sm text-ink-500">Sign in to manage your vehicles and services.</p>
 
+      {reset && <p role="status" className="mt-4 text-sm text-ok-700">Password changed. Please sign in with your new password.</p>}
+      {registered && <p role="status" className="mt-4 text-sm text-ok-700">Account created successfully. Please sign in.</p>}
       <form onSubmit={go} className="mt-7 space-y-4">
-        <Field label="Email or Phone">
+        <Field label="Email" required>
           <Input
-            type="text"
+            type="email"
+            name="email"
+            autoComplete="username"
+            required
+            disabled={pending}
             placeholder="john@example.com"
-            value={identifier}
+            value={email}
             onChange={(e) => {
-              setIdentifier(e.target.value);
+              setEmail(e.target.value);
               setError("");
             }}
           />
         </Field>
-        <Field label="Password">
-          <Input type="password" placeholder="Unavailable in demo" disabled autoComplete="off" />
+        <Field label="Password" required>
+          <Input type="password" name="password" placeholder="Enter your password" value={password}
+            onChange={(e) => { setPassword(e.target.value); setError(""); }}
+            autoComplete="current-password" required disabled={pending} />
         </Field>
 
-        {error && (
-          <div className="rounded-lg bg-bad-50 px-3.5 py-2.5 text-[13px] text-bad-700 ring-1 ring-inset ring-bad-500/20">
-            {error}
+        {(error || authError) && (
+          <div role="alert" className="rounded-lg bg-bad-50 px-3.5 py-2.5 text-[13px] text-bad-700 ring-1 ring-inset ring-bad-500/20">
+            {error || authError}
           </div>
         )}
 
-        <div className="flex items-center justify-between text-[13px]">
-          <label className="flex items-center gap-2 text-ink-500">
-            <input type="checkbox" className="h-4 w-4 rounded border-line accent-brand-500" disabled title="Demo sessions last for this tab only" />
-            Remember me (unavailable)
-          </label>
+        <div className="flex items-center justify-end text-[13px]">
           <Link to="/forgot-password" className="font-medium text-brand-600 hover:underline">
             Forgot password?
           </Link>
         </div>
 
-        <Button type="submit" className="w-full">Sign In</Button>
+        <Button type="submit" className="w-full" disabled={pending}>{pending ? "Signing In…" : "Sign In"}</Button>
       </form>
 
       <p className="mt-6 text-center text-sm text-ink-500">
@@ -108,202 +127,105 @@ export function LoginPage() {
   );
 }
 
-const OTP_TTL = 120; // seconds
-const newCode = () => String(Math.floor(100000 + Math.random() * 900000));
-
-function Alert({ tone, children }: { tone: "ok" | "bad" | "info"; children: ReactNode }) {
-  const cls = {
-    ok: "bg-ok-50 text-ok-700 ring-ok-500/20",
-    bad: "bg-bad-50 text-bad-700 ring-bad-500/20",
-    info: "bg-brand-50 text-brand-700 ring-brand-500/20",
-  }[tone];
-  return <div className={`rounded-lg px-3.5 py-2.5 text-[13px] ring-1 ring-inset ${cls}`}>{children}</div>;
-}
-
-function OtpStep({ email, onVerified, onBack }: { email: string; onVerified: () => void; onBack: () => void }) {
-  const [code, setCode] = useState(newCode);
-  const [expiresAt, setExpiresAt] = useState(() => Date.now() + OTP_TTL * 1000);
-  const [now, setNow] = useState(Date.now());
-  const [digits, setDigits] = useState<string[]>(Array(6).fill(""));
-  const [error, setError] = useState("");
-  const [notice, setNotice] = useState("");
-  const refs = useRef<(HTMLInputElement | null)[]>([]);
-
-  useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), 250);
-    return () => clearInterval(id);
-  }, []);
-
-  const left = Math.max(0, Math.ceil((expiresAt - now) / 1000));
-  const expired = left === 0;
-  const mmss = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}`;
-
-  const setDigit = (i: number, v: string) => {
-    const clean = v.replace(/\D/g, "");
-    if (clean.length > 1) {
-        const next = clean.slice(0, 6).split("");
-      setDigits([...next, ...Array(6 - next.length).fill("")]);
-      refs.current[Math.min(next.length, 5)]?.focus();
-    } else {
-      const next = [...digits];
-      next[i] = clean;
-      setDigits(next);
-      if (clean && i < 5) refs.current[i + 1]?.focus();
-    }
-    setError("");
-  };
-
-  const verify = (e: React.FormEvent) => {
-    e.preventDefault();
-    const entered = digits.join("");
-    if (entered.length < 6) return setError("Enter all 6 digits of the code.");
-    if (expired) return setError("This code has expired. Please request a new one.");
-    if (entered !== code) return setError("Incorrect code. Please check and try again.");
-    onVerified();
-  };
-
-  const resend = () => {
-    setCode(newCode());
-    setExpiresAt(Date.now() + OTP_TTL * 1000);
-    setNow(Date.now());
-    setDigits(Array(6).fill(""));
-    setError("");
-    setNotice(`A new local demo code is ready.`);
-    refs.current[0]?.focus();
-  };
-
-  return (
-    <form onSubmit={verify} className="mt-7 space-y-4">
-      <p className="text-sm text-ink-500">
-        Demo verification for <span className="font-semibold text-ink-900">{email}</span>. No email is sent.
-      </p>
-      <Alert tone="info">
-        Demo code: <span className="font-mono font-semibold tracking-widest">{code}</span>
-      </Alert>
-
-      <div className="flex justify-between gap-2">
-        {digits.map((d, i) => (
-          <input
-            key={i}
-            ref={(el) => { refs.current[i] = el; }}
-            value={d}
-            inputMode="numeric"
-            autoComplete={i === 0 ? "one-time-code" : "off"}
-            maxLength={6}
-            aria-label={`Digit ${i + 1}`}
-            onChange={(e) => setDigit(i, e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Backspace" && !digits[i] && i > 0) refs.current[i - 1]?.focus(); }}
-            className={`h-12 w-12 rounded-lg border bg-white text-center font-mono text-lg font-semibold text-ink-900 focus:outline-none focus:ring-2 ${
-              error ? "border-bad-500 focus:ring-bad-500/15" : "border-line focus:border-brand-500 focus:ring-brand-500/15"
-            }`}
-          />
-        ))}
-      </div>
-
-      <div className="flex items-center justify-between text-[13px]">
-        <span className={expired ? "font-medium text-bad-700" : "text-ink-500"}>
-          {expired ? "Code expired" : <>Code expires in <span className="font-mono font-semibold text-ink-900">{mmss}</span></>}
-        </span>
-        <button type="button" onClick={resend} className="font-medium text-brand-600 hover:underline disabled:opacity-50">
-          Resend code
-        </button>
-      </div>
-
-      {error && <Alert tone="bad">{error}</Alert>}
-      {notice && !error && <Alert tone="ok">{notice}</Alert>}
-
-      <Button type="submit" className="w-full">Verify Code</Button>
-      <button type="button" onClick={onBack} className="w-full text-center text-[13px] font-medium text-ink-500 hover:text-ink-900">
-        Use a different email
-      </button>
-    </form>
-  );
-}
-
-function FieldErr({ msg }: { msg?: string }) {
-  return msg ? <p className="mt-1.5 text-[12px] text-bad-700">{msg}</p> : null;
-}
-
 export function SignUpPage() {
+  const { registerCustomer } = useApp();
   const navigate = useNavigate();
-  const { registerCustomer, accounts } = useApp();
-  const [step, setStep] = useState<"form" | "verify">("form");
-  const [form, setForm] = useState({ name: "", email: "", phone: "" });
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  const set = (k: keyof typeof form, v: string) => { setForm({ ...form, [k]: v }); setErrors({ ...errors, [k]: "" }); };
-
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const er: Record<string, string> = {};
-    if (form.name.trim().length < 2) er.name = "Enter your full name.";
-    if (!emailValid(form.email)) er.email = "Enter a valid email address.";
-    else if (accountForIdentifier(accounts, form.email)) er.email = "An account with this email already exists.";
-    if (form.phone && form.phone.replace(/\D/g, "").length < 10) er.phone = "Enter a phone number with at least 10 digits.";
-    setErrors(er);
-    if (Object.values(er).some(Boolean)) return;
-    setStep("verify");
+  const [form, setForm] = useState<RegistrationData>({ firstName: "", lastName: "", email: "", phone: "", drivingLicenseNumber: "", password: "" });
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [errors, setErrors] = useState<RegistrationErrors>({});
+  const [error, setError] = useState("");
+  const [pending, setPending] = useState(false);
+  const submitting = useRef(false);
+  const set = (field: keyof RegistrationData, value: string) => {
+    setForm((current) => ({ ...current, [field]: value }));
+    setErrors((current) => ({ ...current, [field]: undefined, ...(field === "password" ? { confirmPassword: undefined } : {}) }));
+    setError("");
   };
-
-  const finish = () => {
-    const displayName = form.name.trim();
-    const result = registerCustomer(form);
-    if (!result.ok) {
-      setErrors({ email: result.error });
-      setStep("form");
-      return;
+  const submit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (submitting.current) return;
+    const validation = registrationErrors(form, confirmPassword);
+    setErrors(validation);
+    setError("");
+    if (Object.keys(validation).length) return;
+    submitting.current = true;
+    setPending(true);
+    try {
+      const result = await registerCustomer(form);
+      if (!result.ok) return setError(result.error);
+      setForm((current) => ({ ...current, password: "" }));
+      setConfirmPassword("");
+      navigate("/login?registered=1", { replace: true });
+    } finally {
+      submitting.current = false;
+      setPending(false);
     }
-    navigate(`/${slugify(displayName)}/dashboard`);
   };
-
+  const fieldError = (field: keyof RegistrationErrors) => errors[field]
+    ? <p id={`signup-${field}-error`} className="mt-1 text-xs text-bad-700">{errors[field]}</p> : null;
+  const describedBy = (field: keyof RegistrationErrors) => errors[field] ? `signup-${field}-error` : undefined;
   return (
     <AuthLayout>
-      <h1 className="text-[26px] font-bold text-ink-900">{step === "form" ? "Create Account" : "Verify Your Email"}</h1>
-      <p className="mt-1 text-sm text-ink-500">
-        {step === "form" ? "Create a local demo account using fictional contact details." : "Use the displayed demo code. Email verification requires a backend."}
-      </p>
-      {step === "form" ? (
-        <form onSubmit={submit} className="mt-7 space-y-4" noValidate>
-          <Field label="Full Name" required>
-            <Input placeholder="John Doe" value={form.name} onChange={(e) => set("name", e.target.value)} />
-            <FieldErr msg={errors.name} />
+      <h1 className="text-[26px] font-bold text-ink-900">Create Account</h1>
+      <p className="mt-1 text-sm text-ink-500">Register to book services and track your repairs.</p>
+      <form onSubmit={submit} className="mt-6 space-y-4" noValidate aria-busy={pending}>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Field label="First Name" required>
+            <Input name="firstName" autoComplete="given-name" required maxLength={50} value={form.firstName}
+              onChange={(e) => set("firstName", e.target.value)} disabled={pending} aria-invalid={!!errors.firstName} aria-describedby={describedBy("firstName")} />
+            {fieldError("firstName")}
           </Field>
-          <Field label="Email" required>
-            <Input type="email" placeholder="john@example.com" value={form.email} onChange={(e) => set("email", e.target.value)} />
-            <FieldErr msg={errors.email} />
+          <Field label="Last Name" required>
+            <Input name="lastName" autoComplete="family-name" required maxLength={50} value={form.lastName}
+              onChange={(e) => set("lastName", e.target.value)} disabled={pending} aria-invalid={!!errors.lastName} aria-describedby={describedBy("lastName")} />
+            {fieldError("lastName")}
           </Field>
-          <Field label="Phone">
-            <Input placeholder="(415) 555-0132" value={form.phone} onChange={(e) => set("phone", e.target.value)} />
-            <FieldErr msg={errors.phone} />
-          </Field>
-          <Field label="Password">
-            <Input type="password" placeholder="Unavailable in demo" disabled autoComplete="off" />
-          </Field>
-          <Button type="submit" className="w-full">Create Account</Button>
-        </form>
-      ) : (
-        <OtpStep email={form.email.trim()} onVerified={finish} onBack={() => setStep("form")} />
-      )}
-      <p className="mt-6 text-center text-sm text-ink-500">
-        Already have an account?{" "}
-        <Link to="/login" className="font-semibold text-brand-600 hover:underline">
-          Sign in
-        </Link>
-      </p>
+        </div>
+        <Field label="Email" required>
+          <Input name="email" type="email" autoComplete="email" required maxLength={120} value={form.email}
+            onChange={(e) => set("email", e.target.value)} disabled={pending} aria-invalid={!!errors.email} aria-describedby={describedBy("email")} />
+          {fieldError("email")}
+        </Field>
+        <Field label="Phone (optional)">
+          <Input name="phone" type="tel" autoComplete="tel" maxLength={20} value={form.phone}
+            onChange={(e) => set("phone", e.target.value)} disabled={pending} aria-invalid={!!errors.phone} aria-describedby={describedBy("phone")} />
+          {fieldError("phone")}
+        </Field>
+        <Field label="Driving License Number (optional)">
+          <Input name="drivingLicenseNumber" maxLength={50} value={form.drivingLicenseNumber}
+            onChange={(e) => set("drivingLicenseNumber", e.target.value)} disabled={pending} aria-invalid={!!errors.drivingLicenseNumber} aria-describedby={describedBy("drivingLicenseNumber")} />
+          {fieldError("drivingLicenseNumber")}
+        </Field>
+        <Field label="Password" required>
+          <Input name="password" type="password" autoComplete="new-password" required minLength={8} maxLength={72} value={form.password}
+            onChange={(e) => set("password", e.target.value)} disabled={pending} aria-invalid={!!errors.password} aria-describedby={describedBy("password") ?? "signup-password-help"} />
+          {fieldError("password")}
+          <p id="signup-password-help" className="mt-1 text-xs text-ink-500">Use at least 8 characters.</p>
+        </Field>
+        <Field label="Confirm Password" required>
+          <Input name="confirmPassword" type="password" autoComplete="new-password" required maxLength={72} value={confirmPassword}
+            onChange={(e) => { setConfirmPassword(e.target.value); setErrors((current) => ({ ...current, confirmPassword: undefined })); setError(""); }}
+            disabled={pending} aria-invalid={!!errors.confirmPassword} aria-describedby={describedBy("confirmPassword")} />
+          {fieldError("confirmPassword")}
+        </Field>
+        {error && <div role="alert" className="rounded-lg bg-bad-50 px-3.5 py-2.5 text-[13px] text-bad-700 ring-1 ring-inset ring-bad-500/20">{error}</div>}
+        <Button type="submit" className="w-full" disabled={pending}>{pending ? "Creating Account…" : "Create Account"}</Button>
+      </form>
+      <p className="mt-6 text-center text-sm text-ink-500">Already have an account? <Link to="/login" className="font-semibold text-brand-600 hover:underline">Sign in</Link></p>
     </AuthLayout>
   );
 }
 
 export function ForgotPasswordPage() {
-  return (
-    <AuthLayout>
-      <h1 className="text-[26px] font-bold text-ink-900">Reset Password</h1>
-      <p className="mt-3 text-sm text-ink-500">Password reset is unavailable until authentication and email delivery are connected. Demo sign-in uses an email or phone without a password.</p>
-      <div className="mt-7 space-y-4">
-        <Field label="Email"><Input type="email" placeholder="Unavailable in demo" disabled /></Field>
-        <Button className="w-full" disabled>Send Code</Button>
-      </div>
-      <p className="mt-6 text-center text-sm"><Link to="/login" className="font-semibold text-brand-600 hover:underline">Back to Sign In</Link></p>
-    </AuthLayout>
-  );
+ const navigate=useNavigate();
+ const [email,setEmail]=useState(""),[pending,setPending]=useState(false),[message,setMessage]=useState(""),[error,setError]=useState("");
+ async function submit(e:React.FormEvent){e.preventDefault();if(!emailValid(email))return setError("Enter a valid email address.");navigate(`/reset-password?email=${encodeURIComponent(email.trim().toLowerCase())}`);}
+
+ return <AuthLayout><h1 className="text-[26px] font-bold text-ink-900">Forgot password</h1><p className="mt-3 text-sm text-ink-500">Enter your account email to continue to the new-password screen.</p><form onSubmit={submit} className="mt-6 space-y-4"><Field label="Email" required><Input type="email" autoComplete="email" required value={email} onChange={e=>setEmail(e.target.value)} maxLength={120}/></Field>{error&&<p role="alert" className="text-sm text-red-700">{error}</p>}{message&&<p role="status" className="text-sm text-green-700">{message}</p>}<Button type="submit" disabled={pending}>{pending?"Requesting…":"Continue"}</Button></form><p className="mt-6 text-sm"><Link to="/login" className="text-brand-600 underline">Back to login</Link></p></AuthLayout>;
+}
+export function ResetPasswordPage(){
+ const {search}=useLocation(),navigate=useNavigate(),email=new URLSearchParams(search).get("email");
+ const [password,setPassword]=useState(""),[confirm,setConfirm]=useState(""),[pending,setPending]=useState(false),[error,setError]=useState("");
+ async function submit(e:React.FormEvent){e.preventDefault();if(pending)return;if(password!==confirm)return setError("Passwords must match.");if(password.length<8||new TextEncoder().encode(password).length>72||!password.trim())return setError("Use at least 8 characters and at most 72 UTF-8 bytes.");setPending(true);setError("");try{await apiRequest("/user/password/reset",{method:"POST",body:{email,password},authenticated:false});setPassword("");setConfirm("");clearSession();navigate("/login?reset=1",{replace:true});}catch(e){setError(e instanceof Error?e.message:"Unable to reset the password.");}finally{setPending(false);}}
+ return <AuthLayout><h1 className="text-[26px] font-bold text-ink-900">Choose a new password</h1>{email?<form onSubmit={submit} className="mt-6 space-y-4"><Field label="New password" required><Input type="password" autoComplete="new-password" required minLength={8} value={password} onChange={e=>setPassword(e.target.value)}/></Field><Field label="Confirm password" required><Input type="password" autoComplete="new-password" required value={confirm} onChange={e=>setConfirm(e.target.value)}/></Field>{error&&<p role="alert" className="text-sm text-red-700">{error}</p>}<Button type="submit" disabled={pending}>{pending?"Saving…":"Reset password"}</Button></form>:<p className="mt-5 text-sm text-red-700">Enter your email on the Forgot Password screen first.</p>}<p className="mt-6"><Link to="/forgot-password" className="text-sm text-brand-600 underline">Back to Forgot Password</Link></p></AuthLayout>;
 }
