@@ -3,9 +3,8 @@ import { RouteRoleProvider, matchPath, slugify, toLogical, useLocation, useNavig
 import { useApp } from "./store/AppContext";
 import { AppShell } from "./components/AppShell";
 import { ForgotPasswordPage, LoginPage, SignUpPage, ResetPasswordPage } from "./pages/auth";
-import {CreateServiceRequest,CustomerApproval,CustomerAppointments,CustomerCheckIn,CustomerInvoices,CustomerRequests,InvoiceDetail,MyVehicles,ProfilePage,RepairStatus,ServiceHistory,VehicleForm,AdminAppointments,AdminRequests,Settings,TechnicianManagement,WorkOrderDetail,WorkOrders} from "./pages/operations";
-import {CustomerDashboard,AdminDashboard,TechDashboard,Inventory,Reports,NotificationsPage,TechParts} from "./pages/live";
-import {UserManagement} from "./pages/users";
+import {CreateServiceRequest,CustomerApproval,CustomerAppointments,CustomerCheckIn,CustomerInvoices,CustomerRequests,InvoiceDetail,MyVehicles,ProfilePage,RepairStatus,ServiceHistory,VehicleForm,AdminRequests,TechnicianManagement,WorkOrderDetail,WorkOrders} from "./pages/operations";
+import {AdminDashboard,CustomerDashboard,Inventory,NotificationsPage,TechDashboard,TechParts} from "./pages/live";
 import type { Role } from "./types";
 import { ROLE_PRIORITY } from "./lib/constants";
 
@@ -15,9 +14,9 @@ const customerRoutes: Route[] = [
   { pattern: "/customer/dashboard", title: "Dashboard", el: <CustomerDashboard /> },
   { pattern: "/customer/vehicles", title: "My Vehicles", el: <MyVehicles /> },
   { pattern: "/customer/vehicles/:id", title: "Vehicle", el: <VehicleForm /> },
-  { pattern: "/customer/requests", title: "Service Requests & Appointments", el: <CustomerRequests /> },
+  { pattern: "/customer/requests", title: "Service Requests", el: <CustomerRequests /> },
   { pattern: "/customer/requests/new", title: "New Request", el: <CreateServiceRequest /> },
-  { pattern: "/customer/appointments", title: "Service Requests & Appointments", el: <CustomerRequests /> },
+  { pattern: "/customer/appointments", title: "Service Requests", el: <CustomerRequests /> },
   { pattern: "/customer/check-in/:id", title: "Check-In", el: <CustomerCheckIn /> },
   { pattern: "/customer/approval/:id", title: "Approval", el: <CustomerApproval /> },
   { pattern: "/customer/repair-status/:id", title: "Repair Status", el: <RepairStatus /> },
@@ -44,12 +43,8 @@ const adminRoutes: Route[] = [
   { pattern: "/admin/work-orders/:id", title: "Work Order", el: <WorkOrderDetail /> },
   { pattern: "/admin/dashboard", title: "Dashboard", el: <AdminDashboard /> },
   { pattern: "/admin/requests", title: "Service Requests", el: <AdminRequests /> },
-  { pattern: "/admin/appointments", title: "Appointments", el: <AdminAppointments /> },
-  { pattern: "/admin/users", title: "User Management", el: <UserManagement /> },
   { pattern: "/admin/technicians", title: "Technicians", el: <TechnicianManagement /> },
-  { pattern: "/admin/reports", title: "Reports", el: <Reports /> },
   { pattern: "/admin/inventory", title: "Inventory", el: <Inventory /> },
-  { pattern: "/admin/settings", title: "Settings", el: <Settings /> },
   { pattern: "/admin/profile", title: "Profile", el: <ProfilePage /> },
 ];
 
@@ -58,7 +53,7 @@ const routesByRole: Record<Role, Route[]> = {
   technician: technicianRoutes,
   customer: customerRoutes,
 };
-/** Highest privilege first: when two roles share a URL (dashboard, profile...), the higher one wins. */
+/** Highest privilege first: when two roles share a URL (profile...), the higher one wins. */
 
 
 /** Find the route for a slug URL across ALL of the user's roles (merged access). */
@@ -117,10 +112,10 @@ export default function App() {
           <p className="text-5xl font-bold text-ink-900">404</p>
           <p className="mt-2 text-ink-500">This page could not be found.</p>
           <button
-            onClick={() => navigate(`/${activeRole}/dashboard`)}
+            onClick={() => navigate(`/${slug}/${activeRole === "customer" ? "requests" : "work-orders"}`)}
             className="mt-5 rounded-lg bg-brand-500 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-600"
           >
-            Back to Dashboard
+            Back to {activeRole === "customer" ? "Requests" : "Work Orders"}
           </button>
         </div>
       </AppShell>

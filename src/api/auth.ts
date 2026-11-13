@@ -28,18 +28,19 @@ export function accountFromResponse(data: AuthResponse): Account {
 export async function login(email: string, password: string): Promise<Account> {
   const revision = sessionRevision();
   const response = await apiRequest<AuthResponse>("/user/login", {
-    method: "POST", body: { email: email.trim().toLowerCase(), password }, authenticated: false,
+    method: "POST", body: { email: email.trim().toLowerCase(), passwordHash: password }, authenticated: false,
   });
   return acceptAuthentication(response, revision);
 }
 
 export async function register(data: RegistrationData): Promise<void> {
   const revision = sessionRevision();
-  const response = await apiRequest<AuthResponse>("/user/register", {
+  const response = await apiRequest<AuthResponse>("/user/add", {
     method: "POST",
     body: {
-      firstName: data.firstName.trim(), lastName: data.lastName.trim(), email: data.email.trim().toLowerCase(),
-      phone: data.phone.trim(), drivingLicenseNumber: data.drivingLicenseNumber.trim(), password: data.password,
+      first_name: data.firstName.trim(), last_name: data.lastName.trim(), email: data.email.trim().toLowerCase(),
+      phone: data.phone.trim(), driving_license_number: data.drivingLicenseNumber.trim(), passwordHash: data.password,
+      isEmailVerified: false, isPhoneVerified: false, isActive: true,
     },
     authenticated: false,
   });

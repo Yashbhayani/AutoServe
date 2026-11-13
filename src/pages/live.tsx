@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode, type FormEvent } from "react"
-import { shop, type PartRow, type PriceRow } from "../api/shop"
+import { operations, type OperationsData } from "../api/operations"
+import { shop, type DashboardData, type PartRow, type PriceRow } from "../api/shop"
 import { useRemote } from "../hooks/useRemote"
 import { useNotifications } from "../store/NotificationsContext"
 import { useApp } from "../store/AppContext"
@@ -188,13 +189,91 @@ function useRange() {
   )
   return { ...range, controls }
 }
+function dashboardFromSnapshot(
+  data: OperationsData,
+  from: string,
+  to: string,
+): DashboardData {
+  const requests = data.requests ?? []
+  const periodRequests = requests.filter((request) => {
+    const created = String(request.created_at ?? "").slice(0, 10)
+    return created >= from && created <= to
+  })
+  const statusCounts = new Map<string, number>()
+  for (const request of requests) {
+    const status = String(request.stage ?? "Unknown")
+    statusCounts.set(status, (statusCounts.get(status) ?? 0) + 1)
+  }
+  const activityCounts = new Map<string, number>()
+  for (const request of periodRequests) {
+    const day = String(request.created_at ?? "").slice(0, 10)
+    activityCounts.set(day, (activityCounts.get(day) ?? 0) + 1)
+  }
+  const today = localDate(new Date())
+  const upcoming = (data.appointments ?? [])
+    .filter((appointment) => {
+      const date = String(appointment.scheduled_date ?? "").slice(0, 10)
+      const status = String(
+        appointment.status_code ?? appointment.status ?? "",
+      ).toUpperCase()
+      return (
+        date >= today &&
+        !["CANCELLED", "CANCELED", "COMPLETED"].includes(status)
+      )
+    })
+    .sort((a, b) =>
+      `${a.scheduled_date} ${a.scheduled_time ?? ""}`.localeCompare(
+        `${b.scheduled_date} ${b.scheduled_time ?? ""}`,
+      ),
+    )
+  const openRequests = requests.filter(
+    (request) => !["Completed", "Cancelled"].includes(String(request.stage)),
+  )
+  const recent = [...requests]
+    .sort((a, b) =>
+      String(b.created_at ?? "").localeCompare(String(a.created_at ?? "")),
+    )
+    .slice(0, 20)
+
+  return {
+    summary: {
+      "Requests in period": periodRequests.length,
+      "Open requests": openRequests.length,
+      "Open work orders": openRequests.filter(
+        (request) => request.work_order_id != null,
+      ).length,
+      "Upcoming appointments": upcoming.length,
+    },
+    from,
+    to,
+    statuses: Array.from(statusCounts, ([label, value]) => ({ label, value })),
+    activity: Array.from(activityCounts, ([day, value]) => ({ day, value })),
+    requests: recent.map((request) => ({
+      id: Number(request.id),
+      description: String(request.description ?? ""),
+      created_at: String(request.created_at ?? ""),
+      status: String(request.stage ?? "Unknown"),
+      work_order_id:
+        request.work_order_id == null ? null : Number(request.work_order_id),
+      vehicle: String(request.vehicle ?? ""),
+    })),
+    appointments: upcoming.slice(0, 10).map((appointment) => ({
+      id: Number(appointment.id),
+      service_request_id: Number(appointment.service_request_id),
+      scheduled_date: String(appointment.scheduled_date ?? ""),
+      scheduled_time: String(appointment.scheduled_time ?? ""),
+      status: String(appointment.status ?? appointment.status_code ?? "Unknown"),
+    })),
+  }
+}
+
 function Dashboard({ role }: { role: string }) {
   const range = useRange()
   const remote = useRemote(
-    () => shop.dashboard(role, range.from, range.to),
-    [role, range.from, range.to],
+    operations.load,
+    [role],
   )
-  const d = remote.data
+  const d = remote.data && dashboardFromSnapshot(remote.data, range.from, range.to)
   return (
     <>
       <PageHeader
@@ -552,21 +631,19 @@ export function NotificationsPage() {
 }
 
 function PartsScreen({ admin }: { admin: boolean }) {
-  const { availableRoles } = useApp(),
-    notes = useNotifications()
+  const notes = useNotifications()
   const remote = useRemote(async () => {
-    const [parts, categories, requests, jobs, archivedParts] = await Promise.all([
+    const [parts, categories, requests, archivedParts] = await Promise.all([
       shop.parts(),
       shop.categories(),
-      shop.requests(),
-      availableRoles.includes("technician") ? shop.jobs() : Promise.resolve([]),
+      admin ? shop.requests() : Promise.resolve([]),
       admin ? shop.archivedParts() : Promise.resolve([]),
     ])
-    return { parts, categories, requests, jobs, archivedParts }
+    return { parts, categories, requests, archivedParts }
   }, [admin])
   const { search: query } = useLocation()
   const initial = new URLSearchParams(query).get("filter")
-  const [tab, setTab] = useState(initial === "requests" ? "requests" : "parts"),
+  const [tab, setTab] = useState(initial === "requests" && admin ? "requests" : "parts"),
     [search, setSearch] = useState(""),
     [category, setCategory] = useState("all"),
     [low, setLow] = useState(initial === "low"),
@@ -574,7 +651,6 @@ function PartsScreen({ admin }: { admin: boolean }) {
     [page, setPage] = useState(1)
   const [edit, setEdit] = useState<Partial<PartRow> | null>(null),
     [archive, setArchive] = useState<PartRow | null>(null),
-    [request, setRequest] = useState(false),
     [busy, setBusy] = useState(false),
     [error, setError] = useState(""),
     [success, setSuccess] = useState("")
@@ -660,26 +736,6 @@ function PartsScreen({ admin }: { admin: boolean }) {
       "Part saved.",
     )
   }
-  function submitRequest(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    const f = new FormData(e.currentTarget),
-      quantity = Number(f.get("quantity"))
-    if (!Number.isSafeInteger(quantity) || quantity <= 0) {
-      setError("Enter a positive whole quantity.")
-      return
-    }
-    void mutate(
-      () =>
-        shop.requestPart({
-          workOrderId: Number(f.get("job")),
-          partId: Number(f.get("part")),
-          quantity,
-          note: f.get("note"),
-        }),
-      () => setRequest(false),
-      "Part request submitted for review.",
-    )
-  }
   const formError = error && (
     <p role="alert" className="mb-4 text-sm text-red-700">
       {error}
@@ -692,7 +748,7 @@ function PartsScreen({ admin }: { admin: boolean }) {
         subtitle={
           admin
             ? "Manage stock, pricing, and technician requests."
-            : "Browse stock and request parts for your assigned work orders."
+            : "Browse available inventory."
         }
         action={
           <div className="flex gap-2">
@@ -710,20 +766,12 @@ function PartsScreen({ admin }: { admin: boolean }) {
                 Add part
               </Button>
             ) : (
-              <Button
-                disabled={!d?.jobs.length || !d.parts.length}
-                onClick={() => {
-                  setError("")
-                  setRequest(true)
-                }}
-              >
-                Request part
-              </Button>
+              null
             )}
           </div>
         }
       />
-      {!edit && !archive && !request && formError}
+      {!edit && !archive && formError}
       {success && (
         <p role="status" className="mb-4 text-sm text-green-700">
           {success}
@@ -732,7 +780,7 @@ function PartsScreen({ admin }: { admin: boolean }) {
       <DataState {...remote} retry={remote.refresh} />
       {d && (
         <div className="space-y-5">
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className={`grid gap-4 ${admin ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}>
             <StatCard
               icon={<IconBox />}
               label="Active parts"
@@ -746,17 +794,14 @@ function PartsScreen({ admin }: { admin: boolean }) {
                   .length
               }
             />
-            <StatCard
-              icon={<IconBox />}
-              label="Pending requests"
-              value={d.requests.filter((r) => r.status === "Pending").length}
-            />
+            {admin && (
+              <StatCard
+                icon={<IconBox />}
+                label="Pending requests"
+                value={d.requests.filter((r) => r.status === "Pending").length}
+              />
+            )}
           </div>
-          {!admin && !d.jobs.length && (
-            <p className="text-sm text-ink-500">
-              You have no open assigned work orders eligible for part requests.
-            </p>
-          )}
           <div className="flex flex-wrap gap-2">
             <Button
               variant={tab === "parts" ? "primary" : "secondary"}
@@ -768,25 +813,15 @@ function PartsScreen({ admin }: { admin: boolean }) {
               Parts
             </Button>
             {admin && <Button variant={tab === "archived" ? "primary" : "secondary"} onClick={() => {setTab("archived");setPage(1);setLow(false);}}>Archived parts ({d.archivedParts.length})</Button>}
-            <Button
-              variant={tab === "requests" ? "primary" : "secondary"}
-              onClick={() => {
-                setTab("requests")
-                setPage(1)
-              }}
-            >
-              {admin ? "Technician requests" : "My requests"}
-            </Button>
-            {admin && availableRoles.includes("technician") && (
+            {admin && (
               <Button
-                variant="secondary"
-                disabled={!d.jobs.length}
+                variant={tab === "requests" ? "primary" : "secondary"}
                 onClick={() => {
-                  setError("")
-                  setRequest(true)
+                  setTab("requests")
+                  setPage(1)
                 }}
               >
-                Request for my job
+                Technician requests
               </Button>
             )}
           </div>
@@ -1098,61 +1133,6 @@ function PartsScreen({ admin }: { admin: boolean }) {
         >
           Archive part
         </Button>
-      </Modal>
-      <Modal
-        open={request}
-        onClose={() => {
-          if (!busy) setRequest(false)
-        }}
-        title="Request parts"
-      >
-        <form onSubmit={submitRequest} className="space-y-4">
-          {formError}
-          <Field label="Assigned work order">
-            <Select name="job" required defaultValue="">
-              <option value="" disabled>
-                Select work order
-              </option>
-              {d?.jobs.map((j) => (
-                <option key={j.id} value={j.id}>
-                  #{j.id} · {j.status} · {j.description.slice(0, 70)}
-                </option>
-              ))}
-            </Select>
-          </Field>
-          <Field label="Part">
-            <Select name="part" required defaultValue="">
-              <option value="" disabled>
-                Select part
-              </option>
-              {d?.parts.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name} · {p.sku} · {p.stock_quantity} available
-                </option>
-              ))}
-            </Select>
-          </Field>
-          <Field label="Quantity">
-            <Input
-              name="quantity"
-              required
-              type="number"
-              min={1}
-              max={2147483647}
-              step={1}
-              defaultValue={1}
-            />
-          </Field>
-          <Field label="Note (optional)">
-            <Input name="note" maxLength={500} />
-          </Field>
-          <p className="text-xs text-ink-400">
-            An administrator will issue the parts when stock is available.
-          </p>
-          <Button type="submit" disabled={busy}>
-            {busy ? "Submitting…" : "Submit request"}
-          </Button>
-        </form>
       </Modal>
       <Modal
         open={history !== null}

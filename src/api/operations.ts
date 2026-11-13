@@ -8,6 +8,11 @@ export type OperationsData = {
   technicians: Row[]
   invoices: Row[]
   events: Row[]
+  parts: Row[]
+  workOrderParts: Row[]
+  billing: Row[]
+  invoiceDetails: Row[]
+  invoiceLines: Row[]
   settings: Row[]
 }
 export const operations = {

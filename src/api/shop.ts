@@ -26,12 +26,6 @@ export type PartRequestRow = {
   sku: string
   technician_name: string
 }
-export type JobRow = {
-  id: number
-  service_request_id: number
-  status: string
-  description: string
-}
 export type NoteRow = {
   id: number
   message: string
@@ -102,8 +96,6 @@ export const shop = {
     apiRequest<{ data: PartRequestRow[] }>("/inventory/requests").then(
       (r) => r.data,
     ),
-  jobs: () =>
-    apiRequest<{ data: JobRow[] }>("/inventory/jobs").then((r) => r.data),
   prices: (id: number) =>
     apiRequest<{ data: PriceRow[] }>(`/parts/${id}/prices`).then((r) => r.data),
   savePart: (id: number | undefined, body: unknown) =>
@@ -113,8 +105,6 @@ export const shop = {
     }),
   archivePart: (id: number) =>
     apiRequest(`/parts/delete/${id}`, { method: "DELETE" }),
-  requestPart: (body: unknown) =>
-    apiRequest("/inventory/requests", { method: "POST", body }),
   resolvePart: (id: number, status: string) =>
     apiRequest(`/inventory/requests/${id}`, {
       method: "PUT",

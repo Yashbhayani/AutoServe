@@ -23,7 +23,7 @@ test("login sends email/password JSON and uses the backend identity and roles", 
   globalThis.fetch = async (url, options) => {
     assert.equal(url, "/api/user/login");
     assert.equal(options.method, "POST");
-    assert.deepEqual(JSON.parse(options.body), { email: "alex@example.com", password: " secret " });
+    assert.deepEqual(JSON.parse(options.body), { email: "alex@example.com", passwordHash: " secret " });
     assert.equal(options.headers.Authorization, undefined);
     return json(success);
   };
@@ -193,13 +193,17 @@ test("data arriving after a change of account is discarded", async () => {
   assert.equal(getTokens().accessToken, "second");
 });
 
-test("registration uses the central request helper without signing in", async () => {
+test("registration matches the backend add-user route and model without signing in", async () => {
   globalThis.fetch = async (url, options) => {
-    assert.equal(url, "/api/user/register");
+    assert.equal(url, "/api/user/add");
     assert.equal(options.method, "POST");
     assert.equal(options.headers["Content-Type"], "application/json");
     assert.equal(options.headers.Authorization, undefined);
-    assert.deepEqual(JSON.parse(options.body), { ...registration, firstName: "Alex", lastName: "Rivera", email: "alex@example.com" });
+    assert.deepEqual(JSON.parse(options.body), {
+      first_name: "Alex", last_name: "Rivera", email: "alex@example.com", phone: "",
+      driving_license_number: "", passwordHash: registration.password,
+      isEmailVerified: false, isPhoneVerified: false, isActive: true,
+    });
     return json({ success: true, message: "Account created successfully." }, 201);
   };
   await register({ ...registration, roles: ["ADMIN"], isEmailVerified: true });

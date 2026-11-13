@@ -7,19 +7,14 @@ import {
   IconGauge,
   IconCar,
   IconClipboard,
-  IconCalendar,
   IconHistory,
   IconInvoice,
   IconBell,
   IconUser,
-  IconUsers,
   IconLogout,
   IconWrench,
   IconBox,
   IconClock,
-  IconChart,
-  IconSettings,
-  IconSearch,
   IconMenu,
   IconX,
 } from "./icons";
@@ -33,7 +28,7 @@ const navByRole: Record<Role, NavItem[]> = {
   customer: [
     { label: "Dashboard", to: "/customer/dashboard", icon: <IconGauge /> },
     { label: "My Vehicles", to: "/customer/vehicles", icon: <IconCar /> },
-    { label: "Service Requests & Appointments", to: "/customer/requests", icon: <IconClipboard /> },
+    { label: "Service Requests", to: "/customer/requests", icon: <IconClipboard /> },
     { label: "Service History", to: "/customer/history", icon: <IconHistory /> },
     { label: "Invoices", to: "/customer/invoices", icon: <IconInvoice /> },
     { label: "Notifications", to: "/customer/notifications", icon: <IconBell /> },
@@ -50,12 +45,8 @@ const navByRole: Record<Role, NavItem[]> = {
     { label: "Work Orders", to: "/admin/work-orders", icon: <IconWrench /> },
     { label: "Dashboard", to: "/admin/dashboard", icon: <IconGauge /> },
     { label: "Service Requests", to: "/admin/requests", icon: <IconClipboard /> },
-    { label: "Appointments", to: "/admin/appointments", icon: <IconCalendar /> },
-    { label: "Users", to: "/admin/users", icon: <IconUsers /> },
     { label: "Technicians", to: "/admin/technicians", icon: <IconWrench /> },
-    { label: "Reports", to: "/admin/reports", icon: <IconChart /> },
     { label: "Inventory", to: "/admin/inventory", icon: <IconBox />, feature: "parts" },
-    { label: "Settings", to: "/admin/settings", icon: <IconSettings /> },
     { label: "Notifications", to: "/admin/notifications", icon: <IconBell /> },
     { label: "Profile", to: "/admin/profile", icon: <IconUser /> },
   ],
@@ -64,9 +55,9 @@ const navByRole: Record<Role, NavItem[]> = {
 const roleLabels: Record<Role, string> = { customer: "Customer", technician: "Technician", admin: "Admin / Manager" };
 const navGroups = {
   Overview: ["Dashboard"],
-  Operations: ["Service Requests & Appointments", "Service Requests", "Work Orders", "Appointments", "My Vehicles", "Service History", "Invoices"],
-  Management: ["Technicians", "Users", "Inventory", "Parts", "Reports"],
-  Account: ["Settings", "Notifications", "Profile"],
+  Operations: ["Service Requests", "Work Orders", "My Vehicles", "Service History", "Invoices"],
+  Management: ["Technicians", "Inventory", "Parts"],
+  Account: ["Notifications", "Profile"],
 };
 
 /**
@@ -166,17 +157,6 @@ function Topbar({ role, title, onMenu }: { role: Role; title: string; onMenu: ()
       </div>
 
       <div className="flex items-center gap-2 sm:gap-3">
-        <div className="relative hidden lg:block">
-          <IconSearch size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-400" />
-          <input
-            aria-label="Global search unavailable; use search within lists"
-            placeholder="Use search within lists"
-            disabled
-            title="Global search requires backend integration"
-            className="h-9 w-56 rounded-lg border border-line bg-slate-50 pl-9 pr-3 text-sm text-ink-900 placeholder:text-ink-400 focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/15"
-          />
-        </div>
-
         <Menu
           label="Notifications"
           trigger={
