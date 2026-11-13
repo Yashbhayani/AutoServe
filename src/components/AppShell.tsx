@@ -11,10 +11,12 @@ import {
   IconInvoice,
   IconBell,
   IconUser,
+  IconUsers,
   IconLogout,
   IconWrench,
   IconBox,
   IconClock,
+  IconChart,
   IconMenu,
   IconX,
 } from "./icons";
@@ -46,7 +48,9 @@ const navByRole: Record<Role, NavItem[]> = {
     { label: "Dashboard", to: "/admin/dashboard", icon: <IconGauge /> },
     { label: "Service Requests", to: "/admin/requests", icon: <IconClipboard /> },
     { label: "Technicians", to: "/admin/technicians", icon: <IconWrench /> },
+    { label: "Users", to: "/admin/users", icon: <IconUsers /> },
     { label: "Inventory", to: "/admin/inventory", icon: <IconBox />, feature: "parts" },
+    { label: "Reports", to: "/admin/reports", icon: <IconChart /> },
     { label: "Notifications", to: "/admin/notifications", icon: <IconBell /> },
     { label: "Profile", to: "/admin/profile", icon: <IconUser /> },
   ],
@@ -56,7 +60,7 @@ const roleLabels: Record<Role, string> = { customer: "Customer", technician: "Te
 const navGroups = {
   Overview: ["Dashboard"],
   Operations: ["Service Requests", "Work Orders", "My Vehicles", "Service History", "Invoices"],
-  Management: ["Technicians", "Inventory", "Parts"],
+  Management: ["Technicians", "Users", "Inventory", "Parts", "Reports"],
   Account: ["Notifications", "Profile"],
 };
 

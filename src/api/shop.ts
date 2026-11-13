@@ -121,8 +121,6 @@ export const shop = {
         : `/notifications/${id}/read`,
       { method: "PUT" },
     ),
-  dashboard: (role: string, from: string, to: string) =>
-    apiRequest<DashboardData>("/dashboard", { params: { role, from, to } }),
   report: (from: string, to: string) =>
     apiRequest<ReportData>("/reports", { params: { from, to } }),
 }

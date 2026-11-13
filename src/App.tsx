@@ -4,7 +4,8 @@ import { useApp } from "./store/AppContext";
 import { AppShell } from "./components/AppShell";
 import { ForgotPasswordPage, LoginPage, SignUpPage, ResetPasswordPage } from "./pages/auth";
 import {CreateServiceRequest,CustomerApproval,CustomerAppointments,CustomerCheckIn,CustomerInvoices,CustomerRequests,InvoiceDetail,MyVehicles,ProfilePage,RepairStatus,ServiceHistory,VehicleForm,AdminRequests,TechnicianManagement,WorkOrderDetail,WorkOrders} from "./pages/operations";
-import {AdminDashboard,CustomerDashboard,Inventory,NotificationsPage,TechDashboard,TechParts} from "./pages/live";
+import {AdminDashboard,CustomerDashboard,Inventory,NotificationsPage,Reports,TechDashboard,TechParts} from "./pages/live";
+import {UserManagement} from "./pages/users";
 import type { Role } from "./types";
 import { ROLE_PRIORITY } from "./lib/constants";
 
@@ -44,7 +45,9 @@ const adminRoutes: Route[] = [
   { pattern: "/admin/dashboard", title: "Dashboard", el: <AdminDashboard /> },
   { pattern: "/admin/requests", title: "Service Requests", el: <AdminRequests /> },
   { pattern: "/admin/technicians", title: "Technicians", el: <TechnicianManagement /> },
+  { pattern: "/admin/users", title: "User Management", el: <UserManagement /> },
   { pattern: "/admin/inventory", title: "Inventory", el: <Inventory /> },
+  { pattern: "/admin/reports", title: "Reports", el: <Reports /> },
   { pattern: "/admin/profile", title: "Profile", el: <ProfilePage /> },
 ];
 
