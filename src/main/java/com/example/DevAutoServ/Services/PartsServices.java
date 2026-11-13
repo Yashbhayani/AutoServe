@@ -72,7 +72,7 @@ public class PartsServices implements PartsRepository {
         validate(part); unique(part,0);
         var key = new GeneratedKeyHolder();
         jdbc.update(connection -> {
-            var ps = connection.prepareStatement("INSERT INTO dev_autoserve.parts (category_id,code,name,sku,is_active) VALUES (?,?,?,?,1)", Statement.RETURN_GENERATED_KEYS);
+            var ps = connection.prepareStatement("INSERT INTO dev_autoserve.parts (category_id,code,name,sku,is_active) VALUES (?,?,?,?,1)", new String[]{"id"});
             ps.setLong(1,part.getCategoryId()); ps.setString(2,part.getCode().trim()); ps.setString(3,part.getName().trim()); ps.setString(4,part.getSku().trim()); return ps;
         },key);
         if (key.getKey() == null) throw new IllegalStateException("Missing part ID.");

@@ -14,5 +14,6 @@ public interface UserRepository {
     Map<String, Object> deleteUser(Long id);
     Map<String, Object> Logout(String refreshToken);
     Map<String, Object> RefreshAccessToken(String refreshToken);
+    Map<String, Object> ResetPassword(String email,String password);
 }
 

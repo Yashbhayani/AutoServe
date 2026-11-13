@@ -52,6 +52,7 @@ public class UserServices implements UserRepository {
 
 
     @Override
+    @Transactional
     public Map<String, Object> AddUser(User userModel, HttpServletResponse responses) {
 
         Map<String, Object> response = new HashMap<>();
@@ -67,11 +68,11 @@ public class UserServices implements UserRepository {
 
            String EncryptedPass = passwordServices.EncryptPassword(userModel.getPasswordHash());
 
-            System.out.println(EncryptedPass.toString());
+
             KeyHolder keyHolderForUser = new GeneratedKeyHolder();
             
             jdbcTemplate.update(connection -> {
-                PreparedStatement ps = connection.prepareStatement(commonQueryServicesModel.InsertUser, Statement.RETURN_GENERATED_KEYS);
+                PreparedStatement ps = connection.prepareStatement(commonQueryServicesModel.InsertUser, new String[]{"id"});
                 ps.setString(1, userModel.getEmail().replaceAll("@.*", "").toLowerCase());
                 ps.setString(2, userModel.getEmail().toLowerCase());
                 ps.setString(3, userModel.getFirst_name());
@@ -98,7 +99,7 @@ public class UserServices implements UserRepository {
 
             KeyHolder keyHolderUserRole = new GeneratedKeyHolder();
             jdbcTemplate.update(connection -> {
-                PreparedStatement ps = connection.prepareStatement(commonQueryServicesModel.InsertUserRole, Statement.RETURN_GENERATED_KEYS);
+                PreparedStatement ps = connection.prepareStatement(commonQueryServicesModel.InsertUserRole, new String[]{"id"});
                 ps.setLong(1, generatedId);
                 ps.setShort(2, roleId);
                 return ps;
@@ -110,30 +111,15 @@ public class UserServices implements UserRepository {
                 response.put("message", "Data Not Added!");
             }
 
-            String username = userModel.getEmail().trim().toLowerCase();
-
-            String accessToken =
-                    authServices.generateAccessToken(username);
-
-            String refreshToken =
-                    authServices.generateRefreshToken(username);
-
-            // Save token hash and expiration in refresh_tokens
-            saveRefreshToken(generatedId, refreshToken);
-
-
-
             response.put("success", true);
             response.put("message", "User registered successfully");
-            response.put("access-token", accessToken);
-            response.put("refresh-token", refreshToken);
-            response.put("expiresIn", 900);
 
 
 
         } catch (Exception e) {
             response.put("success", false);
-            response.put("message", e.getMessage());
+            org.springframework.transaction.interceptor.TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            response.put("message", "Unable to create your account. Please try again.");
         }
 
         return response;
@@ -212,6 +198,23 @@ public class UserServices implements UserRepository {
         }
 
         return response;
+    }
+
+    @Override
+    @Transactional
+    public Map<String,Object> ResetPassword(String email,String password) {
+        String normalized=email==null?"":email.trim().toLowerCase();
+        int passwordBytes=password==null?0:password.getBytes(StandardCharsets.UTF_8).length;
+        if(normalized.isBlank()||password==null||password.isBlank()||password.length()<8||passwordBytes>72) {
+            throw new com.example.DevAutoServ.Services.ApiAccessServices.ApiFailure(400,"Enter a valid email and a password of at least 8 characters and at most 72 UTF-8 bytes.");
+        }
+        List<Map<String,Object>> rows=jdbcTemplate.queryForList("SELECT id FROM dev_autoserve.users WHERE email=? AND is_active=1 FOR UPDATE",normalized);
+        if(rows.isEmpty()) return Map.of("success",true,"message","If an active account matches that email, its password has been updated.");
+        long userId=((Number)rows.get(0).get("id")).longValue();
+        jdbcTemplate.update("UPDATE dev_autoserve.users SET password_hash=? WHERE id=?",passwordServices.EncryptPassword(password),userId);
+        jdbcTemplate.update("UPDATE dev_autoserve.refresh_tokens SET is_active=0 WHERE user_id=?",userId);
+        jdbcTemplate.update("INSERT INTO dev_autoserve.as_auth_epoch(user_id,version) VALUES(?,?) ON DUPLICATE KEY UPDATE version=VALUES(version)",userId,UUID.randomUUID().toString());
+        return Map.of("success",true,"message","If an active account matches that email, its password has been updated.");
     }
 
     @Override

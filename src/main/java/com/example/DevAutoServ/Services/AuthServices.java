@@ -13,6 +13,7 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.BadPaddingException;
@@ -49,10 +50,11 @@ public class AuthServices implements AuthRepository {
 
     private SecretKey key;
     private  QueryHandlerServices queryHandlerServices;
+    private final JdbcTemplate jdbcTemplate;
 
     CommonQueryServicesModel commonQueryServicesModel = new CommonQueryServicesModel();
 
-    public AuthServices(QueryHandlerServices queryHandlerServices) { this.queryHandlerServices=queryHandlerServices; }
+    public AuthServices(QueryHandlerServices queryHandlerServices,JdbcTemplate jdbcTemplate) { this.queryHandlerServices=queryHandlerServices;this.jdbcTemplate=jdbcTemplate; }
 
     // INITIALIZE JWT SIGNING KEY
     @PostConstruct
@@ -136,6 +138,7 @@ public class AuthServices implements AuthRepository {
         return Jwts.builder()
                 .id(java.util.UUID.randomUUID().toString())
                 .subject(username)
+            .claim("credentialVersion",credentialVersion(username))
                 .issuedAt(now)
                 .expiration(expiryDate)
                 .claim("tokenType", tokenType)
@@ -205,8 +208,11 @@ public class AuthServices implements AuthRepository {
     public boolean isAccessTokenValid(String token) {
 
         try {
-            return isTokenValid(token)
-                    && "access".equals(getTokenType(token));
+            if (!isTokenValid(token) || !"access".equals(getTokenType(token))) return false;
+            Claims claims=getClaims(token).getPayload();
+            String issuedVersion=claims.get("credentialVersion",String.class);
+            String currentVersion=credentialVersion(claims.getSubject());
+            return java.util.Objects.equals(issuedVersion,currentVersion);
 
         } catch (JwtException | IllegalArgumentException e) {
             return false;
@@ -217,12 +223,24 @@ public class AuthServices implements AuthRepository {
     public boolean isRefreshTokenValid(String token) {
 
         try {
-            return isTokenValid(token)
-                    && "refresh".equals(getTokenType(token));
+            if (!isTokenValid(token) || !"refresh".equals(getTokenType(token))) return false;
+            Claims claims=getClaims(token).getPayload();
+            String issuedVersion=claims.get("credentialVersion",String.class);
+            String currentVersion=credentialVersion(claims.getSubject());
+            return java.util.Objects.equals(issuedVersion,currentVersion);
 
         } catch (JwtException | IllegalArgumentException e) {
             return false;
         }
+    }
+
+    private String credentialVersion(String username) {
+        var rows=jdbcTemplate.queryForList("""
+            SELECT COALESCE(e.version,'') AS version
+            FROM dev_autoserve.users u LEFT JOIN dev_autoserve.as_auth_epoch e ON e.user_id=u.id
+            WHERE u.email=? OR u.username=? ORDER BY CASE WHEN u.email=? THEN 0 ELSE 1 END LIMIT 1
+            """,username,username,username);
+        return rows.isEmpty()?"":String.valueOf(rows.get(0).get("version"));
     }
 
     // ENCRYPT ID
