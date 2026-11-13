@@ -1,13 +1,14 @@
 package com.example.DevAutoServ.Controller;
 
+import com.example.DevAutoServ.CommonModel.CommonQueryServicesModel;
+import com.example.DevAutoServ.Enum.ProjectCodes;
 import com.example.DevAutoServ.Model.AssignPartModel;
-import com.example.DevAutoServ.Services.AppointmentsServices;
-import com.example.DevAutoServ.Services.AuthServices;
-import com.example.DevAutoServ.Services.PartUsagesServices;
-import com.example.DevAutoServ.Services.StatusServices;
+import com.example.DevAutoServ.Services.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.HashMap;
 import java.util.List;
@@ -24,12 +25,18 @@ public class WorkOrderController {
     private final AuthServices authServices;
     private final StatusServices statusServices;
     private final PartUsagesServices partUsagesServices;
-    public WorkOrderController(AppointmentsServices appointmentsServices, AuthServices authServices, StatusServices statusServices, PartUsagesServices partUsagesServices){
+    private final QueryHandlerServices queryHandlerServices;
+    private final ReportsServices reportsServices;
+
+    CommonQueryServicesModel query = new CommonQueryServicesModel();
+    public WorkOrderController(AppointmentsServices appointmentsServices, AuthServices authServices, StatusServices statusServices, PartUsagesServices partUsagesServices, QueryHandlerServices queryHandlerServices, ReportsServices reportsServices){
 
         this.appointmentsServices = appointmentsServices;
         this.authServices = authServices;
         this.statusServices = statusServices;
         this.partUsagesServices = partUsagesServices;
+        this.queryHandlerServices = queryHandlerServices;
+        this.reportsServices = reportsServices;
     }
     private Map<String, Object> Result(boolean success, String message) {
 
@@ -204,5 +211,91 @@ public class WorkOrderController {
             );
         }
     }
+
+
+    @GetMapping("/get")
+    public Map<String, Object> GetWorkOrderList(
+            @RequestParam String queryString,
+            @RequestHeader(value = "Authorization", required = false)
+            String authorization) {
+        try {
+
+            // 1. Verify token
+            Map<String, Object> tokenResponse =
+                    authServices.VerifyToken(authorization);
+
+            if (!Boolean.TRUE.equals(tokenResponse.get("success"))) {
+                return tokenResponse;
+            }
+
+            // 2. Get username
+            Object usernameObject = tokenResponse.get("username");
+
+            if (usernameObject == null) {
+                return Result(false, "Username not found in token.");
+            }
+
+            String loggedInUsername = usernameObject.toString();
+
+            // 3. Get user role
+            Map<String, Object> getUserRole =
+                    authServices.CheckUserRole(loggedInUsername);
+
+            if (!Boolean.TRUE.equals(getUserRole.get("success"))) {
+                return getUserRole;
+            }
+
+            Object roleObject = getUserRole.get("userRole");
+
+            if (roleObject == null) {
+                return Result(false, "User role not found.");
+            }
+
+            String userRole = roleObject.toString();
+
+
+            if(!userRole.equalsIgnoreCase(ProjectCodes.RoleEnum.ADMIN.name())){
+
+                Long customerID = queryHandlerServices.GetUserId(query.GetUserId,loggedInUsername);
+
+                if (customerID == null) {
+                    return Result(false, "Logged-in user was not found.");
+                }
+
+                return reportsServices.fetchDeta(ProjectCodes.SPTableName.GET_WORK_ORDERS_WITH_PAGINATION.name(), queryString);
+            }
+
+            Long customerID = queryHandlerServices.GetUserId(query.GetUserId,loggedInUsername);
+
+            // Convert queryString into JSON
+            ObjectMapper objectMapper = new ObjectMapper();
+
+            Map<String, Object> queryJson = objectMapper.readValue(
+                    queryString,
+                    new TypeReference<Map<String, Object>>() {}
+            );
+
+            // Add Customer ID
+            queryJson.put("customer_id", customerID);
+
+            // Convert JSON back into String
+            String finalQueryString = objectMapper.writeValueAsString(queryJson);
+
+            // 4. Check permission
+            if(userRole.toLowerCase().equals(ProjectCodes.RoleEnum.TECHNICIAN.name().toLowerCase())){
+                return reportsServices.fetchDeta(ProjectCodes.SPTableName.GET_TECHNICIAN_WORK_ORDERS_WITH_PAGINATION.name(), finalQueryString);
+            }
+
+            return Result(false, "Service request is not authorization by this User.");
+
+        } catch (Exception exception) {
+
+            logger.error("Error while updating service request", exception);
+
+            return Result(false,
+                    "Something went wrong while updating the service request.");
+        }
+    }
+
 
 }

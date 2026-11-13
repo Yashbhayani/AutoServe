@@ -378,7 +378,7 @@ public class ServiceRequestsController {
             String finalQueryString = objectMapper.writeValueAsString(queryJson);
 
             // 4. Check permission
-            if(userRole.equals(ProjectCodes.RoleEnum.CUSTOMER.name())){
+            if(userRole.equalsIgnoreCase(ProjectCodes.RoleEnum.CUSTOMER.name())){
                 return reportsServices.fetchDeta(ProjectCodes.SPTableName.GET_CUSTOMER_SERVICE_REQUESTS_WITH_PAGINATION.name(), finalQueryString);
             }
 

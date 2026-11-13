@@ -614,7 +614,7 @@ public class AppointmentsController  {
     }
 
     @GetMapping("/get")
-    public Map<String, Object> GetUserList(
+    public Map<String, Object> GetAppointmentList(
             @RequestParam String queryString,
             @RequestHeader(value = "Authorization", required = false)
             String authorization) {
@@ -682,7 +682,7 @@ public class AppointmentsController  {
             String finalQueryString = objectMapper.writeValueAsString(queryJson);
 
             // 4. Check permission
-            if(userRole.equals(ProjectCodes.RoleEnum.CUSTOMER.name())){
+            if(userRole.equalsIgnoreCase(ProjectCodes.RoleEnum.CUSTOMER.name())){
                 return reportsServices.fetchDeta(ProjectCodes.SPTableName.GET_CUSTOMER_APPOINTMENTS_WITH_PAGINATION.name(), finalQueryString);
             }
 
