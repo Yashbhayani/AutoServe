@@ -621,7 +621,7 @@ function RequestList({ admin = false }: { admin?: boolean }) {
                   )
                   return appointment
                     ? `${String(appointment.scheduled_date).slice(0, 10)} ${String(appointment.scheduled_time ?? "").slice(0, 5)}`
-                    : "Not scheduled"
+                    :( r.stage.toLowerCase() === "completed" ? <StatusBadge status={"Done"} /> : "Not scheduled")
                 })(),
                 <>
                   <StatusBadge status={r.stage} />
@@ -1583,7 +1583,7 @@ export function TechnicianManagement() {
             headers={[
               "Name",
               "Contact",
-              "Specialties",
+              // "Specialties",
               "Availability",
               "Open jobs",
               "Actions",
@@ -1591,7 +1591,7 @@ export function TechnicianManagement() {
             rows={d.technicians.map((t) => [
               `${t.first_name} ${t.last_name}`,
               t.email,
-              t.specialties || "—",
+              //t.specialties || "—",
               t.availability,
               t.active_jobs,
               <Button variant="secondary" onClick={() => setEditing(t)}>
@@ -1625,12 +1625,12 @@ export function TechnicianManagement() {
                   )
                 }
                 fields={[
-                  {
+                  /*{
                     key: "specialties",
                     label: "Specialties (comma separated)",
                     value: editing.specialties,
                     max: 500,
-                  },
+                  },*/
                   {
                     key: "availability",
                     label: "Availability",
