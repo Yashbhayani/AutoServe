@@ -1,0 +1,27 @@
+{
+  "createdUtc": "2026-11-13T17:10:33.470793+00:00",
+  "overall": "Automated checks passed; browser checks incomplete",
+  "existingBackendTests": 32,
+  "existingFrontendTests": 50,
+  "existingSuitesStatus": "Pass",
+  "staticAuthRenderChecks": 6,
+  "httpDatabaseChecks": {
+    "Pass": 159
+  },
+  "matrixApplicableStatus": {
+    "Not Run": 54,
+    "Pass": 202
+  },
+  "nonApplicableOperations": 37,
+  "browser": "Not Run: retry failed at Brave navigation and DOM inspection; same timeoutMs integration error.",
+  "backendSourceOrConfigChanged": true,
+  "backendChangesWithinApproval": true,
+  "database": "Isolated H2 2.3.232 in MySQL mode only; live MySQL not mutated or certified",
+  "performanceTargetChecked": false,
+  "securityCertification": false,
+  "recordsOverlap": "Checklist aliases and workflows share underlying evidence; do not add matrix counts to suite counts.",
+  "lastBrowserConnectionCheckUtc": "2026-11-13T17:45:39.313099+00:00",
+  "browserDiagnostics": "evidence/browser/remaining-retry-20261113T174539Z.json",
+  "remainingApplicableNotRun": 54,
+  "additionalCasesExecutedOnLatestRetry": 0
+}

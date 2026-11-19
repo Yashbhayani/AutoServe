@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="com.example.DevAutoServ.OperationsIntegrationTests" time="0.112" tests="11" errors="0" skipped="0" failures="0" flakes="0">
+  <testcase name="rollback" classname="com.example.DevAutoServ.OperationsIntegrationTests" time="0.017" />
+  <testcase name="billing" classname="com.example.DevAutoServ.OperationsIntegrationTests" time="0.014" />
+  <testcase name="ownership" classname="com.example.DevAutoServ.OperationsIntegrationTests" time="0.01" />
+  <testcase name="workflow" classname="com.example.DevAutoServ.OperationsIntegrationTests" time="0.009" />
+  <testcase name="edits" classname="com.example.DevAutoServ.OperationsIntegrationTests" time="0.008" />
+  <testcase name="holds" classname="com.example.DevAutoServ.OperationsIntegrationTests" time="0.008" />
+  <testcase name="noBypass" classname="com.example.DevAutoServ.OperationsIntegrationTests" time="0.007" />
+  <testcase name="diagnosisAndRevision" classname="com.example.DevAutoServ.OperationsIntegrationTests" time="0.009" />
+  <testcase name="settings" classname="com.example.DevAutoServ.OperationsIntegrationTests" time="0.013" />
+  <testcase name="appointments" classname="com.example.DevAutoServ.OperationsIntegrationTests" time="0.009" />
+  <testcase name="creation" classname="com.example.DevAutoServ.OperationsIntegrationTests" time="0.006" />
+</testsuite>

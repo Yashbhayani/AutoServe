@@ -1,0 +1,56 @@
+[
+  {
+    "name": "frontend-unit-render",
+    "exitCode": 0,
+    "status": "PASS",
+    "seconds": 0.62,
+    "command": [
+      "node",
+      "--experimental-strip-types",
+      "--test",
+      "--test-reporter=tap",
+      "tests/auth.test.mjs",
+      "tests/charts.test.mjs",
+      "tests/invoice.test.mjs",
+      "tests/operations.test.mjs",
+      "tests/reporting.test.mjs",
+      "tests/screens.test.mjs",
+      "tests/workflow.test.mjs"
+    ]
+  },
+  {
+    "name": "typescript",
+    "exitCode": 0,
+    "status": "PASS",
+    "seconds": 1.89,
+    "command": [
+      "npx",
+      "--no-install",
+      "tsc",
+      "--noEmit"
+    ]
+  },
+  {
+    "name": "frontend-build",
+    "exitCode": 0,
+    "status": "PASS",
+    "seconds": 0.52,
+    "command": [
+      "npm",
+      "run",
+      "build"
+    ]
+  },
+  {
+    "name": "backend-tests",
+    "exitCode": 0,
+    "status": "PASS",
+    "seconds": 26.66,
+    "command": [
+      "mvn",
+      "-B",
+      "-ntp",
+      "test"
+    ]
+  }
+]

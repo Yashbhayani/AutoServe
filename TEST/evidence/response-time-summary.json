@@ -1,0 +1,9 @@
+{
+  "sampleCount": 264,
+  "medianMs": 2.58,
+  "p95Ms": 204.98,
+  "maxMs": 332.28,
+  "target": null,
+  "targetConformance": "Not Run",
+  "limitations": "Sequential development-machine HTTP samples include positive/negative cases and startup effects. No load or SLA claim."
+}

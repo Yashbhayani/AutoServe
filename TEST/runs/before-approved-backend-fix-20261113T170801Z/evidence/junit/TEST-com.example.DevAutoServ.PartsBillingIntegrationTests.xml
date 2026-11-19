@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="com.example.DevAutoServ.PartsBillingIntegrationTests" time="0.278" tests="11" errors="0" skipped="0" failures="0" flakes="0">
+  <testcase name="insufficientStockAndStaleUpdatesRollBackEveryWrite" classname="com.example.DevAutoServ.PartsBillingIntegrationTests" time="0.051" />
+  <testcase name="concurrentAssignmentsCannotConsumeMoreStockThanAvailable" classname="com.example.DevAutoServ.PartsBillingIntegrationTests" time="0.023" />
+  <testcase name="inventoryIssuingUsesTheSameFrozenQuoteAndCannotIssueAfterSubmission" classname="com.example.DevAutoServ.PartsBillingIntegrationTests" time="0.031" />
+  <testcase name="externallyChangedUsagesCannotBeSilentlyAddedToAnApprovedInvoice" classname="com.example.DevAutoServ.PartsBillingIntegrationTests" time="0.025" />
+  <testcase name="legacyUsagesArePricedWithoutRemovingStockAgain" classname="com.example.DevAutoServ.PartsBillingIntegrationTests" time="0.021" />
+  <testcase name="snapshotScopesPartsAndInvoiceBreakdownToAuthorizedAccount" classname="com.example.DevAutoServ.PartsBillingIntegrationTests" time="0.031" />
+  <testcase name="approvalAndInvoiceUseFrozenPricesPlusAdminLabor" classname="com.example.DevAutoServ.PartsBillingIntegrationTests" time="0.024" />
+  <testcase name="quantitiesDeductAndUnusedPartsReturnWithoutDoubleDeduction" classname="com.example.DevAutoServ.PartsBillingIntegrationTests" time="0.018" />
+  <testcase name="newLabourOnlyInvoiceStillRequiresApprovalAndPositiveTotal" classname="com.example.DevAutoServ.PartsBillingIntegrationTests" time="0.02" />
+  <testcase name="onlyAdminOrAssignedTechnicianMaySelectPartsDuringDiagnosis" classname="com.example.DevAutoServ.PartsBillingIntegrationTests" time="0.012" />
+  <testcase name="revisionsRequireFreshApprovalAndCannotBypassRepairGate" classname="com.example.DevAutoServ.PartsBillingIntegrationTests" time="0.02" />
+</testsuite>

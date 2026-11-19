@@ -1,0 +1,9 @@
+{
+  "url": "http://127.0.0.1:60211",
+  "backendPort": 60210,
+  "frontendPort": 60211,
+  "database": "isolated H2 only",
+  "backendPid": 99809,
+  "frontendPid": 99814,
+  "startedUtc": "2026-11-13T17:22:40.368935+00:00"
+}

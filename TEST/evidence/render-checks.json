@@ -1,0 +1,32 @@
+[
+  {
+    "id": "AUTH-04-RENDER",
+    "title": "Login fields expose required attributes",
+    "status": "Pass"
+  },
+  {
+    "id": "AUTH-05-RENDER",
+    "title": "Email control uses email input validation",
+    "status": "Pass"
+  },
+  {
+    "id": "UI-02-RENDER",
+    "title": "Login errors are rendered in an alert region",
+    "status": "Pass"
+  },
+  {
+    "id": "AUTH-09-RENDER",
+    "title": "Registration success prompts user to log in",
+    "status": "Pass"
+  },
+  {
+    "id": "SIGNUP-RENDER",
+    "title": "Signup page renders identity and password fields",
+    "status": "Pass"
+  },
+  {
+    "id": "RESET-RENDER",
+    "title": "Reset page renders new-password controls",
+    "status": "Pass"
+  }
+]

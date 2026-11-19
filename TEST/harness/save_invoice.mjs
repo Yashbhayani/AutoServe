@@ -1,0 +1,13 @@
+import {readFileSync,writeFileSync} from 'node:fs';
+import assert from 'node:assert/strict';
+import {invoiceDocument} from '../../Frontend/src/lib/invoice.ts';
+const d=JSON.parse(readFileSync('TEST/evidence/database-snapshot.json','utf8'));
+const i=d.invoices.find(i=>d.as_invoice_details.some(x=>x.invoice_id===i.id));
+const details=d.as_invoice_details.find(x=>x.invoice_id===i.id);
+const lines=d.as_invoice_lines.filter(x=>x.invoice_id===i.id).map(x=>({...x,line_total:Number(x.unit_price)*Number(x.quantity)}));
+i.collected=d.payments.filter(p=>p.invoice_id===i.id).reduce((sum,p)=>sum+Number(p.amount),0);i.status='Paid';
+const html=invoiceDocument(i,details,lines);
+assert.equal(Number(i.amount),100);assert.equal(Number(details.parts_total),25);assert.equal(Number(details.labor_total),75);assert.match(html,/\$100\.00/);assert.match(html,/ACCEPTANCE-1/);
+writeFileSync('TEST/evidence/downloaded-invoice.html',html);
+writeFileSync('TEST/evidence/invoice-artifact-check.json',JSON.stringify({status:'Pass',scope:'Actual invoice export function applied to saved isolated-database invoice. Browser clicking/download-dialog behavior was not tested.',invoiceId:i.id,total:i.amount,parts:details.parts_total,labor:details.labor_total,artifact:'downloaded-invoice.html'},null,2)+'\n');
+console.log('PASS: invoice export contains the saved parts, labor, total and SKU.');

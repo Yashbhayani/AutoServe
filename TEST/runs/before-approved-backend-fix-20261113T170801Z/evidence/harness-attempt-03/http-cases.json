@@ -1,0 +1,2912 @@
+[
+  {
+    "id": "INT-01-ISOLATED",
+    "requirement": "INT",
+    "title": "Start all components with isolated test configuration",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [],
+    "steps": [],
+    "expected": "H2, Spring Boot and Vite start without blocking errors.",
+    "actual": {
+      "backendPort": 55805,
+      "frontendPort": 55806,
+      "database": "Isolated H2; startup successful"
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:05.457974+00:00",
+    "seconds": 0.0,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": []
+  },
+  {
+    "id": "INT-02-HTTP",
+    "requirement": "INT",
+    "title": "Load frontend entry document over HTTP",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [],
+    "steps": [
+      "GET / as anonymous",
+      "GET / as anonymous"
+    ],
+    "expected": "Frontend entry HTML returns HTTP 200.",
+    "actual": {
+      "status": 200
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:05.458224+00:00",
+    "seconds": 0.003,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-1",
+      "http-trace.json#request-2"
+    ]
+  },
+  {
+    "id": "AUTH-01-API-ADMIN",
+    "requirement": "AUTH",
+    "title": "Valid admin login",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "email": "admin@test.invalid",
+        "password": "[REDACTED]"
+      }
+    ],
+    "steps": [
+      "POST /api/user/login as anonymous"
+    ],
+    "expected": "Valid credentials return tokens and the current account role.",
+    "actual": {
+      "account": {
+        "id": 1,
+        "username": "admin",
+        "email": "admin@test.invalid",
+        "first_name": "admin",
+        "last_name": "Test",
+        "phone": null,
+        "is_active": 1,
+        "roles": [
+          "ADMIN"
+        ]
+      },
+      "tokensPresent": "[REDACTED]"
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:05.461418+00:00",
+    "seconds": 0.345,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-3"
+    ]
+  },
+  {
+    "id": "AUTH-01-API-TECHNICIAN",
+    "requirement": "AUTH",
+    "title": "Valid technician login",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "email": "technician@test.invalid",
+        "password": "[REDACTED]"
+      }
+    ],
+    "steps": [
+      "POST /api/user/login as anonymous"
+    ],
+    "expected": "Valid credentials return tokens and the current account role.",
+    "actual": {
+      "account": {
+        "id": 2,
+        "username": "technician",
+        "email": "technician@test.invalid",
+        "first_name": "technician",
+        "last_name": "Test",
+        "phone": null,
+        "is_active": 1,
+        "roles": [
+          "TECHNICIAN"
+        ]
+      },
+      "tokensPresent": "[REDACTED]"
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:05.806023+00:00",
+    "seconds": 0.21,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-4"
+    ]
+  },
+  {
+    "id": "AUTH-01-API-CUSTOMER",
+    "requirement": "AUTH",
+    "title": "Valid customer login",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "email": "customer@test.invalid",
+        "password": "[REDACTED]"
+      }
+    ],
+    "steps": [
+      "POST /api/user/login as anonymous"
+    ],
+    "expected": "Valid credentials return tokens and the current account role.",
+    "actual": {
+      "account": {
+        "id": 3,
+        "username": "customer",
+        "email": "customer@test.invalid",
+        "first_name": "customer",
+        "last_name": "Test",
+        "phone": null,
+        "is_active": 1,
+        "roles": [
+          "CUSTOMER"
+        ]
+      },
+      "tokensPresent": "[REDACTED]"
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.015730+00:00",
+    "seconds": 0.208,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-5"
+    ]
+  },
+  {
+    "id": "AUTH-01-API-STRANGER",
+    "requirement": "AUTH",
+    "title": "Valid stranger login",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "email": "stranger@test.invalid",
+        "password": "[REDACTED]"
+      }
+    ],
+    "steps": [
+      "POST /api/user/login as anonymous"
+    ],
+    "expected": "Valid credentials return tokens and the current account role.",
+    "actual": {
+      "account": {
+        "id": 4,
+        "username": "stranger",
+        "email": "stranger@test.invalid",
+        "first_name": "stranger",
+        "last_name": "Test",
+        "phone": null,
+        "is_active": 1,
+        "roles": [
+          "CUSTOMER"
+        ]
+      },
+      "tokensPresent": "[REDACTED]"
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.223675+00:00",
+    "seconds": 0.207,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-6"
+    ]
+  },
+  {
+    "id": "AUTH-02-API",
+    "requirement": "AUTH",
+    "title": "Incorrect password",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "email": "customer@test.invalid",
+        "password": "[REDACTED]"
+      }
+    ],
+    "steps": [
+      "POST /api/user/login as anonymous"
+    ],
+    "expected": "Credentials are rejected.",
+    "actual": {
+      "status": 200,
+      "message": "Invalid email or password"
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.430964+00:00",
+    "seconds": 0.217,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-7"
+    ]
+  },
+  {
+    "id": "AUTH-03-API",
+    "requirement": "AUTH",
+    "title": "Nonexistent account",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "email": "absent@test.invalid",
+        "password": "[REDACTED]"
+      }
+    ],
+    "steps": [
+      "POST /api/user/login as anonymous"
+    ],
+    "expected": "Credentials are rejected.",
+    "actual": {
+      "status": 200,
+      "message": "Invalid email or password"
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.647797+00:00",
+    "seconds": 0.003,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-8"
+    ]
+  },
+  {
+    "id": "AUTH-04-API",
+    "requirement": "AUTH",
+    "title": "Empty login fields",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "email": "",
+        "password": "[REDACTED]"
+      }
+    ],
+    "steps": [
+      "POST /api/user/login as anonymous"
+    ],
+    "expected": "No tokens or success are returned.",
+    "actual": {
+      "status": 200,
+      "message": "Invalid email or password"
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.650554+00:00",
+    "seconds": 0.002,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-9"
+    ]
+  },
+  {
+    "id": "AUTH-05-API",
+    "requirement": "AUTH",
+    "title": "Invalid email format",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "email": "not-email",
+        "password": "[REDACTED]"
+      }
+    ],
+    "steps": [
+      "POST /api/user/login as anonymous"
+    ],
+    "expected": "Invalid login is rejected.",
+    "actual": {
+      "status": 200,
+      "message": "Invalid email or password"
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.652611+00:00",
+    "seconds": 0.002,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-10"
+    ]
+  },
+  {
+    "id": "AUTH-08-API",
+    "requirement": "AUTH",
+    "title": "Restore the current account",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [],
+    "steps": [
+      "GET /api/user/me as customer"
+    ],
+    "expected": "Authenticated current-account endpoint restores customer identity.",
+    "actual": {
+      "success": true,
+      "user": {
+        "id": 3,
+        "email": "customer@test.invalid",
+        "first_name": "customer",
+        "last_name": "Test",
+        "phone": null,
+        "username": "customer",
+        "roles": [
+          "CUSTOMER"
+        ]
+      }
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.654511+00:00",
+    "seconds": 0.007,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-11"
+    ]
+  },
+  {
+    "id": "API-05-SNAPSHOT",
+    "requirement": "API",
+    "title": "Unauthenticated /api/operations/snapshot",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [],
+    "steps": [
+      "GET /api/operations/snapshot as anonymous"
+    ],
+    "expected": "Protected endpoint denies anonymous requests.",
+    "actual": {
+      "status": 401,
+      "message": "Please sign in again."
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.661182+00:00",
+    "seconds": 0.004,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-12"
+    ]
+  },
+  {
+    "id": "API-05-PARTS",
+    "requirement": "API",
+    "title": "Unauthenticated /api/parts",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [],
+    "steps": [
+      "GET /api/parts as anonymous"
+    ],
+    "expected": "Protected endpoint denies anonymous requests.",
+    "actual": {
+      "status": 401,
+      "message": "Please sign in again."
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.665086+00:00",
+    "seconds": 0.002,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-13"
+    ]
+  },
+  {
+    "id": "API-05-REQUESTS",
+    "requirement": "API",
+    "title": "Unauthenticated /api/inventory/requests",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [],
+    "steps": [
+      "GET /api/inventory/requests as anonymous"
+    ],
+    "expected": "Protected endpoint denies anonymous requests.",
+    "actual": {
+      "status": 401,
+      "message": "Please sign in again."
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.667430+00:00",
+    "seconds": 0.002,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-14"
+    ]
+  },
+  {
+    "id": "API-05-USERS",
+    "requirement": "API",
+    "title": "Unauthenticated /api/admin/users",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [],
+    "steps": [
+      "GET /api/admin/users as anonymous"
+    ],
+    "expected": "Protected endpoint denies anonymous requests.",
+    "actual": {
+      "status": 401,
+      "message": "Please sign in again."
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.669215+00:00",
+    "seconds": 0.002,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-15"
+    ]
+  },
+  {
+    "id": "API-05-REPORTS",
+    "requirement": "API",
+    "title": "Unauthenticated /api/reports",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [],
+    "steps": [
+      "GET /api/reports as anonymous"
+    ],
+    "expected": "Protected endpoint denies anonymous requests.",
+    "actual": {
+      "status": 401,
+      "message": "Please sign in again."
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.670894+00:00",
+    "seconds": 0.002,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-16"
+    ]
+  },
+  {
+    "id": "API-05-NOTIFICATIONS",
+    "requirement": "API",
+    "title": "Unauthenticated /api/notifications",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [],
+    "steps": [
+      "GET /api/notifications as anonymous"
+    ],
+    "expected": "Protected endpoint denies anonymous requests.",
+    "actual": {
+      "status": 401,
+      "message": "Please sign in again."
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.673082+00:00",
+    "seconds": 0.003,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-17"
+    ]
+  },
+  {
+    "id": "API-05-ME",
+    "requirement": "API",
+    "title": "Unauthenticated /api/user/me",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [],
+    "steps": [
+      "GET /api/user/me as anonymous"
+    ],
+    "expected": "Protected endpoint denies anonymous requests.",
+    "actual": {
+      "status": 401,
+      "message": "Please sign in again."
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.676141+00:00",
+    "seconds": 0.002,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-18"
+    ]
+  },
+  {
+    "id": "ROLE-05-API",
+    "requirement": "ROLE",
+    "title": "Customer cannot administer users",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [],
+    "steps": [
+      "GET /api/admin/users as customer"
+    ],
+    "expected": "Restricted API is rejected.",
+    "actual": {
+      "status": 403,
+      "message": "You do not have access to this operation."
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.678395+00:00",
+    "seconds": 0.004,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-19"
+    ]
+  },
+  {
+    "id": "ROLE-03-API",
+    "requirement": "ROLE",
+    "title": "Technician cannot view admin reports",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [],
+    "steps": [
+      "GET /api/reports as technician"
+    ],
+    "expected": "Restricted API is rejected.",
+    "actual": {
+      "status": 403,
+      "message": "You do not have access to this operation."
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.681981+00:00",
+    "seconds": 0.002,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-20"
+    ]
+  },
+  {
+    "id": "VEH-11",
+    "requirement": "VEH",
+    "title": "Empty vehicle list",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [],
+    "steps": [
+      "GET /api/operations/snapshot as customer",
+      "GET /api/operations/snapshot as customer"
+    ],
+    "expected": "Fresh customer has no vehicles.",
+    "actual": {
+      "vehicles": []
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.684496+00:00",
+    "seconds": 0.022,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-21",
+      "http-trace.json#request-22"
+    ]
+  },
+  {
+    "id": "VEH-02",
+    "requirement": "US-01",
+    "title": "Create vehicle",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "make": "Toyota",
+        "model": "Camry",
+        "year": 2024,
+        "color": "Blue",
+        "mileage": 10000,
+        "plate": "TEST-1",
+        "vin": ""
+      }
+    ],
+    "steps": [
+      "POST /api/operations/vehicle.save as customer"
+    ],
+    "expected": "Vehicle is created with customer ownership.",
+    "actual": {
+      "vehicleId": 1
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.706213+00:00",
+    "seconds": 0.013,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-23"
+    ]
+  },
+  {
+    "id": "VEH-06",
+    "requirement": "VEH",
+    "title": "Read saved vehicle",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [],
+    "steps": [
+      "GET /api/operations/snapshot as customer"
+    ],
+    "expected": "Vehicle details match saved values.",
+    "actual": {
+      "id": 1,
+      "customer_id": 3,
+      "make": "Toyota",
+      "model": "Camry",
+      "year": 2024,
+      "vin": null,
+      "mileage": "10000",
+      "license_plate": "TEST-1",
+      "color": "Blue"
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.719615+00:00",
+    "seconds": 0.007,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-24"
+    ]
+  },
+  {
+    "id": "VEH-03",
+    "requirement": "VEH",
+    "title": "Missing vehicle make",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "make": "",
+        "model": "Camry",
+        "year": 2024
+      }
+    ],
+    "steps": [
+      "POST /api/operations/vehicle.save as customer"
+    ],
+    "expected": "Required-data validation rejects the request.",
+    "actual": {
+      "status": 409,
+      "message": "Enter a valid make, model and color."
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.726882+00:00",
+    "seconds": 0.004,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-25"
+    ]
+  },
+  {
+    "id": "VEH-04",
+    "requirement": "VEH",
+    "title": "Invalid VIN",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "make": "Toyota",
+        "model": "Camry",
+        "year": 2024,
+        "vin": "BAD"
+      }
+    ],
+    "steps": [
+      "POST /api/operations/vehicle.save as customer"
+    ],
+    "expected": "An invalid VIN is rejected.",
+    "actual": {
+      "status": 409,
+      "message": "VIN must contain 17 valid characters."
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.731165+00:00",
+    "seconds": 0.004,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-26"
+    ]
+  },
+  {
+    "id": "VEH-05",
+    "requirement": "VEH",
+    "title": "Vehicle year boundary",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "make": "Toyota",
+        "model": "Camry",
+        "year": 1885
+      }
+    ],
+    "steps": [
+      "POST /api/operations/vehicle.save as customer"
+    ],
+    "expected": "Year before 1886 is rejected.",
+    "actual": {
+      "status": 409,
+      "message": "Enter a valid year."
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.734904+00:00",
+    "seconds": 0.004,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-27"
+    ]
+  },
+  {
+    "id": "VEH-07",
+    "requirement": "VEH",
+    "title": "Update vehicle then re-read",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "id": 1,
+        "make": "Toyota",
+        "model": "Camry",
+        "year": 2024,
+        "color": "Blue",
+        "mileage": 12000,
+        "plate": "TEST-1",
+        "vin": ""
+      }
+    ],
+    "steps": [
+      "POST /api/operations/vehicle.save as customer",
+      "GET /api/operations/snapshot as customer"
+    ],
+    "expected": "Saved edit persists in a fresh API read.",
+    "actual": {
+      "id": 1,
+      "customer_id": 3,
+      "make": "Toyota",
+      "model": "Camry",
+      "year": 2024,
+      "vin": null,
+      "mileage": "12000",
+      "license_plate": "TEST-1",
+      "color": "Blue"
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.738921+00:00",
+    "seconds": 0.016,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-28",
+      "http-trace.json#request-29"
+    ]
+  },
+  {
+    "id": "VEH-12",
+    "requirement": "VEH",
+    "title": "Stranger cannot modify another customer vehicle",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "id": 1,
+        "make": "Toyota",
+        "model": "Camry",
+        "year": 2024,
+        "color": "Blue",
+        "mileage": 10000,
+        "plate": "TEST-1",
+        "vin": ""
+      }
+    ],
+    "steps": [
+      "POST /api/operations/vehicle.save as stranger"
+    ],
+    "expected": "Ownership check rejects the action.",
+    "actual": {
+      "status": 409,
+      "message": "Vehicle access denied."
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.755016+00:00",
+    "seconds": 0.004,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-30"
+    ]
+  },
+  {
+    "id": "REQ-02",
+    "requirement": "US-01",
+    "title": "Create request and linked appointment",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "vehicleId": 1,
+        "description": "Brake noise acceptance test",
+        "serviceIds": [
+          13
+        ],
+        "date": "2026-11-16",
+        "time": "10:00"
+      }
+    ],
+    "steps": [
+      "POST /api/operations/request.create as customer"
+    ],
+    "expected": "Request and appointment are created together.",
+    "actual": {
+      "requestId": 1
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.759308+00:00",
+    "seconds": 0.009,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-31"
+    ]
+  },
+  {
+    "id": "REQ-06",
+    "requirement": "REQ",
+    "title": "Read saved request",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [],
+    "steps": [
+      "GET /api/operations/snapshot as customer"
+    ],
+    "expected": "Request references the saved vehicle and correct services.",
+    "actual": {
+      "id": 1,
+      "customer_id": 3,
+      "vehicle_id": 1,
+      "description": "Brake noise acceptance test",
+      "created_at": "2026-11-13T11:46:06.765Z",
+      "preferred_date": "2026-11-16T06:00:00.000Z",
+      "preferred_time": "10:00:00",
+      "stage": "Service Requested",
+      "held": 0,
+      "hold_reason": "",
+      "work_order_id": null,
+      "technician_id": null,
+      "diagnosis": null,
+      "customer_name": "customer Test",
+      "vehicle": "2024 Toyota Camry",
+      "service_ids": "13",
+      "services": "Brake Repair"
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.767947+00:00",
+    "seconds": 0.008,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-32"
+    ]
+  },
+  {
+    "id": "REQ-03",
+    "requirement": "REQ",
+    "title": "Missing request description",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "vehicleId": 1,
+        "description": "",
+        "serviceIds": [
+          13
+        ]
+      }
+    ],
+    "steps": [
+      "POST /api/operations/request.create as customer"
+    ],
+    "expected": "Invalid request is rejected without a new record.",
+    "actual": {
+      "status": 409,
+      "message": "Describe the concern in up to 5000 characters."
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.775880+00:00",
+    "seconds": 0.003,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-33"
+    ]
+  },
+  {
+    "id": "REQ-05",
+    "requirement": "REQ",
+    "title": "Past appointment date",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "vehicleId": 1,
+        "description": "Test",
+        "serviceIds": [
+          13
+        ],
+        "date": "2000-01-01",
+        "time": "10:00"
+      }
+    ],
+    "steps": [
+      "POST /api/operations/request.create as customer"
+    ],
+    "expected": "Past dates cannot create an appointment.",
+    "actual": {
+      "status": 409,
+      "message": "Select a future appointment date and time."
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.779070+00:00",
+    "seconds": 0.003,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-34"
+    ]
+  },
+  {
+    "id": "REQ-12",
+    "requirement": "REQ",
+    "title": "Other customer cannot create against this vehicle",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "vehicleId": 1,
+        "description": "Test",
+        "serviceIds": [
+          13
+        ]
+      }
+    ],
+    "steps": [
+      "POST /api/operations/request.create as stranger"
+    ],
+    "expected": "Ownership is enforced.",
+    "actual": {
+      "status": 409,
+      "message": "Select your own active vehicle."
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.782158+00:00",
+    "seconds": 0.003,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-35"
+    ]
+  },
+  {
+    "id": "REQ-07",
+    "requirement": "REQ",
+    "title": "Update an unstarted request",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "requestId": 1,
+        "description": "Updated brake noise",
+        "serviceIds": [
+          13
+        ]
+      }
+    ],
+    "steps": [
+      "POST /api/operations/request.update as customer"
+    ],
+    "expected": "Description changes persist.",
+    "actual": {
+      "requestId": 1,
+      "success": true,
+      "id": 0
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.785041+00:00",
+    "seconds": 0.005,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-36"
+    ]
+  },
+  {
+    "id": "APT-06",
+    "requirement": "APT",
+    "title": "Appointment links to request",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [],
+    "steps": [
+      "GET /api/operations/snapshot as customer"
+    ],
+    "expected": "Fresh snapshot contains its appointment.",
+    "actual": {
+      "id": 1,
+      "service_request_id": 1,
+      "technician_id": null,
+      "scheduled_date": "2026-11-16T06:00:00.000Z",
+      "scheduled_time": "10:00:00",
+      "status": "Scheduled",
+      "status_code": "SCHEDULED"
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.790430+00:00",
+    "seconds": 0.005,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-37"
+    ]
+  },
+  {
+    "id": "APT-07",
+    "requirement": "APT",
+    "title": "Reschedule appointment",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "requestId": 1,
+        "id": 1,
+        "date": "2026-11-17",
+        "time": "11:00"
+      }
+    ],
+    "steps": [
+      "GET /api/operations/snapshot as customer",
+      "POST /api/operations/appointment.save as customer",
+      "GET /api/operations/snapshot as customer"
+    ],
+    "expected": "New appointment date persists.",
+    "actual": {
+      "id": 1,
+      "service_request_id": 1,
+      "technician_id": null,
+      "scheduled_date": "2026-11-17T06:00:00.000Z",
+      "scheduled_time": "11:00:00",
+      "status": "Rescheduled",
+      "status_code": "RESCHEDULED"
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.795856+00:00",
+    "seconds": 0.013,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-38",
+      "http-trace.json#request-39",
+      "http-trace.json#request-40"
+    ]
+  },
+  {
+    "id": "WO-02",
+    "requirement": "US-03",
+    "title": "Admin assigns technician",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "requestId": 1,
+        "technicianId": 2
+      }
+    ],
+    "steps": [
+      "POST /api/operations/assign as admin"
+    ],
+    "expected": "Assigned technician sees the new work order.",
+    "actual": {
+      "requestId": 1,
+      "success": true,
+      "id": 0
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.809061+00:00",
+    "seconds": 0.004,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-41"
+    ]
+  },
+  {
+    "id": "WO-12",
+    "requirement": "WO",
+    "title": "Customer cannot assign a technician",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "requestId": 1,
+        "technicianId": 2
+      }
+    ],
+    "steps": [
+      "POST /api/operations/assign as customer"
+    ],
+    "expected": "Role restriction rejects the request.",
+    "actual": {
+      "status": 409,
+      "message": "Only admins can assign open work orders."
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.812903+00:00",
+    "seconds": 0.003,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-42"
+    ]
+  },
+  {
+    "id": "WO-05",
+    "requirement": "US-04",
+    "title": "Cannot complete before approval",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "requestId": 1
+      }
+    ],
+    "steps": [
+      "POST /api/operations/complete as technician"
+    ],
+    "expected": "Repair-completion gate rejects the request.",
+    "actual": {
+      "status": 409,
+      "message": "Only approved repairs can be completed by the assigned technician or admin."
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.816039+00:00",
+    "seconds": 0.003,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-43"
+    ]
+  },
+  {
+    "id": "WO-CHECKIN",
+    "requirement": "WO",
+    "title": "Check in the vehicle",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "requestId": 1,
+        "note": "Test arrival"
+      }
+    ],
+    "steps": [
+      "POST /api/operations/checkin as admin"
+    ],
+    "expected": "The next stage is Vehicle Checked In.",
+    "actual": {
+      "requestId": 1,
+      "success": true,
+      "id": 0
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.819369+00:00",
+    "seconds": 0.004,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-44"
+    ]
+  },
+  {
+    "id": "PART-02",
+    "requirement": "PART",
+    "title": "Admin creates catalogue part",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "categoryId": 1,
+        "code": "ACCEPTANCE_FILTER",
+        "name": "Acceptance Oil Filter",
+        "sku": "ACCEPTANCE-1",
+        "unitPrice": 12.5,
+        "stockQuantity": 10,
+        "reorderLevel": 2
+      }
+    ],
+    "steps": [
+      "POST /api/parts/create as admin"
+    ],
+    "expected": "Part, price and stock records are created.",
+    "actual": "AssertionError: Expected successful response; observed HTTP 503: {'success': False, 'message': 'The data service is temporarily unavailable. Please try again.'}",
+    "status": "Fail",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.823583+00:00",
+    "seconds": 0.006,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-45"
+    ]
+  },
+  {
+    "id": "PART-03",
+    "requirement": "PART",
+    "title": "Missing catalogue fields",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {}
+    ],
+    "steps": [
+      "POST /api/parts/create as admin"
+    ],
+    "expected": "Invalid part is rejected.",
+    "actual": {
+      "status": 400,
+      "message": "Select a category."
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.829556+00:00",
+    "seconds": 0.006,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-46"
+    ]
+  },
+  {
+    "id": "PART-05",
+    "requirement": "PART",
+    "title": "Negative catalogue price",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "categoryId": 1,
+        "code": "BAD",
+        "name": "Bad",
+        "sku": "BAD",
+        "unitPrice": -1,
+        "stockQuantity": 1,
+        "reorderLevel": 0
+      }
+    ],
+    "steps": [
+      "POST /api/parts/create as admin"
+    ],
+    "expected": "Negative prices are rejected.",
+    "actual": {
+      "status": 400,
+      "message": "Enter a nonnegative price with at most two decimal places."
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.835388+00:00",
+    "seconds": 0.003,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-47"
+    ]
+  },
+  {
+    "id": "PART-12",
+    "requirement": "PART",
+    "title": "Customer cannot create parts",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {}
+    ],
+    "steps": [
+      "POST /api/parts/create as customer"
+    ],
+    "expected": "Role restriction rejects catalogue write.",
+    "actual": {
+      "status": 403,
+      "message": "You do not have access to this operation."
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.838509+00:00",
+    "seconds": 0.003,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-48"
+    ]
+  },
+  {
+    "id": "PART-06",
+    "requirement": "PART",
+    "title": "Read part details and current stock",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [],
+    "steps": [],
+    "expected": "Catalogue details reflect stored price and quantity.",
+    "actual": "Dependent fixture part was not created successfully",
+    "status": "Not Run",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.841333+00:00",
+    "seconds": 0.0,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": []
+  },
+  {
+    "id": "DB-03-API",
+    "requirement": "DB",
+    "title": "Duplicate SKU/code",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "categoryId": 1,
+        "code": "ACCEPTANCE_FILTER",
+        "name": "Duplicate",
+        "sku": "ACCEPTANCE-1",
+        "unitPrice": 1,
+        "stockQuantity": 1,
+        "reorderLevel": 0
+      }
+    ],
+    "steps": [
+      "POST /api/parts/create as admin"
+    ],
+    "expected": "Uniqueness restriction rejects a second catalogue row.",
+    "actual": "AssertionError: Expected rejected request without a server crash; observed HTTP 503: {'success': False, 'message': 'The data service is temporarily unavailable. Please try again.'}",
+    "status": "Fail",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.841351+00:00",
+    "seconds": 0.003,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-49"
+    ]
+  },
+  {
+    "id": "USE-02",
+    "requirement": "US-21",
+    "title": "Technician selects parts",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [],
+    "steps": [],
+    "expected": "Three selected units deduct stock from 10 to 7.",
+    "actual": "Dependent fixture part was not created successfully",
+    "status": "Not Run",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.844677+00:00",
+    "seconds": 0.0,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": []
+  },
+  {
+    "id": "USE-07",
+    "requirement": "US-21",
+    "title": "Reduce unused quantity",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [],
+    "steps": [],
+    "expected": "Reducing quantity to two returns one unit to stock.",
+    "actual": "Dependent fixture part was not created successfully",
+    "status": "Not Run",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.844695+00:00",
+    "seconds": 0.0,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": []
+  },
+  {
+    "id": "USE-05",
+    "requirement": "USE",
+    "title": "Insufficient stock",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [],
+    "steps": [],
+    "expected": "Over-allocation is rejected without saving.",
+    "actual": "Dependent fixture part was not created successfully",
+    "status": "Not Run",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.844707+00:00",
+    "seconds": 0.0,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": []
+  },
+  {
+    "id": "USE-04",
+    "requirement": "USE",
+    "title": "Fractional parts quantity",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [],
+    "steps": [],
+    "expected": "Parts quantities must be whole numbers.",
+    "actual": "Dependent fixture part was not created successfully",
+    "status": "Not Run",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.844715+00:00",
+    "seconds": 0.0,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": []
+  },
+  {
+    "id": "DIAG-03",
+    "requirement": "DIAG",
+    "title": "Empty diagnosis",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "requestId": 1,
+        "diagnosis": "",
+        "revision": 0
+      }
+    ],
+    "steps": [
+      "GET /api/operations/snapshot as customer",
+      "GET /api/operations/snapshot as customer",
+      "POST /api/operations/diagnosis.submit as technician"
+    ],
+    "expected": "Empty diagnosis cannot be submitted.",
+    "actual": {
+      "status": 409,
+      "message": "Enter a diagnosis of up to 5000 characters."
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.844721+00:00",
+    "seconds": 0.011,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-50",
+      "http-trace.json#request-51",
+      "http-trace.json#request-52"
+    ]
+  },
+  {
+    "id": "DIAG-02",
+    "requirement": "US-22",
+    "title": "Submit diagnosis for customer approval",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "requestId": 1,
+        "diagnosis": "Replace the selected filter and inspect brakes",
+        "revision": 0
+      }
+    ],
+    "steps": [
+      "GET /api/operations/snapshot as customer",
+      "GET /api/operations/snapshot as customer",
+      "POST /api/operations/diagnosis.submit as technician",
+      "GET /api/operations/snapshot as customer",
+      "GET /api/operations/snapshot as customer",
+      "GET /api/operations/snapshot as customer"
+    ],
+    "expected": "Customer sees a priced two-unit parts list totaling 25.",
+    "actual": {
+      "stage": "Customer Approval",
+      "partsTotal": 0
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.856202+00:00",
+    "seconds": 0.026,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-53",
+      "http-trace.json#request-54",
+      "http-trace.json#request-55",
+      "http-trace.json#request-56",
+      "http-trace.json#request-57",
+      "http-trace.json#request-58"
+    ]
+  },
+  {
+    "id": "USE-LOCK",
+    "requirement": "USE",
+    "title": "Parts cannot change while approval pending",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [],
+    "steps": [],
+    "expected": "Attempt is rejected and quoted parts remain unchanged.",
+    "actual": "Dependent fixture part was not created successfully",
+    "status": "Not Run",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.882480+00:00",
+    "seconds": 0.0,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": []
+  },
+  {
+    "id": "APPROVE-12",
+    "requirement": "APPROVE",
+    "title": "Another customer cannot approve",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "requestId": 1,
+        "revision": 1
+      }
+    ],
+    "steps": [
+      "GET /api/operations/snapshot as customer",
+      "GET /api/operations/snapshot as customer",
+      "POST /api/operations/approve as stranger"
+    ],
+    "expected": "Ownership restriction rejects approval.",
+    "actual": {
+      "status": 409,
+      "message": "Access denied for this request."
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.882499+00:00",
+    "seconds": 0.012,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-59",
+      "http-trace.json#request-60",
+      "http-trace.json#request-61"
+    ]
+  },
+  {
+    "id": "APPROVE-02",
+    "requirement": "US-03",
+    "title": "Customer approves diagnosis and parts",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "requestId": 1,
+        "revision": 1
+      }
+    ],
+    "steps": [
+      "GET /api/operations/snapshot as customer",
+      "GET /api/operations/snapshot as customer",
+      "POST /api/operations/approve as customer",
+      "GET /api/operations/snapshot as customer"
+    ],
+    "expected": "Workflow advances to Repair.",
+    "actual": {
+      "stage": "Repair"
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.894800+00:00",
+    "seconds": 0.017,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-62",
+      "http-trace.json#request-63",
+      "http-trace.json#request-64",
+      "http-trace.json#request-65"
+    ]
+  },
+  {
+    "id": "WO-COMPLETE",
+    "requirement": "WO",
+    "title": "Technician completes approved repair",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "requestId": 1,
+        "note": "Repair completed"
+      }
+    ],
+    "steps": [
+      "POST /api/operations/complete as technician"
+    ],
+    "expected": "Workflow advances to Completed.",
+    "actual": {
+      "requestId": 1,
+      "success": true,
+      "id": 0
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.911592+00:00",
+    "seconds": 0.003,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-66"
+    ]
+  },
+  {
+    "id": "INV-12",
+    "requirement": "INV",
+    "title": "Technician cannot issue invoices",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "requestId": 1,
+        "labor": 75
+      }
+    ],
+    "steps": [
+      "POST /api/operations/invoice.issue as technician"
+    ],
+    "expected": "Admin-only operation is denied.",
+    "actual": {
+      "status": 409,
+      "message": "Only admins can invoice completed repairs."
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.915089+00:00",
+    "seconds": 0.003,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-67"
+    ]
+  },
+  {
+    "id": "INV-04",
+    "requirement": "INV",
+    "title": "Negative labor",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "requestId": 1,
+        "labor": -1
+      }
+    ],
+    "steps": [
+      "POST /api/operations/invoice.issue as admin"
+    ],
+    "expected": "Invalid labor is rejected.",
+    "actual": {
+      "status": 400,
+      "message": "Labor must be a nonnegative amount with at most two decimal places."
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.918106+00:00",
+    "seconds": 0.003,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-68"
+    ]
+  },
+  {
+    "id": "INV-02",
+    "requirement": "US-23",
+    "title": "Admin issues parts plus labor invoice",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "requestId": 1,
+        "labor": "75.00",
+        "laborDescription": "Diagnostic and repair labor"
+      }
+    ],
+    "steps": [
+      "POST /api/operations/invoice.issue as admin",
+      "GET /api/operations/snapshot as customer"
+    ],
+    "expected": "Final invoice total is 25 parts + 75 labor = 100.",
+    "actual": "AssertionError: ",
+    "status": "Fail",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.921069+00:00",
+    "seconds": 0.008,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-69",
+      "http-trace.json#request-70"
+    ]
+  },
+  {
+    "id": "INV-06",
+    "requirement": "INV",
+    "title": "Customer reads itemized invoice",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [],
+    "steps": [
+      "GET /api/operations/snapshot as customer"
+    ],
+    "expected": "Two units at 12.50 and labor 75 are visible in invoice API data.",
+    "actual": "AssertionError: ",
+    "status": "Fail",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.928734+00:00",
+    "seconds": 0.003,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-71"
+    ]
+  },
+  {
+    "id": "ROLE-06-API",
+    "requirement": "US-02",
+    "title": "Cross-customer private data isolation",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [],
+    "steps": [
+      "GET /api/operations/snapshot as stranger"
+    ],
+    "expected": "Stranger snapshot excludes requests, vehicles and invoice lines.",
+    "actual": {
+      "foreignPrivateRecordsVisible": 0
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.932228+00:00",
+    "seconds": 0.003,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-72"
+    ]
+  },
+  {
+    "id": "INV-DUP",
+    "requirement": "INV",
+    "title": "Duplicate final invoice",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "requestId": 1,
+        "labor": 75
+      }
+    ],
+    "steps": [
+      "POST /api/operations/invoice.issue as admin"
+    ],
+    "expected": "A second invoice for the same work order is rejected.",
+    "actual": {
+      "status": 409,
+      "message": "This work order already has an invoice."
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.935531+00:00",
+    "seconds": 0.004,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-73"
+    ]
+  },
+  {
+    "id": "PAY-02",
+    "requirement": "US-07",
+    "title": "Admin records confirmed payment",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "requestId": 1,
+        "method": "OTHER"
+      }
+    ],
+    "steps": [
+      "POST /api/operations/payment.record as admin"
+    ],
+    "expected": "Invoice collection reaches its full amount.",
+    "actual": {
+      "requestId": 1,
+      "success": true,
+      "id": 0
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.939951+00:00",
+    "seconds": 0.004,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-74"
+    ]
+  },
+  {
+    "id": "PAY-06",
+    "requirement": "PAY",
+    "title": "Payment updates customer invoice",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [],
+    "steps": [
+      "GET /api/operations/snapshot as customer"
+    ],
+    "expected": "Customer sees paid status, collected 100 and zero balance.",
+    "actual": "AssertionError: ",
+    "status": "Fail",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.944306+00:00",
+    "seconds": 0.004,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-75"
+    ]
+  },
+  {
+    "id": "PAY-DUP",
+    "requirement": "PAY",
+    "title": "Repeated payment",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "requestId": 1,
+        "method": "OTHER"
+      }
+    ],
+    "steps": [
+      "POST /api/operations/payment.record as admin"
+    ],
+    "expected": "Already-paid balance cannot be recorded twice.",
+    "actual": {
+      "status": 409,
+      "message": "This invoice is already paid."
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.948256+00:00",
+    "seconds": 0.003,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-76"
+    ]
+  },
+  {
+    "id": "PAY-12",
+    "requirement": "PAY",
+    "title": "Customer cannot record payments",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "requestId": 1,
+        "method": "OTHER"
+      }
+    ],
+    "steps": [
+      "POST /api/operations/payment.record as customer"
+    ],
+    "expected": "Admin-only operation is rejected.",
+    "actual": {
+      "status": 409,
+      "message": "Only admins can record confirmed payments."
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.951510+00:00",
+    "seconds": 0.002,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-77"
+    ]
+  },
+  {
+    "id": "VEH-09",
+    "requirement": "VEH",
+    "title": "Cannot remove vehicle with service history",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "id": 1
+      }
+    ],
+    "steps": [
+      "POST /api/operations/vehicle.delete as customer"
+    ],
+    "expected": "Linked vehicle cannot be deleted.",
+    "actual": {
+      "status": 409,
+      "message": "Vehicles with service history cannot be removed."
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.953862+00:00",
+    "seconds": 0.002,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-78"
+    ]
+  },
+  {
+    "id": "NOTE-01",
+    "requirement": "NOTE",
+    "title": "Customer receives workflow notifications",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [],
+    "steps": [
+      "GET /api/notifications as customer"
+    ],
+    "expected": "Notifications list is available and contains workflow messages.",
+    "actual": {
+      "success": true,
+      "total": 9,
+      "page": 1,
+      "items": [
+        {
+          "id": 14,
+          "message": "Service request #1: payment.record \u2014 Completed",
+          "type": "SERVICE_REQUEST",
+          "is_read": 0,
+          "created_at": "2026-11-13T11:46:06.943Z"
+        },
+        {
+          "id": 12,
+          "message": "Service request #1: invoice.issue \u2014 Completed",
+          "type": "SERVICE_REQUEST",
+          "is_read": 0,
+          "created_at": "2026-11-13T11:46:06.923Z"
+        },
+        {
+          "id": 11,
+          "message": "Service request #1: complete \u2014 Completed",
+          "type": "SERVICE_REQUEST",
+          "is_read": 0,
+          "created_at": "2026-11-13T11:46:06.914Z"
+        },
+        {
+          "id": 9,
+          "message": "Service request #1: approve \u2014 Repair",
+          "type": "SERVICE_REQUEST",
+          "is_read": 0,
+          "created_at": "2026-11-13T11:46:06.907Z"
+        },
+        {
+          "id": 8,
+          "message": "Service request #1: diagnosis.submit \u2014 Customer Approval",
+          "type": "SERVICE_REQUEST",
+          "is_read": 0,
+          "created_at": "2026-11-13T11:46:06.868Z"
+        },
+        {
+          "id": 6,
+          "message": "Service request #1: checkin \u2014 Vehicle Checked In",
+          "type": "SERVICE_REQUEST",
+          "is_read": 0,
+          "created_at": "2026-11-13T11:46:06.822Z"
+        },
+        {
+          "id": 5,
+          "message": "Service request #1: assign \u2014 Service Requested",
+          "type": "SERVICE_REQUEST",
+          "is_read": 0,
+          "created_at": "2026-11-13T11:46:06.812Z"
+        },
+        {
+          "id": 3,
+          "message": "Service request #1: appointment.save \u2014 Service Requested",
+          "type": "SERVICE_REQUEST",
+          "is_read": 0,
+          "created_at": "2026-11-13T11:46:06.803Z"
+        },
+        {
+          "id": 2,
+          "message": "Service request #1: request.update \u2014 Service Requested",
+          "type": "SERVICE_REQUEST",
+          "is_read": 0,
+          "created_at": "2026-11-13T11:46:06.789Z"
+        }
+      ],
+      "unreadCount": 9,
+      "size": 20
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.956199+00:00",
+    "seconds": 0.003,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-79"
+    ]
+  },
+  {
+    "id": "NOTE-07",
+    "requirement": "NOTE",
+    "title": "Mark notification read",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [],
+    "steps": [
+      "GET /api/notifications as customer",
+      "PUT /api/notifications/14/read as customer",
+      "GET /api/notifications?filter=read as customer"
+    ],
+    "expected": "Read state persists in a fresh filtered read.",
+    "actual": {
+      "success": true,
+      "total": 1,
+      "page": 1,
+      "items": [
+        {
+          "id": 14,
+          "message": "Service request #1: payment.record \u2014 Completed",
+          "type": "SERVICE_REQUEST",
+          "is_read": 1,
+          "created_at": "2026-11-13T11:46:06.943Z"
+        }
+      ],
+      "unreadCount": 8,
+      "size": 20
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.959475+00:00",
+    "seconds": 0.009,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-80",
+      "http-trace.json#request-81",
+      "http-trace.json#request-82"
+    ]
+  },
+  {
+    "id": "NOTE-04",
+    "requirement": "NOTE",
+    "title": "Invalid notification filter",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [],
+    "steps": [
+      "GET /api/notifications?filter=invalid as customer"
+    ],
+    "expected": "Invalid filter is rejected.",
+    "actual": {
+      "status": 400,
+      "message": "Choose valid notification filters and page size."
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.968958+00:00",
+    "seconds": 0.002,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-83"
+    ]
+  },
+  {
+    "id": "USR-02",
+    "requirement": "US-13",
+    "title": "Admin creates user",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "firstName": "New",
+        "lastName": "Technician",
+        "email": "newtech@test.invalid",
+        "phone": "",
+        "password": "[REDACTED]",
+        "roles": [
+          "TECHNICIAN"
+        ],
+        "active": true
+      }
+    ],
+    "steps": [
+      "POST /api/admin/users as admin"
+    ],
+    "expected": "Created account has exactly one selected role.",
+    "actual": {
+      "success": true,
+      "data": {
+        "id": 5,
+        "first_name": "New",
+        "last_name": "Technician",
+        "email": "newtech@test.invalid",
+        "phone": null,
+        "is_active": 1,
+        "created_at": "2026-11-13T11:46:07.177Z",
+        "roles": [
+          "TECHNICIAN"
+        ]
+      }
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:06.971023+00:00",
+    "seconds": 0.208,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-84"
+    ]
+  },
+  {
+    "id": "USR-01",
+    "requirement": "USR",
+    "title": "Admin lists users",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [],
+    "steps": [
+      "GET /api/admin/users as admin"
+    ],
+    "expected": "Users endpoint returns created test users.",
+    "actual": {
+      "success": true,
+      "data": [
+        {
+          "id": 5,
+          "first_name": "New",
+          "last_name": "Technician",
+          "email": "newtech@test.invalid",
+          "phone": null,
+          "is_active": 1,
+          "created_at": "2026-11-13T11:46:07.177Z",
+          "roles": [
+            "TECHNICIAN"
+          ]
+        },
+        {
+          "id": 4,
+          "first_name": "stranger",
+          "last_name": "Test",
+          "email": "stranger@test.invalid",
+          "phone": null,
+          "is_active": 1,
+          "created_at": "2026-11-13T11:46:03.382Z",
+          "roles": [
+            "CUSTOMER"
+          ]
+        },
+        {
+          "id": 3,
+          "first_name": "customer",
+          "last_name": "Test",
+          "email": "customer@test.invalid",
+          "phone": null,
+          "is_active": 1,
+          "created_at": "2026-11-13T11:46:03.179Z",
+          "roles": [
+            "CUSTOMER"
+          ]
+        },
+        {
+          "id": 2,
+          "first_name": "technician",
+          "last_name": "Test",
+          "email": "technician@test.invalid",
+          "phone": null,
+          "is_active": 1,
+          "created_at": "2026-11-13T11:46:02.975Z",
+          "roles": [
+            "TECHNICIAN"
+          ]
+        },
+        {
+          "id": 1,
+          "first_name": "admin",
+          "last_name": "Test",
+          "email": "admin@test.invalid",
+          "phone": null,
+          "is_active": 1,
+          "created_at": "2026-11-13T11:46:02.769Z",
+          "roles": [
+            "ADMIN"
+          ]
+        }
+      ]
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:07.179102+00:00",
+    "seconds": 0.003,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-85"
+    ]
+  },
+  {
+    "id": "USR-04",
+    "requirement": "USR",
+    "title": "Multiple roles rejected",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "firstName": "Bad",
+        "lastName": "Roles",
+        "email": "badroles@test.invalid",
+        "password": "[REDACTED]",
+        "roles": [
+          "TECHNICIAN",
+          "ADMIN"
+        ]
+      }
+    ],
+    "steps": [
+      "POST /api/admin/users as admin"
+    ],
+    "expected": "Exactly one role must be assigned.",
+    "actual": {
+      "status": 400,
+      "message": "Select exactly one supported role."
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:07.181685+00:00",
+    "seconds": 0.002,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-86"
+    ]
+  },
+  {
+    "id": "USR-03",
+    "requirement": "USR",
+    "title": "Missing user fields",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {}
+    ],
+    "steps": [
+      "POST /api/admin/users as admin"
+    ],
+    "expected": "Required profile fields are enforced.",
+    "actual": {
+      "status": 400,
+      "message": "Select exactly one supported role."
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:07.183679+00:00",
+    "seconds": 0.002,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-87"
+    ]
+  },
+  {
+    "id": "USR-12",
+    "requirement": "USR",
+    "title": "Technician cannot administer users",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [],
+    "steps": [
+      "GET /api/admin/users as technician"
+    ],
+    "expected": "Restricted user administration is rejected.",
+    "actual": {
+      "status": 403,
+      "message": "You do not have access to this operation."
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:07.185555+00:00",
+    "seconds": 0.002,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-88"
+    ]
+  },
+  {
+    "id": "PROF-07",
+    "requirement": "PROF",
+    "title": "Update own profile",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "first_name": "Updated",
+        "last_name": "Customer",
+        "phone": "1234567890"
+      }
+    ],
+    "steps": [
+      "POST /api/operations/profile.save as customer"
+    ],
+    "expected": "Name changes persist in the current-account response.",
+    "actual": {
+      "requestId": 0,
+      "success": true,
+      "id": 0
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:07.187143+00:00",
+    "seconds": 0.002,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-89"
+    ]
+  },
+  {
+    "id": "PROF-06",
+    "requirement": "PROF",
+    "title": "Read updated profile",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [],
+    "steps": [
+      "GET /api/user/me as customer"
+    ],
+    "expected": "Updated customer profile is returned.",
+    "actual": {
+      "success": true,
+      "user": {
+        "id": 3,
+        "email": "customer@test.invalid",
+        "first_name": "Updated",
+        "last_name": "Customer",
+        "phone": "1234567890",
+        "username": "customer",
+        "roles": [
+          "CUSTOMER"
+        ]
+      }
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:07.189391+00:00",
+    "seconds": 0.002,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-90"
+    ]
+  },
+  {
+    "id": "PROF-03",
+    "requirement": "PROF",
+    "title": "Empty profile names",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "first_name": "",
+        "last_name": "",
+        "phone": ""
+      }
+    ],
+    "steps": [
+      "POST /api/operations/profile.save as customer"
+    ],
+    "expected": "Required names are enforced.",
+    "actual": {
+      "status": 409,
+      "message": "Enter valid names and phone."
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:07.190929+00:00",
+    "seconds": 0.002,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-91"
+    ]
+  },
+  {
+    "id": "TECH-07",
+    "requirement": "TECH",
+    "title": "Technician availability update",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "id": 2,
+        "specialties": "Brakes",
+        "availability": "Busy"
+      }
+    ],
+    "steps": [
+      "POST /api/operations/technician.save as admin"
+    ],
+    "expected": "Admin can save technician availability.",
+    "actual": {
+      "requestId": 2,
+      "success": true,
+      "id": 2
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:07.192723+00:00",
+    "seconds": 0.002,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-92"
+    ]
+  },
+  {
+    "id": "TECH-04",
+    "requirement": "TECH",
+    "title": "Invalid availability",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "id": 2,
+        "specialties": "",
+        "availability": "INVALID"
+      }
+    ],
+    "steps": [
+      "POST /api/operations/technician.save as admin"
+    ],
+    "expected": "Unsupported technician availability is rejected.",
+    "actual": {
+      "status": 409,
+      "message": "Invalid availability."
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:07.194734+00:00",
+    "seconds": 0.002,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-93"
+    ]
+  },
+  {
+    "id": "SET-07",
+    "requirement": "SET",
+    "title": "Save service-center settings",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "center_name": "Acceptance AutoServe",
+        "phone": "1234567890",
+        "email": "center@test.invalid",
+        "address": "1 Test Road"
+      }
+    ],
+    "steps": [
+      "POST /api/operations/settings.save as admin"
+    ],
+    "expected": "Admin settings persist in subsequent snapshots.",
+    "actual": {
+      "requestId": 0,
+      "success": true,
+      "id": 0
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:07.196589+00:00",
+    "seconds": 0.002,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-94"
+    ]
+  },
+  {
+    "id": "SET-12",
+    "requirement": "SET",
+    "title": "Customer cannot save service-center settings",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "center_name": "Unauthorized",
+        "phone": "",
+        "email": "",
+        "address": ""
+      }
+    ],
+    "steps": [
+      "POST /api/operations/settings.save as customer"
+    ],
+    "expected": "Admin-only settings operation is rejected.",
+    "actual": {
+      "status": 409,
+      "message": "Admin access required."
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:07.198864+00:00",
+    "seconds": 0.002,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-95"
+    ]
+  },
+  {
+    "id": "RPT-01",
+    "requirement": "US-17",
+    "title": "Generate report for current dates",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [],
+    "steps": [
+      "GET /api/reports?from=2026-11-13&to=2026-11-13 as admin"
+    ],
+    "expected": "Report responds with payment-based totals.",
+    "actual": {
+      "from": "2026-11-13",
+      "to": "2026-11-13",
+      "revenue": [
+        {
+          "collection_day": "2026-11-13T06:00:00.000Z",
+          "collected_amount": 75.0,
+          "day": "2026-11-13",
+          "value": 75.0
+        }
+      ],
+      "services": [
+        {
+          "label": "Brake Repair",
+          "request_count": 1,
+          "value": 1
+        }
+      ],
+      "technicians": [
+        {
+          "id": 2,
+          "name": "technician Test",
+          "completed": 1,
+          "hours": 0
+        }
+      ],
+      "success": true,
+      "summary": {
+        "Collected payments": 75.0,
+        "Invoices issued": 1,
+        "Requests created": 1,
+        "Jobs completed": 1
+      },
+      "invoices": [
+        {
+          "id": 1,
+          "work_order_id": 1,
+          "amount": 75.0,
+          "status": "Paid",
+          "created_at": "2026-11-13T11:46:06.923Z",
+          "collected": 75.0
+        }
+      ]
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:07.201032+00:00",
+    "seconds": 0.003,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-96"
+    ]
+  },
+  {
+    "id": "RPT-04",
+    "requirement": "RPT",
+    "title": "Invalid report date",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [],
+    "steps": [
+      "GET /api/reports?from=bad-date&to=2026-11-13 as admin"
+    ],
+    "expected": "Malformed report dates are rejected.",
+    "actual": {
+      "status": 400,
+      "message": "Choose valid report dates."
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:07.204513+00:00",
+    "seconds": 0.002,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-97"
+    ]
+  },
+  {
+    "id": "RPT-05",
+    "requirement": "RPT",
+    "title": "Reversed report range",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [],
+    "steps": [
+      "GET /api/reports?from=2026-12-01&to=2026-01-01 as admin"
+    ],
+    "expected": "Date range must be ordered.",
+    "actual": {
+      "status": 400,
+      "message": "Choose a valid date range of at most 367 days."
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:07.206820+00:00",
+    "seconds": 0.002,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-98"
+    ]
+  },
+  {
+    "id": "DASH-01-ADMIN",
+    "requirement": "DASH",
+    "title": "Load admin dashboard",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [],
+    "steps": [
+      "GET /api/dashboard?role=admin&from=2026-11-13&to=2026-11-13 as admin"
+    ],
+    "expected": "Dashboard endpoint used by frontend returns valid data.",
+    "actual": "AssertionError: Expected successful response; observed HTTP 404: {'timestamp': '2026-11-13T11:46:07.212Z', 'status': 404, 'error': 'Not Found', 'path': '/api/dashboard'}",
+    "status": "Fail",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:07.208580+00:00",
+    "seconds": 0.005,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-99"
+    ]
+  },
+  {
+    "id": "DASH-01-TECHNICIAN",
+    "requirement": "DASH",
+    "title": "Load technician dashboard",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [],
+    "steps": [
+      "GET /api/dashboard?role=technician&from=2026-11-13&to=2026-11-13 as technician"
+    ],
+    "expected": "Dashboard endpoint used by frontend returns valid data.",
+    "actual": "AssertionError: Expected successful response; observed HTTP 404: {'timestamp': '2026-11-13T11:46:07.214Z', 'status': 404, 'error': 'Not Found', 'path': '/api/dashboard'}",
+    "status": "Fail",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:07.213141+00:00",
+    "seconds": 0.002,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-100"
+    ]
+  },
+  {
+    "id": "DASH-01-CUSTOMER",
+    "requirement": "DASH",
+    "title": "Load customer dashboard",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [],
+    "steps": [
+      "GET /api/dashboard?role=customer&from=2026-11-13&to=2026-11-13 as customer"
+    ],
+    "expected": "Dashboard endpoint used by frontend returns valid data.",
+    "actual": "AssertionError: Expected successful response; observed HTTP 404: {'timestamp': '2026-11-13T11:46:07.216Z', 'status': 404, 'error': 'Not Found', 'path': '/api/dashboard'}",
+    "status": "Fail",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:07.214739+00:00",
+    "seconds": 0.002,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-101"
+    ]
+  },
+  {
+    "id": "AUTH-09-REG",
+    "requirement": "AUTH",
+    "title": "Frontend registration endpoint",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "first_name": "New",
+        "last_name": "Customer",
+        "email": "register@test.invalid",
+        "passwordHash": "[REDACTED]",
+        "phone": "",
+        "driving_license_number": "",
+        "isEmailVerified": false,
+        "isPhoneVerified": false,
+        "isActive": true
+      }
+    ],
+    "steps": [
+      "POST /api/user/add as anonymous"
+    ],
+    "expected": "POST /user/add creates an account without authenticating it.",
+    "actual": "AssertionError: Expected successful response; observed HTTP 200: {'success': False, 'message': 'The getKey method should only be used when a single key is returned. The current key entry contains multiple keys: [{id=6, created_at=2026-11-13 05:46:07.436838, updated_at=2026-11-13 05:46:07.436838}]'}",
+    "status": "Fail",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:07.216466+00:00",
+    "seconds": 0.222,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-102"
+    ]
+  },
+  {
+    "id": "AUTH-09-RESET",
+    "requirement": "AUTH",
+    "title": "Local test-only password reset",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "email": "stranger@test.invalid",
+        "password": "[REDACTED]"
+      },
+      {
+        "email": "stranger@test.invalid",
+        "password": "[REDACTED]"
+      },
+      {
+        "email": "stranger@test.invalid",
+        "password": "[REDACTED]"
+      }
+    ],
+    "steps": [
+      "POST /api/user/password/reset as anonymous",
+      "POST /api/user/login as anonymous",
+      "POST /api/user/login as anonymous"
+    ],
+    "expected": "Reset changes credentials and rejects previous password.",
+    "actual": {
+      "reset": "successful",
+      "oldPassword": "[REDACTED]",
+      "newPassword": "[REDACTED]"
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:07.438311+00:00",
+    "seconds": 0.671,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-103",
+      "http-trace.json#request-104",
+      "http-trace.json#request-105"
+    ]
+  },
+  {
+    "id": "AUTH-06-API",
+    "requirement": "AUTH",
+    "title": "Logout revokes refresh session",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "refreshToken": "[REDACTED]"
+      },
+      {
+        "refreshToken": "[REDACTED]"
+      }
+    ],
+    "steps": [
+      "POST /api/user/logout as anonymous",
+      "POST /api/user/refresh as anonymous"
+    ],
+    "expected": "Revoked refresh token cannot issue new tokens.",
+    "actual": {
+      "refreshSession": "revoked"
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:08.109257+00:00",
+    "seconds": 0.005,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-106",
+      "http-trace.json#request-107"
+    ]
+  },
+  {
+    "id": "API-04",
+    "requirement": "API",
+    "title": "Unknown part record",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [],
+    "steps": [
+      "GET /api/parts/99999999 as admin"
+    ],
+    "expected": "Unknown record is rejected appropriately without server crash.",
+    "actual": {
+      "status": 404,
+      "message": "Part not found."
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:08.114239+00:00",
+    "seconds": 0.002,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-108"
+    ]
+  },
+  {
+    "id": "API-02",
+    "requirement": "API",
+    "title": "Missing required data",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {}
+    ],
+    "steps": [
+      "POST /api/operations/vehicle.save as customer"
+    ],
+    "expected": "Incomplete vehicle input is rejected.",
+    "actual": {
+      "status": 409,
+      "message": "Enter a valid make, model and color."
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:08.116333+00:00",
+    "seconds": 0.002,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-109"
+    ]
+  },
+  {
+    "id": "API-03",
+    "requirement": "API",
+    "title": "Bypass frontend validation",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "make": "Toyota",
+        "model": "Camry",
+        "year": 2024,
+        "mileage": -1
+      }
+    ],
+    "steps": [
+      "POST /api/operations/vehicle.save as customer"
+    ],
+    "expected": "Negative mileage is rejected by backend.",
+    "actual": {
+      "status": 400,
+      "message": "IDs, year and mileage must be nonnegative whole numbers."
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:08.118320+00:00",
+    "seconds": 0.002,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-110"
+    ]
+  },
+  {
+    "id": "DB-01",
+    "requirement": "DB",
+    "title": "Inspect stored relationships",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [],
+    "steps": [],
+    "expected": "Database rows agree with the completed request and invoice.",
+    "actual": "AssertionError: ",
+    "status": "Fail",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:08.229001+00:00",
+    "seconds": 0.0,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": []
+  },
+  {
+    "id": "INT-07",
+    "requirement": "INT",
+    "title": "Unavailable test database",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "make": "Honda",
+        "model": "Civic",
+        "year": 2022
+      }
+    ],
+    "steps": [
+      "POST /api/operations/vehicle.save as customer"
+    ],
+    "expected": "No successful save is reported when database connections are unavailable.",
+    "actual": "AssertionError: ",
+    "status": "Fail",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:08.739374+00:00",
+    "seconds": 0.01,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-111"
+    ]
+  },
+  {
+    "id": "INT-05-HTTP",
+    "requirement": "INT",
+    "title": "Backend process stopped",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [],
+    "steps": [
+      "GET /api/operations/snapshot as admin"
+    ],
+    "expected": "Proxy reports a failed request without success.",
+    "actual": {
+      "status": 502,
+      "response": {
+        "text": ""
+      },
+      "fault": "Only the owned isolated backend stopped; Vite remains running"
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:09.119901+00:00",
+    "seconds": 0.016,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-112"
+    ]
+  },
+  {
+    "id": "INT-06-HTTP",
+    "requirement": "INT",
+    "title": "Backend restored without resetting frontend",
+    "preconditions": "Isolated H2 test fixtures; private Vite proxy; accounts created only in the test database.",
+    "input": [
+      {
+        "email": "admin@test.invalid",
+        "password": "[REDACTED]"
+      }
+    ],
+    "steps": [
+      "POST /api/user/login as anonymous"
+    ],
+    "expected": "Same Vite process successfully proxies requests after backend restart.",
+    "actual": {
+      "expiresIn": 900,
+      "refresh-token": "[REDACTED]",
+      "success": true,
+      "access-token": "[REDACTED]",
+      "message": "Login successful",
+      "user": {
+        "id": 1,
+        "username": "admin",
+        "email": "admin@test.invalid",
+        "first_name": "admin",
+        "last_name": "Test",
+        "phone": null,
+        "is_active": 1,
+        "roles": [
+          "ADMIN"
+        ]
+      }
+    },
+    "status": "Pass",
+    "tester": "Codex automated HTTP execution",
+    "date": "2026-11-13T11:46:11.957760+00:00",
+    "seconds": 0.326,
+    "scope": "Actual HTTP via Vite proxy to unchanged Spring Boot application on isolated H2; no browser UI verification",
+    "evidence": [
+      "http-trace.json#request-113"
+    ]
+  }
+]

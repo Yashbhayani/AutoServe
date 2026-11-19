@@ -1,0 +1,1428 @@
+[
+  {
+    "id": "JUNIT:com.example.DevAutoServ.AdminUsersIntegrationTests.rejectsNonAdminAndDuplicateEmail",
+    "requirement": "Existing named test; also mapped in acceptance.json where applicable",
+    "preconditions": "Isolated H2 seeded using the copied test-source fixtures; no live data.",
+    "input": "Exact fixture and input literals are retained in evidence/test-sources/backend/java/.",
+    "steps": [
+      "Execute rejectsNonAdminAndDuplicateEmail"
+    ],
+    "expected": "All named JUnit assertions pass.",
+    "actual": "All assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Maven Surefire",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/junit/TEST-com.example.DevAutoServ.AdminUsersIntegrationTests.xml#rejectsNonAdminAndDuplicateEmail"
+    ],
+    "seconds": "0.285"
+  },
+  {
+    "id": "JUNIT:com.example.DevAutoServ.AdminUsersIntegrationTests.updatesAccountAndRejectsRemovingLastAdministrator",
+    "requirement": "Existing named test; also mapped in acceptance.json where applicable",
+    "preconditions": "Isolated H2 seeded using the copied test-source fixtures; no live data.",
+    "input": "Exact fixture and input literals are retained in evidence/test-sources/backend/java/.",
+    "steps": [
+      "Execute updatesAccountAndRejectsRemovingLastAdministrator"
+    ],
+    "expected": "All named JUnit assertions pass.",
+    "actual": "All assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Maven Surefire",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/junit/TEST-com.example.DevAutoServ.AdminUsersIntegrationTests.xml#updatesAccountAndRejectsRemovingLastAdministrator"
+    ],
+    "seconds": "0.263"
+  },
+  {
+    "id": "JUNIT:com.example.DevAutoServ.AdminUsersIntegrationTests.rejectsMultipleRoles",
+    "requirement": "Existing named test; also mapped in acceptance.json where applicable",
+    "preconditions": "Isolated H2 seeded using the copied test-source fixtures; no live data.",
+    "input": "Exact fixture and input literals are retained in evidence/test-sources/backend/java/.",
+    "steps": [
+      "Execute rejectsMultipleRoles"
+    ],
+    "expected": "All named JUnit assertions pass.",
+    "actual": "All assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Maven Surefire",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/junit/TEST-com.example.DevAutoServ.AdminUsersIntegrationTests.xml#rejectsMultipleRoles"
+    ],
+    "seconds": "0.024"
+  },
+  {
+    "id": "JUNIT:com.example.DevAutoServ.AdminUsersIntegrationTests.adminCreatesAndListsExactlyOneRole",
+    "requirement": "Existing named test; also mapped in acceptance.json where applicable",
+    "preconditions": "Isolated H2 seeded using the copied test-source fixtures; no live data.",
+    "input": "Exact fixture and input literals are retained in evidence/test-sources/backend/java/.",
+    "steps": [
+      "Execute adminCreatesAndListsExactlyOneRole"
+    ],
+    "expected": "All named JUnit assertions pass.",
+    "actual": "All assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Maven Surefire",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/junit/TEST-com.example.DevAutoServ.AdminUsersIntegrationTests.xml#adminCreatesAndListsExactlyOneRole"
+    ],
+    "seconds": "0.255"
+  },
+  {
+    "id": "JUNIT:com.example.DevAutoServ.DevAutoServApplicationTests.frontendEndpointsUseJwtAuthenticationAndCurrentRoles",
+    "requirement": "Existing named test; also mapped in acceptance.json where applicable",
+    "preconditions": "Isolated H2 seeded using the copied test-source fixtures; no live data.",
+    "input": "Exact fixture and input literals are retained in evidence/test-sources/backend/java/.",
+    "steps": [
+      "Execute frontendEndpointsUseJwtAuthenticationAndCurrentRoles"
+    ],
+    "expected": "All named JUnit assertions pass.",
+    "actual": "All assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Maven Surefire",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/junit/TEST-com.example.DevAutoServ.DevAutoServApplicationTests.xml#frontendEndpointsUseJwtAuthenticationAndCurrentRoles"
+    ],
+    "seconds": "21.452"
+  },
+  {
+    "id": "JUNIT:com.example.DevAutoServ.DevAutoServApplicationTests.contextLoads",
+    "requirement": "Existing named test; also mapped in acceptance.json where applicable",
+    "preconditions": "Isolated H2 seeded using the copied test-source fixtures; no live data.",
+    "input": "Exact fixture and input literals are retained in evidence/test-sources/backend/java/.",
+    "steps": [
+      "Execute contextLoads"
+    ],
+    "expected": "All named JUnit assertions pass.",
+    "actual": "All assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Maven Surefire",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/junit/TEST-com.example.DevAutoServ.DevAutoServApplicationTests.xml#contextLoads"
+    ],
+    "seconds": "0.0"
+  },
+  {
+    "id": "JUNIT:com.example.DevAutoServ.OperationsIntegrationTests.rollback",
+    "requirement": "Existing named test; also mapped in acceptance.json where applicable",
+    "preconditions": "Isolated H2 seeded using the copied test-source fixtures; no live data.",
+    "input": "Exact fixture and input literals are retained in evidence/test-sources/backend/java/.",
+    "steps": [
+      "Execute rollback"
+    ],
+    "expected": "All named JUnit assertions pass.",
+    "actual": "All assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Maven Surefire",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/junit/TEST-com.example.DevAutoServ.OperationsIntegrationTests.xml#rollback"
+    ],
+    "seconds": "0.015"
+  },
+  {
+    "id": "JUNIT:com.example.DevAutoServ.OperationsIntegrationTests.billing",
+    "requirement": "Existing named test; also mapped in acceptance.json where applicable",
+    "preconditions": "Isolated H2 seeded using the copied test-source fixtures; no live data.",
+    "input": "Exact fixture and input literals are retained in evidence/test-sources/backend/java/.",
+    "steps": [
+      "Execute billing"
+    ],
+    "expected": "All named JUnit assertions pass.",
+    "actual": "All assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Maven Surefire",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/junit/TEST-com.example.DevAutoServ.OperationsIntegrationTests.xml#billing"
+    ],
+    "seconds": "0.016"
+  },
+  {
+    "id": "JUNIT:com.example.DevAutoServ.OperationsIntegrationTests.ownership",
+    "requirement": "Existing named test; also mapped in acceptance.json where applicable",
+    "preconditions": "Isolated H2 seeded using the copied test-source fixtures; no live data.",
+    "input": "Exact fixture and input literals are retained in evidence/test-sources/backend/java/.",
+    "steps": [
+      "Execute ownership"
+    ],
+    "expected": "All named JUnit assertions pass.",
+    "actual": "All assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Maven Surefire",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/junit/TEST-com.example.DevAutoServ.OperationsIntegrationTests.xml#ownership"
+    ],
+    "seconds": "0.009"
+  },
+  {
+    "id": "JUNIT:com.example.DevAutoServ.OperationsIntegrationTests.workflow",
+    "requirement": "Existing named test; also mapped in acceptance.json where applicable",
+    "preconditions": "Isolated H2 seeded using the copied test-source fixtures; no live data.",
+    "input": "Exact fixture and input literals are retained in evidence/test-sources/backend/java/.",
+    "steps": [
+      "Execute workflow"
+    ],
+    "expected": "All named JUnit assertions pass.",
+    "actual": "All assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Maven Surefire",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/junit/TEST-com.example.DevAutoServ.OperationsIntegrationTests.xml#workflow"
+    ],
+    "seconds": "0.008"
+  },
+  {
+    "id": "JUNIT:com.example.DevAutoServ.OperationsIntegrationTests.edits",
+    "requirement": "Existing named test; also mapped in acceptance.json where applicable",
+    "preconditions": "Isolated H2 seeded using the copied test-source fixtures; no live data.",
+    "input": "Exact fixture and input literals are retained in evidence/test-sources/backend/java/.",
+    "steps": [
+      "Execute edits"
+    ],
+    "expected": "All named JUnit assertions pass.",
+    "actual": "All assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Maven Surefire",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/junit/TEST-com.example.DevAutoServ.OperationsIntegrationTests.xml#edits"
+    ],
+    "seconds": "0.011"
+  },
+  {
+    "id": "JUNIT:com.example.DevAutoServ.OperationsIntegrationTests.holds",
+    "requirement": "Existing named test; also mapped in acceptance.json where applicable",
+    "preconditions": "Isolated H2 seeded using the copied test-source fixtures; no live data.",
+    "input": "Exact fixture and input literals are retained in evidence/test-sources/backend/java/.",
+    "steps": [
+      "Execute holds"
+    ],
+    "expected": "All named JUnit assertions pass.",
+    "actual": "All assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Maven Surefire",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/junit/TEST-com.example.DevAutoServ.OperationsIntegrationTests.xml#holds"
+    ],
+    "seconds": "0.008"
+  },
+  {
+    "id": "JUNIT:com.example.DevAutoServ.OperationsIntegrationTests.noBypass",
+    "requirement": "Existing named test; also mapped in acceptance.json where applicable",
+    "preconditions": "Isolated H2 seeded using the copied test-source fixtures; no live data.",
+    "input": "Exact fixture and input literals are retained in evidence/test-sources/backend/java/.",
+    "steps": [
+      "Execute noBypass"
+    ],
+    "expected": "All named JUnit assertions pass.",
+    "actual": "All assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Maven Surefire",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/junit/TEST-com.example.DevAutoServ.OperationsIntegrationTests.xml#noBypass"
+    ],
+    "seconds": "0.007"
+  },
+  {
+    "id": "JUNIT:com.example.DevAutoServ.OperationsIntegrationTests.diagnosisAndRevision",
+    "requirement": "Existing named test; also mapped in acceptance.json where applicable",
+    "preconditions": "Isolated H2 seeded using the copied test-source fixtures; no live data.",
+    "input": "Exact fixture and input literals are retained in evidence/test-sources/backend/java/.",
+    "steps": [
+      "Execute diagnosisAndRevision"
+    ],
+    "expected": "All named JUnit assertions pass.",
+    "actual": "All assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Maven Surefire",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/junit/TEST-com.example.DevAutoServ.OperationsIntegrationTests.xml#diagnosisAndRevision"
+    ],
+    "seconds": "0.013"
+  },
+  {
+    "id": "JUNIT:com.example.DevAutoServ.OperationsIntegrationTests.settings",
+    "requirement": "Existing named test; also mapped in acceptance.json where applicable",
+    "preconditions": "Isolated H2 seeded using the copied test-source fixtures; no live data.",
+    "input": "Exact fixture and input literals are retained in evidence/test-sources/backend/java/.",
+    "steps": [
+      "Execute settings"
+    ],
+    "expected": "All named JUnit assertions pass.",
+    "actual": "All assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Maven Surefire",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/junit/TEST-com.example.DevAutoServ.OperationsIntegrationTests.xml#settings"
+    ],
+    "seconds": "0.005"
+  },
+  {
+    "id": "JUNIT:com.example.DevAutoServ.OperationsIntegrationTests.appointments",
+    "requirement": "Existing named test; also mapped in acceptance.json where applicable",
+    "preconditions": "Isolated H2 seeded using the copied test-source fixtures; no live data.",
+    "input": "Exact fixture and input literals are retained in evidence/test-sources/backend/java/.",
+    "steps": [
+      "Execute appointments"
+    ],
+    "expected": "All named JUnit assertions pass.",
+    "actual": "All assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Maven Surefire",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/junit/TEST-com.example.DevAutoServ.OperationsIntegrationTests.xml#appointments"
+    ],
+    "seconds": "0.006"
+  },
+  {
+    "id": "JUNIT:com.example.DevAutoServ.OperationsIntegrationTests.creation",
+    "requirement": "Existing named test; also mapped in acceptance.json where applicable",
+    "preconditions": "Isolated H2 seeded using the copied test-source fixtures; no live data.",
+    "input": "Exact fixture and input literals are retained in evidence/test-sources/backend/java/.",
+    "steps": [
+      "Execute creation"
+    ],
+    "expected": "All named JUnit assertions pass.",
+    "actual": "All assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Maven Surefire",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/junit/TEST-com.example.DevAutoServ.OperationsIntegrationTests.xml#creation"
+    ],
+    "seconds": "0.005"
+  },
+  {
+    "id": "JUNIT:com.example.DevAutoServ.PartsBillingIntegrationTests.insufficientStockAndStaleUpdatesRollBackEveryWrite",
+    "requirement": "Existing named test; also mapped in acceptance.json where applicable",
+    "preconditions": "Isolated H2 seeded using the copied test-source fixtures; no live data.",
+    "input": "Exact fixture and input literals are retained in evidence/test-sources/backend/java/.",
+    "steps": [
+      "Execute insufficientStockAndStaleUpdatesRollBackEveryWrite"
+    ],
+    "expected": "All named JUnit assertions pass.",
+    "actual": "All assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Maven Surefire",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/junit/TEST-com.example.DevAutoServ.PartsBillingIntegrationTests.xml#insufficientStockAndStaleUpdatesRollBackEveryWrite"
+    ],
+    "seconds": "0.051"
+  },
+  {
+    "id": "JUNIT:com.example.DevAutoServ.PartsBillingIntegrationTests.concurrentAssignmentsCannotConsumeMoreStockThanAvailable",
+    "requirement": "Existing named test; also mapped in acceptance.json where applicable",
+    "preconditions": "Isolated H2 seeded using the copied test-source fixtures; no live data.",
+    "input": "Exact fixture and input literals are retained in evidence/test-sources/backend/java/.",
+    "steps": [
+      "Execute concurrentAssignmentsCannotConsumeMoreStockThanAvailable"
+    ],
+    "expected": "All named JUnit assertions pass.",
+    "actual": "All assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Maven Surefire",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/junit/TEST-com.example.DevAutoServ.PartsBillingIntegrationTests.xml#concurrentAssignmentsCannotConsumeMoreStockThanAvailable"
+    ],
+    "seconds": "0.023"
+  },
+  {
+    "id": "JUNIT:com.example.DevAutoServ.PartsBillingIntegrationTests.inventoryIssuingUsesTheSameFrozenQuoteAndCannotIssueAfterSubmission",
+    "requirement": "Existing named test; also mapped in acceptance.json where applicable",
+    "preconditions": "Isolated H2 seeded using the copied test-source fixtures; no live data.",
+    "input": "Exact fixture and input literals are retained in evidence/test-sources/backend/java/.",
+    "steps": [
+      "Execute inventoryIssuingUsesTheSameFrozenQuoteAndCannotIssueAfterSubmission"
+    ],
+    "expected": "All named JUnit assertions pass.",
+    "actual": "All assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Maven Surefire",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/junit/TEST-com.example.DevAutoServ.PartsBillingIntegrationTests.xml#inventoryIssuingUsesTheSameFrozenQuoteAndCannotIssueAfterSubmission"
+    ],
+    "seconds": "0.031"
+  },
+  {
+    "id": "JUNIT:com.example.DevAutoServ.PartsBillingIntegrationTests.externallyChangedUsagesCannotBeSilentlyAddedToAnApprovedInvoice",
+    "requirement": "Existing named test; also mapped in acceptance.json where applicable",
+    "preconditions": "Isolated H2 seeded using the copied test-source fixtures; no live data.",
+    "input": "Exact fixture and input literals are retained in evidence/test-sources/backend/java/.",
+    "steps": [
+      "Execute externallyChangedUsagesCannotBeSilentlyAddedToAnApprovedInvoice"
+    ],
+    "expected": "All named JUnit assertions pass.",
+    "actual": "All assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Maven Surefire",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/junit/TEST-com.example.DevAutoServ.PartsBillingIntegrationTests.xml#externallyChangedUsagesCannotBeSilentlyAddedToAnApprovedInvoice"
+    ],
+    "seconds": "0.025"
+  },
+  {
+    "id": "JUNIT:com.example.DevAutoServ.PartsBillingIntegrationTests.legacyUsagesArePricedWithoutRemovingStockAgain",
+    "requirement": "Existing named test; also mapped in acceptance.json where applicable",
+    "preconditions": "Isolated H2 seeded using the copied test-source fixtures; no live data.",
+    "input": "Exact fixture and input literals are retained in evidence/test-sources/backend/java/.",
+    "steps": [
+      "Execute legacyUsagesArePricedWithoutRemovingStockAgain"
+    ],
+    "expected": "All named JUnit assertions pass.",
+    "actual": "All assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Maven Surefire",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/junit/TEST-com.example.DevAutoServ.PartsBillingIntegrationTests.xml#legacyUsagesArePricedWithoutRemovingStockAgain"
+    ],
+    "seconds": "0.021"
+  },
+  {
+    "id": "JUNIT:com.example.DevAutoServ.PartsBillingIntegrationTests.snapshotScopesPartsAndInvoiceBreakdownToAuthorizedAccount",
+    "requirement": "Existing named test; also mapped in acceptance.json where applicable",
+    "preconditions": "Isolated H2 seeded using the copied test-source fixtures; no live data.",
+    "input": "Exact fixture and input literals are retained in evidence/test-sources/backend/java/.",
+    "steps": [
+      "Execute snapshotScopesPartsAndInvoiceBreakdownToAuthorizedAccount"
+    ],
+    "expected": "All named JUnit assertions pass.",
+    "actual": "All assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Maven Surefire",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/junit/TEST-com.example.DevAutoServ.PartsBillingIntegrationTests.xml#snapshotScopesPartsAndInvoiceBreakdownToAuthorizedAccount"
+    ],
+    "seconds": "0.031"
+  },
+  {
+    "id": "JUNIT:com.example.DevAutoServ.PartsBillingIntegrationTests.approvalAndInvoiceUseFrozenPricesPlusAdminLabor",
+    "requirement": "Existing named test; also mapped in acceptance.json where applicable",
+    "preconditions": "Isolated H2 seeded using the copied test-source fixtures; no live data.",
+    "input": "Exact fixture and input literals are retained in evidence/test-sources/backend/java/.",
+    "steps": [
+      "Execute approvalAndInvoiceUseFrozenPricesPlusAdminLabor"
+    ],
+    "expected": "All named JUnit assertions pass.",
+    "actual": "All assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Maven Surefire",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/junit/TEST-com.example.DevAutoServ.PartsBillingIntegrationTests.xml#approvalAndInvoiceUseFrozenPricesPlusAdminLabor"
+    ],
+    "seconds": "0.024"
+  },
+  {
+    "id": "JUNIT:com.example.DevAutoServ.PartsBillingIntegrationTests.quantitiesDeductAndUnusedPartsReturnWithoutDoubleDeduction",
+    "requirement": "Existing named test; also mapped in acceptance.json where applicable",
+    "preconditions": "Isolated H2 seeded using the copied test-source fixtures; no live data.",
+    "input": "Exact fixture and input literals are retained in evidence/test-sources/backend/java/.",
+    "steps": [
+      "Execute quantitiesDeductAndUnusedPartsReturnWithoutDoubleDeduction"
+    ],
+    "expected": "All named JUnit assertions pass.",
+    "actual": "All assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Maven Surefire",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/junit/TEST-com.example.DevAutoServ.PartsBillingIntegrationTests.xml#quantitiesDeductAndUnusedPartsReturnWithoutDoubleDeduction"
+    ],
+    "seconds": "0.018"
+  },
+  {
+    "id": "JUNIT:com.example.DevAutoServ.PartsBillingIntegrationTests.newLabourOnlyInvoiceStillRequiresApprovalAndPositiveTotal",
+    "requirement": "Existing named test; also mapped in acceptance.json where applicable",
+    "preconditions": "Isolated H2 seeded using the copied test-source fixtures; no live data.",
+    "input": "Exact fixture and input literals are retained in evidence/test-sources/backend/java/.",
+    "steps": [
+      "Execute newLabourOnlyInvoiceStillRequiresApprovalAndPositiveTotal"
+    ],
+    "expected": "All named JUnit assertions pass.",
+    "actual": "All assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Maven Surefire",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/junit/TEST-com.example.DevAutoServ.PartsBillingIntegrationTests.xml#newLabourOnlyInvoiceStillRequiresApprovalAndPositiveTotal"
+    ],
+    "seconds": "0.02"
+  },
+  {
+    "id": "JUNIT:com.example.DevAutoServ.PartsBillingIntegrationTests.onlyAdminOrAssignedTechnicianMaySelectPartsDuringDiagnosis",
+    "requirement": "Existing named test; also mapped in acceptance.json where applicable",
+    "preconditions": "Isolated H2 seeded using the copied test-source fixtures; no live data.",
+    "input": "Exact fixture and input literals are retained in evidence/test-sources/backend/java/.",
+    "steps": [
+      "Execute onlyAdminOrAssignedTechnicianMaySelectPartsDuringDiagnosis"
+    ],
+    "expected": "All named JUnit assertions pass.",
+    "actual": "All assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Maven Surefire",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/junit/TEST-com.example.DevAutoServ.PartsBillingIntegrationTests.xml#onlyAdminOrAssignedTechnicianMaySelectPartsDuringDiagnosis"
+    ],
+    "seconds": "0.012"
+  },
+  {
+    "id": "JUNIT:com.example.DevAutoServ.PartsBillingIntegrationTests.revisionsRequireFreshApprovalAndCannotBypassRepairGate",
+    "requirement": "Existing named test; also mapped in acceptance.json where applicable",
+    "preconditions": "Isolated H2 seeded using the copied test-source fixtures; no live data.",
+    "input": "Exact fixture and input literals are retained in evidence/test-sources/backend/java/.",
+    "steps": [
+      "Execute revisionsRequireFreshApprovalAndCannotBypassRepairGate"
+    ],
+    "expected": "All named JUnit assertions pass.",
+    "actual": "All assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Maven Surefire",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/junit/TEST-com.example.DevAutoServ.PartsBillingIntegrationTests.xml#revisionsRequireFreshApprovalAndCannotBypassRepairGate"
+    ],
+    "seconds": "0.02"
+  },
+  {
+    "id": "JUNIT:com.example.DevAutoServ.ReportsIntegrationTests.reportsUsePaymentDatesAndNeverMultiplyRevenueByServices",
+    "requirement": "Existing named test; also mapped in acceptance.json where applicable",
+    "preconditions": "Isolated H2 seeded using the copied test-source fixtures; no live data.",
+    "input": "Exact fixture and input literals are retained in evidence/test-sources/backend/java/.",
+    "steps": [
+      "Execute reportsUsePaymentDatesAndNeverMultiplyRevenueByServices"
+    ],
+    "expected": "All named JUnit assertions pass.",
+    "actual": "All assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Maven Surefire",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/junit/TEST-com.example.DevAutoServ.ReportsIntegrationTests.xml#reportsUsePaymentDatesAndNeverMultiplyRevenueByServices"
+    ],
+    "seconds": "0.017"
+  },
+  {
+    "id": "JUNIT:com.example.DevAutoServ.ShopIntegrationTests.archiveRestorePreservesStockAndPriceHistory",
+    "requirement": "Existing named test; also mapped in acceptance.json where applicable",
+    "preconditions": "Isolated H2 seeded using the copied test-source fixtures; no live data.",
+    "input": "Exact fixture and input literals are retained in evidence/test-sources/backend/java/.",
+    "steps": [
+      "Execute archiveRestorePreservesStockAndPriceHistory"
+    ],
+    "expected": "All named JUnit assertions pass.",
+    "actual": "All assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Maven Surefire",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/junit/TEST-com.example.DevAutoServ.ShopIntegrationTests.xml#archiveRestorePreservesStockAndPriceHistory"
+    ],
+    "seconds": "0.005"
+  },
+  {
+    "id": "JUNIT:com.example.DevAutoServ.ShopIntegrationTests.concurrentIssueIsExactlyOnce",
+    "requirement": "Existing named test; also mapped in acceptance.json where applicable",
+    "preconditions": "Isolated H2 seeded using the copied test-source fixtures; no live data.",
+    "input": "Exact fixture and input literals are retained in evidence/test-sources/backend/java/.",
+    "steps": [
+      "Execute concurrentIssueIsExactlyOnce"
+    ],
+    "expected": "All named JUnit assertions pass.",
+    "actual": "All assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Maven Surefire",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/junit/TEST-com.example.DevAutoServ.ShopIntegrationTests.xml#concurrentIssueIsExactlyOnce"
+    ],
+    "seconds": "0.009"
+  },
+  {
+    "id": "JUNIT:com.example.DevAutoServ.ShopIntegrationTests.notificationsArePrivateAndReadsPersist",
+    "requirement": "Existing named test; also mapped in acceptance.json where applicable",
+    "preconditions": "Isolated H2 seeded using the copied test-source fixtures; no live data.",
+    "input": "Exact fixture and input literals are retained in evidence/test-sources/backend/java/.",
+    "steps": [
+      "Execute notificationsArePrivateAndReadsPersist"
+    ],
+    "expected": "All named JUnit assertions pass.",
+    "actual": "All assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Maven Surefire",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/junit/TEST-com.example.DevAutoServ.ShopIntegrationTests.xml#notificationsArePrivateAndReadsPersist"
+    ],
+    "seconds": "0.006"
+  },
+  {
+    "id": "NODE:1",
+    "requirement": "Existing frontend named test; see test-sources/frontend",
+    "preconditions": "Node test runner; mocked transport/session and React static rendering as defined by each test.",
+    "input": "Exact inputs and mocks retained in evidence/test-sources/frontend/.",
+    "steps": [
+      "login sends email/password JSON and uses the backend identity and roles"
+    ],
+    "expected": "All named Node assertions pass.",
+    "actual": "Assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Node test runner",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/frontend-unit-render.log#test-1"
+    ]
+  },
+  {
+    "id": "NODE:2",
+    "requirement": "Existing frontend named test; see test-sources/frontend",
+    "preconditions": "Node test runner; mocked transport/session and React static rendering as defined by each test.",
+    "input": "Exact inputs and mocks retained in evidence/test-sources/frontend/.",
+    "steps": [
+      "incorrect passwords never create a session"
+    ],
+    "expected": "All named Node assertions pass.",
+    "actual": "Assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Node test runner",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/frontend-unit-render.log#test-2"
+    ]
+  },
+  {
+    "id": "NODE:3",
+    "requirement": "Existing frontend named test; see test-sources/frontend",
+    "preconditions": "Node test runner; mocked transport/session and React static rendering as defined by each test.",
+    "input": "Exact inputs and mocks retained in evidence/test-sources/frontend/.",
+    "steps": [
+      "incomplete login responses and unsupported roles cannot authenticate"
+    ],
+    "expected": "All named Node assertions pass.",
+    "actual": "Assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Node test runner",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/frontend-unit-render.log#test-3"
+    ]
+  },
+  {
+    "id": "NODE:4",
+    "requirement": "Existing frontend named test; see test-sources/frontend",
+    "preconditions": "Node test runner; mocked transport/session and React static rendering as defined by each test.",
+    "input": "Exact inputs and mocks retained in evidence/test-sources/frontend/.",
+    "steps": [
+      "session restoration reads the account from the server with a Bearer token"
+    ],
+    "expected": "All named Node assertions pass.",
+    "actual": "Assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Node test runner",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/frontend-unit-render.log#test-4"
+    ]
+  },
+  {
+    "id": "NODE:5",
+    "requirement": "Existing frontend named test; see test-sources/frontend",
+    "preconditions": "Node test runner; mocked transport/session and React static rendering as defined by each test.",
+    "input": "Exact inputs and mocks retained in evidence/test-sources/frontend/.",
+    "steps": [
+      "the same helper supports methods, encoded parameters, and bodyless responses"
+    ],
+    "expected": "All named Node assertions pass.",
+    "actual": "Assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Node test runner",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/frontend-unit-render.log#test-5"
+    ]
+  },
+  {
+    "id": "NODE:6",
+    "requirement": "Existing frontend named test; see test-sources/frontend",
+    "preconditions": "Node test runner; mocked transport/session and React static rendering as defined by each test.",
+    "input": "Exact inputs and mocks retained in evidence/test-sources/frontend/.",
+    "steps": [
+      "concurrent unauthorized requests share one refresh and retry once"
+    ],
+    "expected": "All named Node assertions pass.",
+    "actual": "Assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Node test runner",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/frontend-unit-render.log#test-6"
+    ]
+  },
+  {
+    "id": "NODE:7",
+    "requirement": "Existing frontend named test; see test-sources/frontend",
+    "preconditions": "Node test runner; mocked transport/session and React static rendering as defined by each test.",
+    "input": "Exact inputs and mocks retained in evidence/test-sources/frontend/.",
+    "steps": [
+      "rejected refresh clears authentication without an infinite retry"
+    ],
+    "expected": "All named Node assertions pass.",
+    "actual": "Assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Node test runner",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/frontend-unit-render.log#test-7"
+    ]
+  },
+  {
+    "id": "NODE:8",
+    "requirement": "Existing frontend named test; see test-sources/frontend",
+    "preconditions": "Node test runner; mocked transport/session and React static rendering as defined by each test.",
+    "input": "Exact inputs and mocks retained in evidence/test-sources/frontend/.",
+    "steps": [
+      "logout clears local authentication and revokes the backend refresh token"
+    ],
+    "expected": "All named Node assertions pass.",
+    "actual": "Assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Node test runner",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/frontend-unit-render.log#test-8"
+    ]
+  },
+  {
+    "id": "NODE:9",
+    "requirement": "Existing frontend named test; see test-sources/frontend",
+    "preconditions": "Node test runner; mocked transport/session and React static rendering as defined by each test.",
+    "input": "Exact inputs and mocks retained in evidence/test-sources/frontend/.",
+    "steps": [
+      "an in-flight login cannot restore a session after logout"
+    ],
+    "expected": "All named Node assertions pass.",
+    "actual": "Assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Node test runner",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/frontend-unit-render.log#test-9"
+    ]
+  },
+  {
+    "id": "NODE:10",
+    "requirement": "Existing frontend named test; see test-sources/frontend",
+    "preconditions": "Node test runner; mocked transport/session and React static rendering as defined by each test.",
+    "input": "Exact inputs and mocks retained in evidence/test-sources/frontend/.",
+    "steps": [
+      "requests from an old session are never retried with another user's credentials"
+    ],
+    "expected": "All named Node assertions pass.",
+    "actual": "Assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Node test runner",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/frontend-unit-render.log#test-10"
+    ]
+  },
+  {
+    "id": "NODE:11",
+    "requirement": "Existing frontend named test; see test-sources/frontend",
+    "preconditions": "Node test runner; mocked transport/session and React static rendering as defined by each test.",
+    "input": "Exact inputs and mocks retained in evidence/test-sources/frontend/.",
+    "steps": [
+      "network and non-JSON failures produce actionable errors"
+    ],
+    "expected": "All named Node assertions pass.",
+    "actual": "Assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Node test runner",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/frontend-unit-render.log#test-11"
+    ]
+  },
+  {
+    "id": "NODE:12",
+    "requirement": "Existing frontend named test; see test-sources/frontend",
+    "preconditions": "Node test runner; mocked transport/session and React static rendering as defined by each test.",
+    "input": "Exact inputs and mocks retained in evidence/test-sources/frontend/.",
+    "steps": [
+      "a refresh that finishes after logout cannot recreate the session"
+    ],
+    "expected": "All named Node assertions pass.",
+    "actual": "Assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Node test runner",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/frontend-unit-render.log#test-12"
+    ]
+  },
+  {
+    "id": "NODE:13",
+    "requirement": "Existing frontend named test; see test-sources/frontend",
+    "preconditions": "Node test runner; mocked transport/session and React static rendering as defined by each test.",
+    "input": "Exact inputs and mocks retained in evidence/test-sources/frontend/.",
+    "steps": [
+      "data arriving after a change of account is discarded"
+    ],
+    "expected": "All named Node assertions pass.",
+    "actual": "Assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Node test runner",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/frontend-unit-render.log#test-13"
+    ]
+  },
+  {
+    "id": "NODE:14",
+    "requirement": "Existing frontend named test; see test-sources/frontend",
+    "preconditions": "Node test runner; mocked transport/session and React static rendering as defined by each test.",
+    "input": "Exact inputs and mocks retained in evidence/test-sources/frontend/.",
+    "steps": [
+      "registration matches the backend add-user route and model without signing in"
+    ],
+    "expected": "All named Node assertions pass.",
+    "actual": "Assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Node test runner",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/frontend-unit-render.log#test-14"
+    ]
+  },
+  {
+    "id": "NODE:15",
+    "requirement": "Existing frontend named test; see test-sources/frontend",
+    "preconditions": "Node test runner; mocked transport/session and React static rendering as defined by each test.",
+    "input": "Exact inputs and mocks retained in evidence/test-sources/frontend/.",
+    "steps": [
+      "duplicate email and registration failures leave authentication empty"
+    ],
+    "expected": "All named Node assertions pass.",
+    "actual": "Assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Node test runner",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/frontend-unit-render.log#test-15"
+    ]
+  },
+  {
+    "id": "NODE:16",
+    "requirement": "Existing frontend named test; see test-sources/frontend",
+    "preconditions": "Node test runner; mocked transport/session and React static rendering as defined by each test.",
+    "input": "Exact inputs and mocks retained in evidence/test-sources/frontend/.",
+    "steps": [
+      "registration completing after sign-out cannot authenticate"
+    ],
+    "expected": "All named Node assertions pass.",
+    "actual": "Assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Node test runner",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/frontend-unit-render.log#test-16"
+    ]
+  },
+  {
+    "id": "NODE:17",
+    "requirement": "Existing frontend named test; see test-sources/frontend",
+    "preconditions": "Node test runner; mocked transport/session and React static rendering as defined by each test.",
+    "input": "Exact inputs and mocks retained in evidence/test-sources/frontend/.",
+    "steps": [
+      "registration validation allows optional contact details and rejects invalid required fields"
+    ],
+    "expected": "All named Node assertions pass.",
+    "actual": "Assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Node test runner",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/frontend-unit-render.log#test-17"
+    ]
+  },
+  {
+    "id": "NODE:18",
+    "requirement": "Existing frontend named test; see test-sources/frontend",
+    "preconditions": "Node test runner; mocked transport/session and React static rendering as defined by each test.",
+    "input": "Exact inputs and mocks retained in evidence/test-sources/frontend/.",
+    "steps": [
+      "password length respects BCrypt's byte limit for Unicode as well as ASCII"
+    ],
+    "expected": "All named Node assertions pass.",
+    "actual": "Assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Node test runner",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/frontend-unit-render.log#test-18"
+    ]
+  },
+  {
+    "id": "NODE:19",
+    "requirement": "Existing frontend named test; see test-sources/frontend",
+    "preconditions": "Node test runner; mocked transport/session and React static rendering as defined by each test.",
+    "input": "Exact inputs and mocks retained in evidence/test-sources/frontend/.",
+    "steps": [
+      "logout clears cached user data even if server revocation fails"
+    ],
+    "expected": "All named Node assertions pass.",
+    "actual": "Assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Node test runner",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/frontend-unit-render.log#test-19"
+    ]
+  },
+  {
+    "id": "NODE:20",
+    "requirement": "Existing frontend named test; see test-sources/frontend",
+    "preconditions": "Node test runner; mocked transport/session and React static rendering as defined by each test.",
+    "input": "Exact inputs and mocks retained in evidence/test-sources/frontend/.",
+    "steps": [
+      "gateway failures identify backend availability instead of a generic login failure"
+    ],
+    "expected": "All named Node assertions pass.",
+    "actual": "Assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Node test runner",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/frontend-unit-render.log#test-20"
+    ]
+  },
+  {
+    "id": "NODE:21",
+    "requirement": "Existing frontend named test; see test-sources/frontend",
+    "preconditions": "Node test runner; mocked transport/session and React static rendering as defined by each test.",
+    "input": "Exact inputs and mocks retained in evidence/test-sources/frontend/.",
+    "steps": [
+      "trend chart keeps a fixed pixel height and bounded points over a full report period"
+    ],
+    "expected": "All named Node assertions pass.",
+    "actual": "Assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Node test runner",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/frontend-unit-render.log#test-21"
+    ]
+  },
+  {
+    "id": "NODE:22",
+    "requirement": "Existing frontend named test; see test-sources/frontend",
+    "preconditions": "Node test runner; mocked transport/session and React static rendering as defined by each test.",
+    "input": "Exact inputs and mocks retained in evidence/test-sources/frontend/.",
+    "steps": [
+      "bar labels use HTML text sizing rather than scaling with number of bars"
+    ],
+    "expected": "All named Node assertions pass.",
+    "actual": "Assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Node test runner",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/frontend-unit-render.log#test-22"
+    ]
+  },
+  {
+    "id": "NODE:23",
+    "requirement": "Existing frontend named test; see test-sources/frontend",
+    "preconditions": "Node test runner; mocked transport/session and React static rendering as defined by each test.",
+    "input": "Exact inputs and mocks retained in evidence/test-sources/frontend/.",
+    "steps": [
+      "donut legend wraps long labels and exposes keyboard-selectable controls"
+    ],
+    "expected": "All named Node assertions pass.",
+    "actual": "Assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Node test runner",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/frontend-unit-render.log#test-23"
+    ]
+  },
+  {
+    "id": "NODE:24",
+    "requirement": "Existing frontend named test; see test-sources/frontend",
+    "preconditions": "Node test runner; mocked transport/session and React static rendering as defined by each test.",
+    "input": "Exact inputs and mocks retained in evidence/test-sources/frontend/.",
+    "steps": [
+      "empty and single-point charts render without invalid coordinates"
+    ],
+    "expected": "All named Node assertions pass.",
+    "actual": "Assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Node test runner",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/frontend-unit-render.log#test-24"
+    ]
+  },
+  {
+    "id": "NODE:25",
+    "requirement": "Existing frontend named test; see test-sources/frontend",
+    "preconditions": "Node test runner; mocked transport/session and React static rendering as defined by each test.",
+    "input": "Exact inputs and mocks retained in evidence/test-sources/frontend/.",
+    "steps": [
+      "downloaded invoice includes itemized parts, labor, totals and payment balance"
+    ],
+    "expected": "All named Node assertions pass.",
+    "actual": "Assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Node test runner",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/frontend-unit-render.log#test-25"
+    ]
+  },
+  {
+    "id": "NODE:26",
+    "requirement": "Existing frontend named test; see test-sources/frontend",
+    "preconditions": "Node test runner; mocked transport/session and React static rendering as defined by each test.",
+    "input": "Exact inputs and mocks retained in evidence/test-sources/frontend/.",
+    "steps": [
+      "downloaded invoice safely escapes customer, part and labor text"
+    ],
+    "expected": "All named Node assertions pass.",
+    "actual": "Assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Node test runner",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/frontend-unit-render.log#test-26"
+    ]
+  },
+  {
+    "id": "NODE:27",
+    "requirement": "Existing frontend named test; see test-sources/frontend",
+    "preconditions": "Node test runner; mocked transport/session and React static rendering as defined by each test.",
+    "input": "Exact inputs and mocks retained in evidence/test-sources/frontend/.",
+    "steps": [
+      "historical invoices do not invent a parts or labor breakdown"
+    ],
+    "expected": "All named Node assertions pass.",
+    "actual": "Assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Node test runner",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/frontend-unit-render.log#test-27"
+    ]
+  },
+  {
+    "id": "NODE:28",
+    "requirement": "Existing frontend named test; see test-sources/frontend",
+    "preconditions": "Node test runner; mocked transport/session and React static rendering as defined by each test.",
+    "input": "Exact inputs and mocks retained in evidence/test-sources/frontend/.",
+    "steps": [
+      "live workflow actions use the central authenticated JSON API"
+    ],
+    "expected": "All named Node assertions pass.",
+    "actual": "Assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Node test runner",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/frontend-unit-render.log#test-28"
+    ]
+  },
+  {
+    "id": "NODE:29",
+    "requirement": "Existing frontend named test; see test-sources/frontend",
+    "preconditions": "Node test runner; mocked transport/session and React static rendering as defined by each test.",
+    "input": "Exact inputs and mocks retained in evidence/test-sources/frontend/.",
+    "steps": [
+      "snapshot loads preserve the API contract and do not fall back to sample records"
+    ],
+    "expected": "All named Node assertions pass.",
+    "actual": "Assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Node test runner",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/frontend-unit-render.log#test-29"
+    ]
+  },
+  {
+    "id": "NODE:30",
+    "requirement": "Existing frontend named test; see test-sources/frontend",
+    "preconditions": "Node test runner; mocked transport/session and React static rendering as defined by each test.",
+    "input": "Exact inputs and mocks retained in evidence/test-sources/frontend/.",
+    "steps": [
+      "part selection and approval revisions use the reusable request function"
+    ],
+    "expected": "All named Node assertions pass.",
+    "actual": "Assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Node test runner",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/frontend-unit-render.log#test-30"
+    ]
+  },
+  {
+    "id": "NODE:31",
+    "requirement": "Existing frontend named test; see test-sources/frontend",
+    "preconditions": "Node test runner; mocked transport/session and React static rendering as defined by each test.",
+    "input": "Exact inputs and mocks retained in evidence/test-sources/frontend/.",
+    "steps": [
+      "CSV quotes delimiters and protects formulas in user input"
+    ],
+    "expected": "All named Node assertions pass.",
+    "actual": "Assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Node test runner",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/frontend-unit-render.log#test-31"
+    ]
+  },
+  {
+    "id": "NODE:32",
+    "requirement": "Existing frontend named test; see test-sources/frontend",
+    "preconditions": "Node test runner; mocked transport/session and React static rendering as defined by each test.",
+    "input": "Exact inputs and mocks retained in evidence/test-sources/frontend/.",
+    "steps": [
+      "daily series fills absent days and includes both endpoints"
+    ],
+    "expected": "All named Node assertions pass.",
+    "actual": "Assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Node test runner",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/frontend-unit-render.log#test-32"
+    ]
+  },
+  {
+    "id": "NODE:33",
+    "requirement": "Existing frontend named test; see test-sources/frontend",
+    "preconditions": "Node test runner; mocked transport/session and React static rendering as defined by each test.",
+    "input": "Exact inputs and mocks retained in evidence/test-sources/frontend/.",
+    "steps": [
+      "technician parts page shows inventory without part request controls"
+    ],
+    "expected": "All named Node assertions pass.",
+    "actual": "Assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Node test runner",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/frontend-unit-render.log#test-33"
+    ]
+  },
+  {
+    "id": "NODE:34",
+    "requirement": "Existing frontend named test; see test-sources/frontend",
+    "preconditions": "Node test runner; mocked transport/session and React static rendering as defined by each test.",
+    "input": "Exact inputs and mocks retained in evidence/test-sources/frontend/.",
+    "steps": [
+      "dashboard renders metrics and records from the operations snapshot"
+    ],
+    "expected": "All named Node assertions pass.",
+    "actual": "Assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Node test runner",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/frontend-unit-render.log#test-34"
+    ]
+  },
+  {
+    "id": "NODE:35",
+    "requirement": "Existing frontend named test; see test-sources/frontend",
+    "preconditions": "Node test runner; mocked transport/session and React static rendering as defined by each test.",
+    "input": "Exact inputs and mocks retained in evidence/test-sources/frontend/.",
+    "steps": [
+      "work-order check-in requires an active appointment and offers scheduling when missing"
+    ],
+    "expected": "All named Node assertions pass.",
+    "actual": "Assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Node test runner",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/frontend-unit-render.log#test-35"
+    ]
+  },
+  {
+    "id": "NODE:36",
+    "requirement": "Existing frontend named test; see test-sources/frontend",
+    "preconditions": "Node test runner; mocked transport/session and React static rendering as defined by each test.",
+    "input": "Exact inputs and mocks retained in evidence/test-sources/frontend/.",
+    "steps": [
+      "appointment slots enforce business hours and close Sundays"
+    ],
+    "expected": "All named Node assertions pass.",
+    "actual": "Assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Node test runner",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/frontend-unit-render.log#test-36"
+    ]
+  },
+  {
+    "id": "NODE:37",
+    "requirement": "Existing frontend named test; see test-sources/frontend",
+    "preconditions": "Node test runner; mocked transport/session and React static rendering as defined by each test.",
+    "input": "Exact inputs and mocks retained in evidence/test-sources/frontend/.",
+    "steps": [
+      "admin service requests show only unstarted requests and appointment times appear for staff"
+    ],
+    "expected": "All named Node assertions pass.",
+    "actual": "Assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Node test runner",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/frontend-unit-render.log#test-37"
+    ]
+  },
+  {
+    "id": "NODE:38",
+    "requirement": "Existing frontend named test; see test-sources/frontend",
+    "preconditions": "Node test runner; mocked transport/session and React static rendering as defined by each test.",
+    "input": "Exact inputs and mocks retained in evidence/test-sources/frontend/.",
+    "steps": [
+      "work orders include every held request last, even without assignment or stage match"
+    ],
+    "expected": "All named Node assertions pass.",
+    "actual": "Assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Node test runner",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/frontend-unit-render.log#test-38"
+    ]
+  },
+  {
+    "id": "NODE:39",
+    "requirement": "Existing frontend named test; see test-sources/frontend",
+    "preconditions": "Node test runner; mocked transport/session and React static rendering as defined by each test.",
+    "input": "Exact inputs and mocks retained in evidence/test-sources/frontend/.",
+    "steps": [
+      "customers cannot edit or check in and see cancel after activity history"
+    ],
+    "expected": "All named Node assertions pass.",
+    "actual": "Assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Node test runner",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/frontend-unit-render.log#test-39"
+    ]
+  },
+  {
+    "id": "NODE:40",
+    "requirement": "Existing frontend named test; see test-sources/frontend",
+    "preconditions": "Node test runner; mocked transport/session and React static rendering as defined by each test.",
+    "input": "Exact inputs and mocks retained in evidence/test-sources/frontend/.",
+    "steps": [
+      "admin can cancel an unstarted work order while customers cannot cancel work orders"
+    ],
+    "expected": "All named Node assertions pass.",
+    "actual": "Assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Node test runner",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/frontend-unit-render.log#test-40"
+    ]
+  },
+  {
+    "id": "NODE:41",
+    "requirement": "Existing frontend named test; see test-sources/frontend",
+    "preconditions": "Node test runner; mocked transport/session and React static rendering as defined by each test.",
+    "input": "Exact inputs and mocks retained in evidence/test-sources/frontend/.",
+    "steps": [
+      "customer can change an active appointment but cannot set one when none exists"
+    ],
+    "expected": "All named Node assertions pass.",
+    "actual": "Assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Node test runner",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/frontend-unit-render.log#test-41"
+    ]
+  },
+  {
+    "id": "NODE:42",
+    "requirement": "Existing frontend named test; see test-sources/frontend",
+    "preconditions": "Node test runner; mocked transport/session and React static rendering as defined by each test.",
+    "input": "Exact inputs and mocks retained in evidence/test-sources/frontend/.",
+    "steps": [
+      "US-UI-01: customer requests omit completed requests and appointment panels"
+    ],
+    "expected": "All named Node assertions pass.",
+    "actual": "Assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Node test runner",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/frontend-unit-render.log#test-42"
+    ]
+  },
+  {
+    "id": "NODE:43",
+    "requirement": "Existing frontend named test; see test-sources/frontend",
+    "preconditions": "Node test runner; mocked transport/session and React static rendering as defined by each test.",
+    "input": "Exact inputs and mocks retained in evidence/test-sources/frontend/.",
+    "steps": [
+      "US-UI-02: technician work orders show diagnosis and customer approval without estimate or hours editors"
+    ],
+    "expected": "All named Node assertions pass.",
+    "actual": "Assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Node test runner",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/frontend-unit-render.log#test-43"
+    ]
+  },
+  {
+    "id": "NODE:44",
+    "requirement": "Existing frontend named test; see test-sources/frontend",
+    "preconditions": "Node test runner; mocked transport/session and React static rendering as defined by each test.",
+    "input": "Exact inputs and mocks retained in evidence/test-sources/frontend/.",
+    "steps": [
+      "US-UI-03: customers cannot see admin billing or assignment controls"
+    ],
+    "expected": "All named Node assertions pass.",
+    "actual": "Assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Node test runner",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/frontend-unit-render.log#test-44"
+    ]
+  },
+  {
+    "id": "NODE:45",
+    "requirement": "Existing frontend named test; see test-sources/frontend",
+    "preconditions": "Node test runner; mocked transport/session and React static rendering as defined by each test.",
+    "input": "Exact inputs and mocks retained in evidence/test-sources/frontend/.",
+    "steps": [
+      "US-UI-04: diagnosis exposes part quantities to technicians and admins"
+    ],
+    "expected": "All named Node assertions pass.",
+    "actual": "Assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Node test runner",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/frontend-unit-render.log#test-45"
+    ]
+  },
+  {
+    "id": "NODE:46",
+    "requirement": "Existing frontend named test; see test-sources/frontend",
+    "preconditions": "Node test runner; mocked transport/session and React static rendering as defined by each test.",
+    "input": "Exact inputs and mocks retained in evidence/test-sources/frontend/.",
+    "steps": [
+      "US-UI-05: customer sees approval totals and full downloadable invoice"
+    ],
+    "expected": "All named Node assertions pass.",
+    "actual": "Assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Node test runner",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/frontend-unit-render.log#test-46"
+    ]
+  },
+  {
+    "id": "NODE:47",
+    "requirement": "Existing frontend named test; see test-sources/frontend",
+    "preconditions": "Node test runner; mocked transport/session and React static rendering as defined by each test.",
+    "input": "Exact inputs and mocks retained in evidence/test-sources/frontend/.",
+    "steps": [
+      "US-UI-06: admin reviews parts and adds labor instead of entering an arbitrary invoice amount"
+    ],
+    "expected": "All named Node assertions pass.",
+    "actual": "Assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Node test runner",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/frontend-unit-render.log#test-47"
+    ]
+  },
+  {
+    "id": "NODE:48",
+    "requirement": "Existing frontend named test; see test-sources/frontend",
+    "preconditions": "Node test runner; mocked transport/session and React static rendering as defined by each test.",
+    "input": "Exact inputs and mocks retained in evidence/test-sources/frontend/.",
+    "steps": [
+      "work progresses through exactly six stages and cannot skip customer approval"
+    ],
+    "expected": "All named Node assertions pass.",
+    "actual": "Assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Node test runner",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/frontend-unit-render.log#test-48"
+    ]
+  },
+  {
+    "id": "NODE:49",
+    "requirement": "Existing frontend named test; see test-sources/frontend",
+    "preconditions": "Node test runner; mocked transport/session and React static rendering as defined by each test.",
+    "input": "Exact inputs and mocks retained in evidence/test-sources/frontend/.",
+    "steps": [
+      "diagnosis can be saved and submitted without an estimate or repair-price lines"
+    ],
+    "expected": "All named Node assertions pass.",
+    "actual": "Assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Node test runner",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/frontend-unit-render.log#test-49"
+    ]
+  },
+  {
+    "id": "NODE:50",
+    "requirement": "Existing frontend named test; see test-sources/frontend",
+    "preconditions": "Node test runner; mocked transport/session and React static rendering as defined by each test.",
+    "input": "Exact inputs and mocks retained in evidence/test-sources/frontend/.",
+    "steps": [
+      "saved demo requests migrate old stage names without losing linked records"
+    ],
+    "expected": "All named Node assertions pass.",
+    "actual": "Assertions passed",
+    "status": "Pass",
+    "tester": "Codex / Node test runner",
+    "date": "2026-11-13T16:50:57.089897+00:00",
+    "evidence": [
+      "evidence/frontend-unit-render.log#test-50"
+    ]
+  }
+]

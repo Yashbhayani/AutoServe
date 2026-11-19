@@ -1,0 +1,54 @@
+--- a/Backend/src/main/java/com/example/DevAutoServ/Services/UserServices.java
++++ b/Backend/src/main/java/com/example/DevAutoServ/Services/UserServices.java
+@@ -52,6 +52,7 @@
+ 
+ 
+     @Override
++    @Transactional
+     public Map<String, Object> AddUser(User userModel, HttpServletResponse responses) {
+ 
+         Map<String, Object> response = new HashMap<>();
+@@ -67,11 +68,11 @@
+ 
+            String EncryptedPass = passwordServices.EncryptPassword(userModel.getPasswordHash());
+ 
+-            System.out.println(EncryptedPass.toString());
++
+             KeyHolder keyHolderForUser = new GeneratedKeyHolder();
+             
+             jdbcTemplate.update(connection -> {
+-                PreparedStatement ps = connection.prepareStatement(commonQueryServicesModel.InsertUser, Statement.RETURN_GENERATED_KEYS);
++                PreparedStatement ps = connection.prepareStatement(commonQueryServicesModel.InsertUser, new String[]{"id"});
+                 ps.setString(1, userModel.getEmail().replaceAll("@.*", "").toLowerCase());
+                 ps.setString(2, userModel.getEmail().toLowerCase());
+                 ps.setString(3, userModel.getFirst_name());
+@@ -98,7 +99,7 @@
+ 
+             KeyHolder keyHolderUserRole = new GeneratedKeyHolder();
+             jdbcTemplate.update(connection -> {
+-                PreparedStatement ps = connection.prepareStatement(commonQueryServicesModel.InsertUserRole, Statement.RETURN_GENERATED_KEYS);
++                PreparedStatement ps = connection.prepareStatement(commonQueryServicesModel.InsertUserRole, new String[]{"id"});
+                 ps.setLong(1, generatedId);
+                 ps.setShort(2, roleId);
+                 return ps;
+@@ -117,7 +118,8 @@
+ 
+         } catch (Exception e) {
+             response.put("success", false);
+-            response.put("message", e.getMessage());
++            org.springframework.transaction.interceptor.TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
++            response.put("message", "Unable to create your account. Please try again.");
+         }
+ 
+         return response;
+--- a/Backend/src/main/java/com/example/DevAutoServ/Services/PartsServices.java
++++ b/Backend/src/main/java/com/example/DevAutoServ/Services/PartsServices.java
+@@ -72,7 +72,7 @@
+         validate(part); unique(part,0);
+         var key = new GeneratedKeyHolder();
+         jdbc.update(connection -> {
+-            var ps = connection.prepareStatement("INSERT INTO dev_autoserve.parts (category_id,code,name,sku,is_active) VALUES (?,?,?,?,1)", Statement.RETURN_GENERATED_KEYS);
++            var ps = connection.prepareStatement("INSERT INTO dev_autoserve.parts (category_id,code,name,sku,is_active) VALUES (?,?,?,?,1)", new String[]{"id"});
+             ps.setLong(1,part.getCategoryId()); ps.setString(2,part.getCode().trim()); ps.setString(3,part.getName().trim()); ps.setString(4,part.getSku().trim()); return ps;
+         },key);
+         if (key.getKey() == null) throw new IllegalStateException("Missing part ID.");

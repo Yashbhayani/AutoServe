@@ -1,0 +1,16 @@
+{
+  "applicationReadmeLocationsChecked": [
+    "README.md",
+    "Frontend/README.md",
+    "Backend/README.md"
+  ],
+  "foundApplicationReadme": false,
+  "otherGuides": [
+    "LOGIN_INTEGRATION.md",
+    "DATA_INTEGRATIONS.md",
+    "testing/README.md",
+    "Frontend/plans/autoserve-workflow-safeguards.md",
+    "Frontend/plans/create-a-complete-desktop-sequential-hopper.md"
+  ],
+  "note": "No application setup README existed at these paths at test start. TEST/README.md documents this test package only."
+}

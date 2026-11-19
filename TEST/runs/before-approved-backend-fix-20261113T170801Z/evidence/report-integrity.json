@@ -1,0 +1,8 @@
+{
+  "caseRecords": 291,
+  "uniqueIds": true,
+  "requiredMetadataPresent": true,
+  "backendFilesUnchanged": true,
+  "requiredArtifactsPresent": true,
+  "note": "Passing matrix rows share underlying assertions. Browser and unsupported scenarios remain explicit."
+}

@@ -1,0 +1,16 @@
+{
+  "caseRecords": 293,
+  "uniqueIds": true,
+  "requiredMetadataPresent": true,
+  "backendChangesWithinApproval": true,
+  "changedBackendFiles": [
+    "Backend/src/main/java/com/example/DevAutoServ/Services/PartsServices.java",
+    "Backend/src/main/java/com/example/DevAutoServ/Services/UserServices.java"
+  ],
+  "httpAssertions": 159,
+  "httpFailures": 0,
+  "all26AutomatedStoryMappingsPass": true,
+  "browserExecuted": false,
+  "temporaryServersStopped": true,
+  "checkedUtc": "2026-11-13T17:12:21.799066+00:00"
+}

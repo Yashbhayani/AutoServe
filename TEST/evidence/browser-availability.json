@@ -1,0 +1,68 @@
+{
+  "status": "Not Run",
+  "selectionTarget": "http://localhost:5173",
+  "selectionResult": "No browser is available",
+  "availableBrowsers": [],
+  "actions": "Loaded Browser skill, initialized runtime, attempted URL selection, read troubleshooting documentation and enumerated available browsers. No browser session existed.",
+  "screenshotsCaptured": false,
+  "interactiveClicksPerformed": false,
+  "keyboardOrViewportTested": false,
+  "reason": "Retry: navigation and documented alternate DOM inspection both fail with the timeoutMs integration error.",
+  "lastCheckedUtc": "2026-11-13T17:45:39.313099+00:00",
+  "connectionAttempts": [
+    {
+      "checkedUtc": "2026-11-13T17:14:23.620137+00:00",
+      "selectionTarget": "http://localhost:5173",
+      "selectionResult": "No browser is available",
+      "availableBrowsers": [],
+      "troubleshootingCompleted": true,
+      "result": "Not Run: awaiting browser connection",
+      "screenshotsCaptured": false,
+      "interactiveActionsPerformed": false
+    },
+    {
+      "checkedUtc": "2026-11-13T17:17:01.814984+00:00",
+      "browser": "chrome",
+      "initialResult": "Browser is not available: chrome",
+      "retryResult": "Browser is not available: chrome",
+      "diagnostics": "browser-diagnostics.json",
+      "result": "Not Run"
+    },
+    {
+      "checkedUtc": "2026-11-13T17:27:18.908704+00:00",
+      "connection": "Connected",
+      "pageControl": "Failed",
+      "evidence": "browser/control-failure.json"
+    },
+    {
+      "checkedUtc": "2026-11-13T17:37:14.420449+00:00",
+      "browser": "brave",
+      "result": "Not available; not running",
+      "evidence": "browser/brave-connection.json"
+    },
+    {
+      "checkedUtc": "2026-11-13T17:39:26.293100+00:00",
+      "browser": "brave",
+      "running": true,
+      "registered": false,
+      "evidence": "browser/brave-connection.json"
+    },
+    {
+      "checkedUtc": "2026-11-13T17:41:07.032959+00:00",
+      "browser": "brave",
+      "connected": true,
+      "pageControlAvailable": false,
+      "evidence": "browser/brave-control-failure.json"
+    },
+    {
+      "checkedUtc": "2026-11-13T17:45:39.313099+00:00",
+      "browser": "brave",
+      "connected": true,
+      "pageControlAvailable": false,
+      "evidence": "browser/remaining-retry-20261113T174539Z.json"
+    }
+  ],
+  "connected": true,
+  "pageControlAvailable": false,
+  "requestedBrowser": "brave"
+}

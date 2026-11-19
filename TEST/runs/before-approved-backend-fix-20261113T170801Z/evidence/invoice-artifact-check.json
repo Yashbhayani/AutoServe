@@ -1,0 +1,9 @@
+{
+  "status": "Pass",
+  "scope": "Actual invoice export function applied to saved isolated-database invoice. Browser clicking/download-dialog behavior was not tested.",
+  "invoiceId": 1,
+  "total": 100,
+  "parts": 25,
+  "labor": 75,
+  "artifact": "downloaded-invoice.html"
+}

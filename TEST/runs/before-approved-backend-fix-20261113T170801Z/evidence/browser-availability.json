@@ -1,0 +1,10 @@
+{
+  "status": "Not Run",
+  "selectionTarget": "http://localhost:5173",
+  "selectionResult": "No browser is available",
+  "availableBrowsers": [],
+  "actions": "Loaded Browser skill, initialized runtime, attempted URL selection, read troubleshooting documentation and enumerated available browsers. No browser session existed.",
+  "screenshotsCaptured": false,
+  "interactiveClicksPerformed": false,
+  "keyboardOrViewportTested": false
+}
