@@ -46,7 +46,6 @@ public class AppointmentsServices implements AppointmentsRepository {
             return Result(false, "Service is required.");
         }
 
-
         //
         KeyHolder keyHolderUserRole = new GeneratedKeyHolder();
 
@@ -59,7 +58,6 @@ public class AppointmentsServices implements AppointmentsRepository {
 
             ps.setLong(1, scheduledServiceAppointmentsModel.getServiceRequestId());
             ps.setLong(2, scheduledServiceAppointmentsModel.getTechnicianId());
-
 
             if (scheduledServiceAppointmentsModel.getScheduledDate() == null) {
                 ps.setNull(3, Types.TIMESTAMP);
@@ -93,111 +91,6 @@ public class AppointmentsServices implements AppointmentsRepository {
     }
 
     // ADMIN ASSIGNS TECHNICIAN AND SETS ACTUAL APPOINTMENT DATE/TIME
-/*
-    @Transactional
-    public Map<String, Object> AssignTechnicianAndSchedule(
-            Long appointmentId,
-            Long technicianId,
-            LocalDateTime scheduledDate
-    ) {
-
-        if (appointmentId == null || appointmentId <= 0) {
-            return Result(false, "Valid appointment ID is required.");
-        }
-
-        if (technicianId == null || technicianId <= 0) {
-            return Result(false, "Technician is required.");
-        }
-
-        if (scheduledDate == null) {
-            return Result(false, "Appointment date and time are required.");
-        }
-
-        if (!scheduledDate.isAfter(LocalDateTime.now())) {
-            return Result(false,
-                    "Appointment date and time must be in the future.");
-        }
-
-        Map<String, Object> appointment;
-
-        try {
-            appointment = jdbcTemplate.queryForMap(
-                    queries.ATechSchdappointment,
-                    appointmentId
-            );
-        } catch (org.springframework.dao.EmptyResultDataAccessException ex) {
-            return Result(false, "Appointment not found.");
-        }
-
-        Long serviceRequestId =
-                ((Number) appointment.get("service_request_id")).longValue();
-
-        // Service request must be approved before technician assignment.
-        String requestStatus = jdbcTemplate.queryForObject(
-                queries.ATechSchdrequestStatus,
-                String.class,
-                serviceRequestId
-        );
-
-        if (!"APPROVED".equals(requestStatus)) {
-            return Result(false,
-                    "The service request must be APPROVED before assigning a technician.");
-        }
-
-        // Appointment must not be cancelled or completed.
-        String appointmentStatus =
-                (String) appointment.get("appointment_status");
-
-        if ("CANCELLED".equals(appointmentStatus)
-                || "COMPLETED".equals(appointmentStatus)) {
-            return Result(false,
-                    "Cancelled or completed appointments cannot be scheduled.");
-        }
-
-        // Verify technician has the TECHNICIAN role.
-        Integer technicianCount = jdbcTemplate.queryForObject(
-                queries.IsTechnicianValid,
-                Integer.class,
-                technicianId
-        );
-
-        if (technicianCount == null || technicianCount == 0) {
-            return Result(false,
-                    "Selected user is not an active technician.");
-        }
-
-        Integer confirmedStatusId =
-                statusServices.GetStatusId("APPOINTMENT", "CONFIRMED");
-
-        if (confirmedStatusId == null) {
-            throw new IllegalStateException(
-                    "APPOINTMENT/CONFIRMED status was not found."
-            );
-        }
-
-        // Set technician, actual date/time and confirmed status.
-        jdbcTemplate.update(
-                queries.ATechSchdupdate,
-                technicianId,
-                java.sql.Timestamp.valueOf(scheduledDate),
-                confirmedStatusId,
-                appointmentId
-        );
-
-        Map<String, Object> response = Result(
-                true,
-                "Technician assigned and appointment scheduled successfully."
-        );
-
-        response.put("appointmentId", appointmentId);
-        response.put("serviceRequestId", serviceRequestId);
-        response.put("technicianId", technicianId);
-        response.put("scheduledDate", scheduledDate);
-        response.put("appointmentStatus", "CONFIRMED");
-
-        return response;
-    }
-*/
 
     // RESCHEDULE APPOINTMENT
 
@@ -304,7 +197,6 @@ public class AppointmentsServices implements AppointmentsRepository {
         );
             return response;
     }
-
 
     private Map<String, Object> Result(
             boolean success,

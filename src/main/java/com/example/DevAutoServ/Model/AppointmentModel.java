@@ -3,7 +3,6 @@ package com.example.DevAutoServ.Model;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
-
 public class AppointmentModel {
     private Long id;
     private Long serviceRequestId;

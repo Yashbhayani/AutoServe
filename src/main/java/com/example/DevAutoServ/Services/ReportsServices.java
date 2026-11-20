@@ -1,6 +1,5 @@
 package com.example.DevAutoServ.Services;
 
-
 import com.example.DevAutoServ.CommonModel.CommonQueryServicesModel;
 import com.example.DevAutoServ.Repository.ReportsRepository;
 import org.springframework.jdbc.core.CallableStatementCallback;
@@ -128,7 +127,6 @@ public class ReportsServices implements ReportsRepository {
                                 break;
                             }
                         }
-
 
                         return datas;
                     }

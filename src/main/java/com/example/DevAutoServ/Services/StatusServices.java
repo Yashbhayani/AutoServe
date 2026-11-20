@@ -512,7 +512,6 @@ public class StatusServices implements StatusServicesRepository {
         }
     }
 
-
     private Map<String, Object> Result(
             boolean success,
             String message

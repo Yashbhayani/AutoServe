@@ -48,7 +48,6 @@ public class WorkOrderController {
         return response;
     }
 
-
     @PostMapping("/assign-parts/{id}")
     public Map<String, Object> createServiceRequests(
             @PathVariable Long id,
@@ -90,8 +89,6 @@ public class WorkOrderController {
 
             String userRole = roleObject.toString();
             return partUsagesServices.assignParts(id, parts);
-
-
 
         }
         catch (Exception e){
@@ -212,7 +209,6 @@ public class WorkOrderController {
         }
     }
 
-
     @GetMapping("/get")
     public Map<String, Object> GetWorkOrderList(
             @RequestParam String queryString,
@@ -252,7 +248,6 @@ public class WorkOrderController {
             }
 
             String userRole = roleObject.toString();
-
 
             if(!userRole.equalsIgnoreCase(ProjectCodes.RoleEnum.ADMIN.name())){
 
@@ -296,6 +291,5 @@ public class WorkOrderController {
                     "Something went wrong while updating the service request.");
         }
     }
-
 
 }

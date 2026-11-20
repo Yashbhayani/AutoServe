@@ -20,13 +20,8 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
-import java.sql.Statement;
+
 import java.util.*;
-
-
-/*CALL dev_autoserve.GetUsersWithPagination(
-    '{"page_number":1,"page_size":10}'
-);*/
 
 @Service
 public class UserServices implements UserRepository {
@@ -49,8 +44,6 @@ public class UserServices implements UserRepository {
         this.passwordServices = passwordServices;
     }
 
-
-
     @Override
     @Transactional
     public Map<String, Object> AddUser(User userModel, HttpServletResponse responses) {
@@ -67,7 +60,6 @@ public class UserServices implements UserRepository {
             }
 
            String EncryptedPass = passwordServices.EncryptPassword(userModel.getPasswordHash());
-
 
             KeyHolder keyHolderForUser = new GeneratedKeyHolder();
             
@@ -114,8 +106,6 @@ public class UserServices implements UserRepository {
             response.put("success", true);
             response.put("message", "User registered successfully");
 
-
-
         } catch (Exception e) {
             response.put("success", false);
             org.springframework.transaction.interceptor.TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
@@ -143,7 +133,6 @@ public class UserServices implements UserRepository {
                 response.put("message", "Invalid email or password");
                 return response;
             }
-
 
             Map<String, Object> user = users.get(0);
 
@@ -222,8 +211,6 @@ public class UserServices implements UserRepository {
         Map<String, Object> response = new HashMap<>();
 
         try {
-
-
 
             int rows = jdbcTemplate.update(
                     commonQueryServicesModel.EditUser,
@@ -441,6 +428,5 @@ public class UserServices implements UserRepository {
 
         return jdbcTemplate.update(query, tokenHash);
     }
-
 
 }

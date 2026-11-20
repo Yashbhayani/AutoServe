@@ -33,7 +33,6 @@ public class VehiclesServices implements VehiclesRepository {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-
     @Override
     public Map<String, Object> AddVehicles(VehiclesModel vehicle) {
         Map<String, Object> response = new HashMap<>();

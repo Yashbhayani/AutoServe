@@ -1,11 +1,9 @@
 package com.example.DevAutoServ.Controller;
 
-import com.example.DevAutoServ.AutoServeModel.User;
-import com.example.DevAutoServ.AutoServeModel.Vehicle;
 import com.example.DevAutoServ.CommonModel.CommonQueryServicesModel;
 import com.example.DevAutoServ.Enum.ProjectCodes;
 import com.example.DevAutoServ.Model.VehiclesModel;
-import com.example.DevAutoServ.Repository.UserRepository;
+
 import com.example.DevAutoServ.Repository.VehiclesRepository;
 import com.example.DevAutoServ.Services.AuthServices;
 import com.example.DevAutoServ.Services.QueryHandlerServices;
@@ -58,18 +56,6 @@ public class VehiclesController {
 
         vehicle.setCustomerId(loggedInUserId);
 
-
-/*        //Admin
-        if (
-                userRole.equalsIgnoreCase(ProjectCodes.RoleEnum.ADMIN.name())
-                        &&
-                        authServices.CheckthePermission(
-                                ProjectCodes.PermissionEnum.VEHICLE_CREATE.name(),
-                                ProjectCodes.RoleEnum.ADMIN.name()
-                        )) {
-            return vehiclesRepository.AddVehicles(vehicle);
-        }*/
-
         // Permission As par UserRole
         boolean hasPermission = authServices.CheckthePermission(
                 ProjectCodes.PermissionEnum.VEHICLE_CREATE.name(),
@@ -82,7 +68,6 @@ public class VehiclesController {
             response.put("message", "Access denied");
             return response;
         }
-
 
         return vehiclesRepository.AddVehicles(vehicle);
 
@@ -115,19 +100,6 @@ public class VehiclesController {
         if(vehicle.getCustomerId() == null){
             vehicle.setCustomerId(loggedInUserId);
         }
-
-/*
-        //Admin
-        if (
-                userRole.equalsIgnoreCase(ProjectCodes.RoleEnum.ADMIN.name())
-                        &&
-                        authServices.CheckthePermission(
-                                ProjectCodes.PermissionEnum.VEHICLE_UPDATE_OWN.name(),
-                                ProjectCodes.RoleEnum.ADMIN.name()
-                        )) {
-            return vehiclesRepository.AddVehicles(vehicle);
-        }
-*/
 
         // Permission As par UserRole
         boolean hasPermission = authServices.CheckthePermission(

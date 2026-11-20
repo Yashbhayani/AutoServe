@@ -4,8 +4,7 @@ package com.example.DevAutoServ.Controller;
 import com.example.DevAutoServ.CommonModel.CommonQueryServicesModel;
 import com.example.DevAutoServ.Enum.ProjectCodes;
 import com.example.DevAutoServ.Model.ScheduledServiceAppointmentsModel;
-import com.example.DevAutoServ.Model.ServiceRequestModel;
-import com.example.DevAutoServ.Repository.AppointmentsRepository;
+
 import com.example.DevAutoServ.Services.*;
 
 import org.slf4j.Logger;
@@ -303,20 +302,6 @@ public class AppointmentsController  {
                 return authResponse;
             }
 
-/*            LocalDateTime appointmentDateTime;
-
-            try {
-
-                appointmentDateTime =
-                        LocalDateTime.parse(scheduledServiceAppointmentsModel.getScheduledDate());
-
-            } catch (Exception e) {
-
-                return response(
-                        false,
-                        "Invalid date format. Use yyyy-MM-ddTHH:mm:ss."
-                );
-            }*/
             return appointmentsServices.CreateAppointment(scheduledServiceAppointmentsModel);
         }catch (Exception e){
             logger.error(
@@ -329,62 +314,6 @@ public class AppointmentsController  {
         }
 
     }
-
-/*    @PutMapping("/assign/{id}")
-    public Map<String, Object> AssignTechnicianAndSchedule(
-            @PathVariable Long id,
-            @RequestParam Long technicianId,
-            @RequestParam String scheduledDate,
-            @RequestHeader(
-                    value = "Authorization",
-                    required = false
-            ) String authorization
-    ) {
-
-        try {
-
-            Map<String, Object> authResponse = authorize(
-                    authorization,
-                    ProjectCodes.PermissionEnum
-                            .APPOINTMENT_ASSIGN_TECHNICIAN.name()
-            );
-
-            if (!Boolean.TRUE.equals(authResponse.get("success"))) {
-                return authResponse;
-            }
-
-            LocalDateTime appointmentDateTime;
-
-            try {
-
-                appointmentDateTime =
-                        LocalDateTime.parse(scheduledDate);
-
-            } catch (Exception e) {
-
-                return response(
-                        false,
-                        "Invalid date format. Use yyyy-MM-ddTHH:mm:ss."
-                );
-            }
-
-            return appointmentsServices.AssignTechnicianAndSchedule(
-                    id,
-                    technicianId,
-                    appointmentDateTime
-            );
-
-        } catch (Exception e) {
-
-            logger.error(
-                    "Assign technician error: {}",
-                    e.getMessage(),
-                    e
-            );
-
-            return response(false, "Unable to assign technician.");
-        }
-    }*/
 
     // ---------------------------------------------------------
     // RESCHEDULE APPOINTMENT
@@ -518,7 +447,6 @@ public class AppointmentsController  {
         }
     }
 
-
     @PutMapping("/accept/{id}")
     public Map<String, Object> AcceptAppointment(
             @PathVariable Long id,
@@ -540,7 +468,6 @@ public class AppointmentsController  {
                 return authResponse;
             }
 
-
             return appointmentsServices.AcceptAppointment(
                     id
             );
@@ -556,7 +483,6 @@ public class AppointmentsController  {
             return response(false, "Unable to reschedule appointment.");
         }
     }
-
 
     // ---------------------------------------------------------
     // COMPLETE APPOINTMENT
@@ -652,7 +578,6 @@ public class AppointmentsController  {
             }
 
             String userRole = roleObject.toString();
-
 
             if(!userRole.toLowerCase().equals(ProjectCodes.RoleEnum.ADMIN.name().toLowerCase())){
 

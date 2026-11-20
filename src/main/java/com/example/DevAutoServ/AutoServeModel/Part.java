@@ -1,6 +1,5 @@
 package com.example.DevAutoServ.AutoServeModel;
 
-
 import jakarta.persistence.*;
 import lombok.*;
 

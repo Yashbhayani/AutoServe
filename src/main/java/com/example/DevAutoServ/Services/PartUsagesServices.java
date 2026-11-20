@@ -3,7 +3,7 @@ package com.example.DevAutoServ.Services;
 import com.example.DevAutoServ.CommonModel.CommonQueryServicesModel;
 import com.example.DevAutoServ.Model.AssignPartModel;
 import com.example.DevAutoServ.Repository.PartUsagesRepository;
-import org.springframework.jdbc.core.ColumnMapRowMapper;
+
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,7 +37,6 @@ public class PartUsagesServices implements PartUsagesRepository {
         response.put("Message", message);
         return response;
     }
-
 
     @Override
     @Transactional
@@ -134,7 +133,6 @@ public class PartUsagesServices implements PartUsagesRepository {
                         partId,
                         quantity
                 );
-
 
                 Integer updated = jdbcTemplate.update(
                         queryServicesModel.deductInventory,

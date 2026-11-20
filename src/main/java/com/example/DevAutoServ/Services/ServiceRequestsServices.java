@@ -65,7 +65,6 @@ public class ServiceRequestsServices
             return Result(false, "Description is too long.");
         }
 
-
         // Validate vehicle ownership.
         Integer vehicleCount = jdbcTemplate.queryForObject(
                 queries.IsVehicleOwned,
@@ -185,24 +184,13 @@ public class ServiceRequestsServices
             );
         }
 
-/*
-        // 3. Automatically create appointment.
-        // scheduled_date = NULL until Admin schedules it.
-        // technician_id = NULL until Admin assigns a technician.
-        jdbcTemplate.update(
-                queries.InsertAppointment,
-                serviceRequestId,
-                scheduledStatusId
-        );
-*/
-
         Map<String, Object> response = Result(
                 true,
                 "Service request submitted created successfully."
         );
 
         response.put("serviceRequestId", serviceRequestId);
-//        response.put("appointmentStatus", "SCHEDULED");
+
         response.put("serviceRequestStatus", "SUBMITTED");
 
         return response;

@@ -5,7 +5,6 @@ public class AssignPartModel {
     private Long partId;
     private Integer quantity;
 
-
     public AssignPartModel(Long partId, Integer quantity) {
         this.partId = partId;
         this.quantity = quantity;

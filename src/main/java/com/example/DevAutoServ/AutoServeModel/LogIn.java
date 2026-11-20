@@ -1,7 +1,5 @@
 package com.example.DevAutoServ.AutoServeModel;
 
-import jakarta.persistence.Column;
-
 public class LogIn {
     public LogIn() {}
     public String email;

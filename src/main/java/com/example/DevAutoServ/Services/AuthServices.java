@@ -2,7 +2,7 @@
 package com.example.DevAutoServ.Services;
 
 import com.example.DevAutoServ.CommonModel.CommonQueryServicesModel;
-import com.example.DevAutoServ.Enum.ProjectCodes;
+
 import com.example.DevAutoServ.Repository.AuthRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
@@ -22,7 +22,6 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-import javax.management.ObjectName;
 
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
@@ -388,8 +387,6 @@ public class AuthServices implements AuthRepository {
 
     }
 
-
-
     public Map<String, Object> CheckUserRole(String username) {
 
         Map<String, Object> response = new HashMap<>();
@@ -432,7 +429,6 @@ public class AuthServices implements AuthRepository {
 
         return response;
     }
-
 
     public  boolean CheckthePermission (String PermissionName, String Role ){
 

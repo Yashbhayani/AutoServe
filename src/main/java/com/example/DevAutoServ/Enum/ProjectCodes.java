@@ -91,7 +91,6 @@
             OTHER
         }
 
-
         public enum NotificationTypeEnum {
             SERVICE_REQUEST,
             APPOINTMENT,
@@ -109,7 +108,6 @@
             COMPLETED,
             CANCELLED
         }
-
 
         public  enum  WORKORDER{
             IN_PROGRESS,

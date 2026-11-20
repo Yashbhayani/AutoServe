@@ -18,7 +18,6 @@ public class UserModel {
         this.password = password;
     }
 
-
     public String getPassword() {
         return password;
     }
@@ -66,7 +65,5 @@ public class UserModel {
     public void setFname(String fname) {
         this.fname = fname;
     }
-
-
 
 }

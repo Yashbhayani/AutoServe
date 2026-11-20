@@ -4,9 +4,9 @@ import com.example.DevAutoServ.AutoServeModel.User;
 import com.example.DevAutoServ.CommonModel.CommonQueryServicesModel;
 import com.example.DevAutoServ.Enum.ProjectCodes;
 import com.example.DevAutoServ.Model.ServiceRequestModel;
-import com.example.DevAutoServ.Repository.UserRepository;
+
 import com.example.DevAutoServ.Services.*;
-import jakarta.servlet.http.HttpServletResponse;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.ComponentScan;
@@ -31,7 +31,6 @@ public class ServiceRequestsController {
     private final StatusServices statusServices;
     private final ReportsServices reportsServices;
     CommonQueryServicesModel commonQueryServicesModel = new CommonQueryServicesModel();
-
 
     public  ServiceRequestsController(ServiceRequestsServices serviceRequestsServices,
                                       AuthServices authServices,
@@ -74,7 +73,6 @@ public class ServiceRequestsController {
             return Result(false, "Logged-in user is required.");
         }
 
-
         if (serviceRequestModel.getVehicleId() == null) {
             return Result(false, "Please select a vehicle.");
         }
@@ -96,7 +94,6 @@ public class ServiceRequestsController {
         }
 
         String userRole = getUserRole.get("userRole").toString();
-
 
         // Permission As par UserRole
         boolean hasPermission = authServices.CheckthePermission(
@@ -120,7 +117,6 @@ public class ServiceRequestsController {
 
         return serviceRequestsServices.createServiceRequests(serviceRequestModel);
     }
-
 
     // EDIT SERVICE REQUEST
     @PutMapping("/update/{id}")
@@ -191,7 +187,6 @@ public class ServiceRequestsController {
                     return Result(false, "Logged-in user was not found.");
                 }
 
-
                 // 3. Check whether service request exists and is active
                 if (!queryHandlerServices.IsServiceRequestValid(commonQueryServicesModel.IsServiceRequestValid,id, customerID)) {
                     return Result(false,
@@ -214,7 +209,6 @@ public class ServiceRequestsController {
                     "Something went wrong while updating the service request.");
         }
     }
-
 
     // DELETE SERVICE REQUEST
     @DeleteMapping("/delete/{id}")
@@ -307,8 +301,6 @@ public class ServiceRequestsController {
         }
     }
 
-
-
     @GetMapping("/get")
     public Map<String, Object> GetUserList(
             @RequestParam String queryString,
@@ -348,7 +340,6 @@ public class ServiceRequestsController {
             }
 
             String userRole = roleObject.toString();
-
 
             if(!userRole.toLowerCase().equals(ProjectCodes.RoleEnum.ADMIN.name().toLowerCase())){
 
@@ -393,192 +384,6 @@ public class ServiceRequestsController {
         }
     }
 
-
 //AsignTech
-/*
-    PUT /api/service-requests/status/15?status=UNDER_REVIEW
-    PUT /api/service-requests/status/15?status=REJECTED
-    PUT /api/service-requests/status/15?status=IN_PROGRESS
-    PUT /api/service-requests/status/15?status=COMPLETED
-    PUT /api/service-requests/status/15?status=CANCELLED
-    */
-
-/*    @PutMapping("/status/{id}")
-    public Map<String, Object> UpdateServiceRequestStatus(
-            @PathVariable Long id,
-            @RequestParam String status,
-            @RequestHeader(value = "Authorization", required = false)
-            String authorization) {
-
-        try {
-
-            Map<String, Object> auth =
-                    authServices.VerifyToken(authorization);
-
-            if (!Boolean.TRUE.equals(auth.get("success"))) {
-                return auth;
-            }
-
-            String username = auth.get("username").toString();
-            String role = auth.get("userRole").toString();
-
-            if (status == null || status.isBlank()) {
-                return Result(false, "Status is required.");
-            }
-
-            status = status.trim().toUpperCase();
-
-            String permission;
-
-            switch (status) {
-
-                // ADMIN: review request
-                case "UNDER_REVIEW":
-
-                    if (!role.equalsIgnoreCase(
-                            ProjectCodes.RoleEnum.ADMIN.name())) {
-
-                        return Result(false,
-                                "Only Admin can review service requests.");
-                    }
-
-                    permission = ProjectCodes.PermissionEnum
-                            .SERVICE_REQUEST_REVIEW.name();
-
-                    break;
-
-                // ADMIN: approve request
-                case "APPROVED":
-
-                    if (!role.equalsIgnoreCase(
-                            ProjectCodes.RoleEnum.ADMIN.name())) {
-
-                        return Result(false,
-                                "Only Admin can approve service requests.");
-                    }
-
-                    permission = ProjectCodes.PermissionEnum
-                            .SERVICE_REQUEST_APPROVE.name();
-
-                    break;
-
-                // ADMIN: reject request
-                case "REJECTED":
-
-                    if (!role.equalsIgnoreCase(
-                            ProjectCodes.RoleEnum.ADMIN.name())) {
-
-                        return Result(false,
-                                "Only Admin can reject service requests.");
-                    }
-
-                    permission = ProjectCodes.PermissionEnum
-                            .SERVICE_REQUEST_REJECT.name();
-
-                    break;
-
-                // CUSTOMER: cancel own
-                // ADMIN: cancel any
-                case "CANCELLED":
-
-                    if (role.equalsIgnoreCase(
-                            ProjectCodes.RoleEnum.CUSTOMER.name())) {
-
-                        permission = ProjectCodes.PermissionEnum
-                                .SERVICE_REQUEST_UPDATE.name();
-
-                    } else if (role.equalsIgnoreCase(
-                            ProjectCodes.RoleEnum.ADMIN.name())) {
-
-                        permission = ProjectCodes.PermissionEnum
-                                .SERVICE_MANAGE.name();
-
-                    } else {
-
-                        return Result(false,
-                                "You cannot cancel this service request.");
-                    }
-
-                    break;
-
-                // TECHNICIAN: start work
-                // ADMIN: manage service workflow
-                case "IN_PROGRESS":
-
-                    if (role.equalsIgnoreCase(
-                            ProjectCodes.RoleEnum.TECHNICIAN.name())) {
-
-                        permission = ProjectCodes.PermissionEnum
-                                .JOB_UPDATE_ASSIGNED.name();
-
-                    } else if (role.equalsIgnoreCase(
-                            ProjectCodes.RoleEnum.ADMIN.name())) {
-
-                        permission = ProjectCodes.PermissionEnum
-                                .SERVICE_MANAGE.name();
-
-                    } else {
-
-                        return Result(false,
-                                "Only an assigned Technician or Admin can start service work.");
-                    }
-
-                    break;
-
-                // TECHNICIAN: complete work
-                // ADMIN: manage service workflow
-                case "COMPLETED":
-
-                    if (role.equalsIgnoreCase(
-                            ProjectCodes.RoleEnum.TECHNICIAN.name())) {
-
-                        permission = ProjectCodes.PermissionEnum
-                                .JOB_UPDATE_ASSIGNED.name();
-
-                    } else if (role.equalsIgnoreCase(
-                            ProjectCodes.RoleEnum.ADMIN.name())) {
-
-                        permission = ProjectCodes.PermissionEnum
-                                .SERVICE_MANAGE.name();
-
-                    } else {
-
-                        return Result(false,
-                                "Only an assigned Technician or Admin can complete service work.");
-                    }
-
-                    break;
-
-                default:
-
-                    return Result(false,
-                            "Invalid service request status.");
-            }
-
-            // Check role permission
-            if (!HasPermission(permission, role)) {
-                return Result(false,
-                        "You do not have permission to perform this status update.");
-            }
-
-            // Update status
-            return statusServices.UpdateServiceRequestStatus(
-                    id,
-                    status,
-                    username,
-                    role
-            );
-
-        } catch (Exception exception) {
-
-            logger.error(
-                    "Service request status update failed.",
-                    exception
-            );
-
-            return Result(false,
-                    "Something went wrong while updating service request status.");
-        }
-    }*/
 
 }

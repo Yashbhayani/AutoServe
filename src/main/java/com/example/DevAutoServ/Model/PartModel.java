@@ -19,7 +19,6 @@ public class PartModel {
     public Integer getExpectedStockQuantity(){return expectedStockQuantity;}
     public void setExpectedStockQuantity(Integer value){expectedStockQuantity=value;}
 
-
     public PartModel(){}
 
     public PartModel(Long id, Long categoryId, String code, String name, String sku, BigDecimal unitPrice, Integer stockQuantity) {

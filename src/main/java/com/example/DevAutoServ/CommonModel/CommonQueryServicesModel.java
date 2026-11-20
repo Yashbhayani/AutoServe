@@ -29,7 +29,6 @@ public class CommonQueryServicesModel {
             ")\n" +
             "VALUES ( ?,?);";
 
-
     // USER
     public final String GetUserId = """
         SELECT id
@@ -49,7 +48,6 @@ public class CommonQueryServicesModel {
              ON r.id = ur.role_id
          WHERE u.username = ?;
          """;
-
 
     public String CheckRolePermission = """
     SELECT EXISTS (
@@ -126,8 +124,6 @@ public class CommonQueryServicesModel {
       AND is_active = TRUE
     """;
 
-
-
     public final String GetStatusCode = """
         SELECT code
         FROM dev_autoserve.statuses
@@ -136,23 +132,12 @@ public class CommonQueryServicesModel {
         LIMIT 1
         """;
 
-
     public  String GetServiceTypeID = """
             SELECT 
                 id
             FROM dev_autoserve.statuses
             WHERE code = ?
             """;
-
-/*
-    public  String GetStatusID= """
-            SELECT
-                id
-           FROM dev_autoserve.statuses
-           WHERE code= ?;
-            """;
-*/
-
 
     // AUTOMATICALLY CREATE APPOINTMENT
     public final String InsertAppointment = """
@@ -194,96 +179,6 @@ public class CommonQueryServicesModel {
         WHERE id = ? AND is_active = 1
         """;
 
-
-/*
-    public String ConfirmAppointment = """
-    UPDATE dev_autoserve.appointments
-    SET status_id = (
-        SELECT id
-        FROM dev_autoserve.statuses
-        WHERE table_code = 'APPOINTMENT'
-          AND code = 'CONFIRMED'
-          AND is_active = TRUE
-        LIMIT 1
-    )
-    WHERE id = ?
-      AND is_active = TRUE
-      AND status_id IN (
-          SELECT id
-          FROM dev_autoserve.statuses
-          WHERE table_code = 'APPOINTMENT'
-            AND code IN ('SCHEDULED', 'RESCHEDULED')
-            AND is_active = TRUE
-      )
-    """;
-
-    public String RescheduleAppointment = """
-    UPDATE dev_autoserve.appointments
-    SET scheduled_date = ?,
-        status_id = (
-            SELECT id
-            FROM dev_autoserve.statuses
-            WHERE table_code = 'APPOINTMENT'
-              AND code = 'RESCHEDULED'
-              AND is_active = TRUE
-            LIMIT 1
-        )
-    WHERE id = ?
-      AND is_active = TRUE
-      AND status_id IN (
-          SELECT id
-          FROM dev_autoserve.statuses
-          WHERE table_code = 'APPOINTMENT'
-            AND code IN ('SCHEDULED', 'CONFIRMED', 'RESCHEDULED')
-            AND is_active = TRUE
-      )
-    """;
-
-    public String CancelAppointment = """
-    UPDATE dev_autoserve.appointments
-    SET status_id = (
-        SELECT id
-        FROM dev_autoserve.statuses
-        WHERE table_code = 'APPOINTMENT'
-          AND code = 'CANCELLED'
-          AND is_active = TRUE
-        LIMIT 1
-    )
-    WHERE id = ?
-      AND is_active = TRUE
-      AND status_id IN (
-          SELECT id
-          FROM dev_autoserve.statuses
-          WHERE table_code = 'APPOINTMENT'
-            AND code IN ('SCHEDULED', 'CONFIRMED', 'RESCHEDULED')
-            AND is_active = TRUE
-      )
-    """;
-
-    public String CompleteAppointment = """
-    UPDATE dev_autoserve.appointments
-    SET status_id = (
-        SELECT id
-        FROM dev_autoserve.statuses
-        WHERE table_code = 'APPOINTMENT'
-          AND code = 'COMPLETED'
-          AND is_active = TRUE
-        LIMIT 1
-    )
-    WHERE id = ?
-      AND is_active = TRUE
-      AND status_id = (
-          SELECT id
-          FROM dev_autoserve.statuses
-          WHERE table_code = 'APPOINTMENT'
-            AND code = 'CONFIRMED'
-            AND is_active = TRUE
-          LIMIT 1
-      )
-    """;
-*/
-
-
     public  String InsertRefreshtokens = """
             INSERT INTO dev_autoserve.refresh_tokens (
                 user_id,
@@ -300,12 +195,10 @@ public class CommonQueryServicesModel {
               AND expires_at > CURRENT_TIMESTAMP(3);
             """;
 
-
     public String DeactivateToken= """
             UPDATE dev_autoserve.refresh_tokens
             SET is_active = FALSE
             WHERE token_hash = ?;""";
-
 
     public String DeactivateUserRefreshTokens= """
             SELECT id, user_id, is_active, expires_at, created_at, updated_at
@@ -361,7 +254,6 @@ public class CommonQueryServicesModel {
         VALUES (?, ?, ?, NULL, ?, ?, 1, ?)
         """;
 
-
     // CREATE SERVICE REQUEST SERVICES
     public final String InsertSelectedServicesTypes = """
         INSERT INTO dev_autoserve.service_request_services
@@ -373,10 +265,6 @@ public class CommonQueryServicesModel {
         VALUES (?, ?, 1)
         ON DUPLICATE KEY UPDATE is_active = 1
         """;
-
-
-
-
 
     // UPDATE SERVICE REQUEST
     public final String UpdateServiceRequests = """
@@ -431,7 +319,6 @@ public class CommonQueryServicesModel {
         FOR UPDATE
         """;
 
-
   public String deleteServicesQuery = """
             UPDATE dev_autoserve.service_request_services
             SET is_active = 0
@@ -445,7 +332,6 @@ public class CommonQueryServicesModel {
               AND customer_id = ?
               AND is_active = 1
             """;
-
 
     public  String ServiceRequestsStatusQuery = """
                     SELECT s.code
@@ -467,7 +353,6 @@ public class CommonQueryServicesModel {
                       AND is_active = 1;
                     """;
 
-
     public String AppointmentsStatusQuery = """
                     SELECT s.code
                     FROM dev_autoserve.appointments a
@@ -479,7 +364,6 @@ public class CommonQueryServicesModel {
                       AND s.is_active = 1
                     FOR UPDATE;
                     """;
-
 
     // UPDATE APPOINTMENT STATUS
     public final String UpdateAppointmentStatus = """
@@ -505,16 +389,6 @@ public class CommonQueryServicesModel {
         """;
 
     // ADMIN ASSIGNS TECHNICIAN AND ACTUAL DATE/TIME
-   /* public final String AssignTechnicianAndSchedule = """
-        UPDATE dev_autoserve.appointments
-        SET
-            technician_id = ?,
-            scheduled_date = ?,
-            is_appointed = 1,
-            status_id = ?
-        WHERE id = ?
-          AND is_active = 1
-        """;*/
 
     // CHECK TECHNICIAN ROLE
     public final String IsTechnicianValid = """
@@ -529,7 +403,6 @@ public class CommonQueryServicesModel {
           AND r.code = 'TECHNICIAN'
         """;
 
-
     public String GetInitialStatusId = """
         SELECT id
         FROM dev_autoserve.statuses
@@ -538,13 +411,6 @@ public class CommonQueryServicesModel {
           AND is_active = 1
         LIMIT 1;
         """;
-
-/*    public  final  String UpdateServiceRequestStatus = """
-                    UPDATE dev_autoserve.service_requests
-                    SET status_id = ?
-                    WHERE id = ?
-                      AND is_active = 1
-                    """;*/
 
     public String GetServiceRequestForStatusUpdate = """
     SELECT
@@ -558,7 +424,6 @@ public class CommonQueryServicesModel {
       AND sr.is_active = 1
     FOR UPDATE
     """;
-
 
     public String GetAppointmentForServiceRequest = """
     SELECT
@@ -575,7 +440,6 @@ public class CommonQueryServicesModel {
     FOR UPDATE
     """;
 
-
     public String IsAssignedTechnician = """
     SELECT COUNT(*)
     FROM dev_autoserve.appointments
@@ -583,7 +447,6 @@ public class CommonQueryServicesModel {
       AND technician_id = ?
       AND is_active = 1
     """;
-
 
     public String UpdateServiceRequestStatus = """
     UPDATE dev_autoserve.service_requests
@@ -896,7 +759,6 @@ public class CommonQueryServicesModel {
             VALUES (?, ?, ?)
         """;
 
-
     public  String SP = """
             Select 
                 Name
@@ -937,7 +799,6 @@ public class CommonQueryServicesModel {
     WHERE part_id = ?
       AND is_active = 1
 """;
-
 
 }
 

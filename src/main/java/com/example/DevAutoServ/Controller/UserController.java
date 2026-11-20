@@ -69,7 +69,6 @@ public class UserController {
 
         String userRole = getUserRole.get("userRole").toString();
 
-
         // ADMIN can update any user
         if (
                 userRole.equalsIgnoreCase(ProjectCodes.RoleEnum.ADMIN.name())
@@ -108,7 +107,6 @@ public class UserController {
             // Find the ID of the logged-in user
             Long loggedInUserId = queryHandlerServices.GetUserId
                     (commonQueryServicesModel.GetUserId,loggedInUsername);
-
 
             // Check ownership
             if (!loggedInUserId.equals(id)) {
@@ -247,7 +245,6 @@ public class UserController {
 
         String userRole = getUserRole.get("userRole").toString();
 
-
         boolean hasPermission = authServices.CheckthePermission(
                 ProjectCodes.PermissionEnum.USER_VIEW_ALL.name(),
                 userRole
@@ -259,7 +256,6 @@ public class UserController {
             response.put("message", "You do not have permission to delete users");
             return response;
         }
-
 
         return reportsServices.fetchDeta(ProjectCodes.SPTableName.GET_USERS_WITH_PAGINATION.name(), queryString );
     }

@@ -58,7 +58,6 @@ public interface AuthRepository {
 
     Date getTokenExpiration(String token);
 
-
     Map<String, Object> VerifyToken(String authorization);
 }
 
