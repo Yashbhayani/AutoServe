@@ -3,7 +3,7 @@ import { RouteRoleProvider, matchPath, slugify, toLogical, useLocation, useNavig
 import { useApp } from "./store/AppContext";
 import { AppShell } from "./components/AppShell";
 import { ForgotPasswordPage, LoginPage, SignUpPage, ResetPasswordPage } from "./pages/auth";
-import {CreateServiceRequest,CustomerApproval,CustomerAppointments,CustomerCheckIn,CustomerInvoices,CustomerRequests,InvoiceDetail,MyVehicles,ProfilePage,RepairStatus,ServiceHistory,VehicleForm,AdminRequests,TechnicianManagement,WorkOrderDetail,WorkOrders} from "./pages/operations";
+import {CreateServiceRequest,CustomerApproval,CustomerCheckIn,CustomerInvoices,CustomerRequests,InvoiceDetail,MyVehicles,ProfilePage,RepairStatus,ServiceHistory,VehicleForm,AdminRequests,TechnicianManagement,WorkOrderDetail,WorkOrders} from "./pages/operations";
 import {AdminDashboard,CustomerDashboard,Inventory,NotificationsPage,Reports,TechDashboard,TechParts} from "./pages/live";
 import {UserManagement} from "./pages/users";
 import type { Role } from "./types";
@@ -56,10 +56,7 @@ const routesByRole: Record<Role, Route[]> = {
   technician: technicianRoutes,
   customer: customerRoutes,
 };
-/** Highest privilege first: when two roles share a URL (profile...), the higher one wins. */
-
-
-/** Find the route for a slug URL across ALL of the user's roles (merged access). */
+// Resolve shared routes using the account's role priority.
 function resolveRoute(pathname: string, roles: Role[]) {
   for (const r of ROLE_PRIORITY) {
     if (!roles.includes(r)) continue;
@@ -82,8 +79,7 @@ export default function App() {
     pathname === "/login" || pathname === "/signup" || pathname === "/forgot-password" || pathname === "/reset-password";
   const urlSlug = pathname.split("/")[1];
 
-  // The role is taken from the authenticated session, NOT the URL — so a URL can't
-  // grant access to a role the signed-in user doesn't have.
+  // Check session roles before resolving a protected route.
   let redirectTo: string | null = null;
   if (authLoading) redirectTo = null;
   else if (pathname === "/") redirectTo = authed ? `/${slug}/dashboard` : "/login";
@@ -96,7 +92,6 @@ export default function App() {
 
   if (authLoading) return <div role="status" className="grid min-h-screen place-items-center text-sm text-ink-500">Restoring your session…</div>;
 
-  // Auth screens (no shell)
   if (pathname === "/login") return <LoginPage />;
   if (pathname === "/signup") return <SignUpPage />;
   if (pathname === "/reset-password") return <ResetPasswordPage />;

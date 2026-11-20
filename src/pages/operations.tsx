@@ -496,69 +496,6 @@ export function CreateServiceRequest() {
     </Frame>
   )
 }
-function AppointmentList({
-  remote,
-  data,
-}: {
-  remote: ReturnType<typeof useOperations>
-  data: OperationsData
-}) {
-  const [cancel, setCancel] = useState<Row | null>(null)
-  return (
-    <>
-      <Card>
-        <CardHeader title="Appointments" />
-        <GridTable
-          headers={[
-            "Appointment",
-            "Request",
-            "Date / time",
-            "Status",
-            "Actions",
-          ]}
-          rows={data.appointments.map((a) => [
-            `#${a.id}`,
-            `#${a.service_request_id}`,
-            `${String(a.scheduled_date).slice(0, 10)} ${String(a.scheduled_time ?? "").slice(0, 5)}`,
-            <StatusBadge status={a.status} />,
-            !["CANCELLED", "COMPLETED"].includes(a.status_code) ? (
-              <Button variant="secondary" onClick={() => setCancel(a)}>
-                Cancel
-              </Button>
-            ) : (
-              "—"
-            ),
-          ])}
-        />
-      </Card>
-      <Modal
-        open={!!cancel}
-        onClose={() => {
-          if (!remote.busy) setCancel(null)
-        }}
-        title="Cancel appointment"
-      >
-        <p className="mb-5 text-sm">
-          Cancel this appointment? The service request remains available for
-          rescheduling.
-        </p>
-        <Button
-          disabled={remote.busy}
-          onClick={() =>
-            void remote.act(
-              "appointment.cancel",
-              { requestId: cancel?.service_request_id },
-              () => setCancel(null),
-            )
-          }
-        >
-          Confirm cancellation
-        </Button>
-      </Modal>
-    </>
-  )
-}
-export const CustomerAppointments = CustomerRequests
 export function AdminRequests() {
   return <RequestList admin />
 }
@@ -1575,7 +1512,7 @@ export function TechnicianManagement() {
     <Frame
       remote={remote}
       title="Technicians"
-      subtitle="Manage technician specialties and availability."
+      subtitle="Manage technician availability."
     >
       {(d) => (
         <>
@@ -1583,7 +1520,6 @@ export function TechnicianManagement() {
             headers={[
               "Name",
               "Contact",
-              // "Specialties",
               "Availability",
               "Open jobs",
               "Actions",
@@ -1591,7 +1527,6 @@ export function TechnicianManagement() {
             rows={d.technicians.map((t) => [
               `${t.first_name} ${t.last_name}`,
               t.email,
-              //t.specialties || "—",
               t.availability,
               t.active_jobs,
               <Button variant="secondary" onClick={() => setEditing(t)}>
@@ -1625,12 +1560,6 @@ export function TechnicianManagement() {
                   )
                 }
                 fields={[
-                  /*{
-                    key: "specialties",
-                    label: "Specialties (comma separated)",
-                    value: editing.specialties,
-                    max: 500,
-                  },*/
                   {
                     key: "availability",
                     label: "Availability",

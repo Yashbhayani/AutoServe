@@ -1,6 +1,0 @@
-{
-  "status": "Pass",
-  "comparedFiles": 100,
-  "changedPaths": [],
-  "scope": "Backend src files, pom.xml and .env; generated target/ output excluded. No credentials copied."
-}

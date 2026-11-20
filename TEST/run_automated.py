@@ -2,7 +2,7 @@
 """Runs existing application tests without editing backend sources/configuration."""
 from pathlib import Path
 import subprocess,os,time,json,re,xml.etree.ElementTree as ET
-ROOT=Path(__file__).resolve().parents[1];OUT=ROOT/'TEST/evidence';OUT.mkdir(exist_ok=True)
+TEST=Path(__file__).resolve().parents[0];ROOT=TEST.parent.parent;OUT=TEST/'evidence';OUT.mkdir(exist_ok=True)
 env=os.environ.copy();env['JAVA_HOME']='/Library/Java/JavaVirtualMachines/temurin-25.jdk/Contents/Home'
 secrets=[]
 for file in (ROOT/'Backend/.env',ROOT/'Frontend/.env'):
@@ -36,7 +36,7 @@ for src in (ROOT/'Backend/src/test/java').rglob('*Tests.java'):
  props=root.find('properties')
  if props is not None:
   cp=next((p.get('value') for p in props if p.get('name')=='java.class.path'),None)
-  if cp:(ROOT/'TEST/harness/classpath.txt').write_text(cp)
+  if cp:(TEST/'harness/classpath.txt').write_text(cp)
   root.remove(props)
  for child in root:
   if child.text:child.text=sanitize(child.text)

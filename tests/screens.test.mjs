@@ -43,10 +43,13 @@ test('work-order check-in requires an active appointment and offers scheduling w
  }finally{snapshot.appointments=appointments;snapshot.requests[0].stage=stage;}
 });
 test('appointment slots enforce business hours and close Sundays',()=>{
- assert.equal(screens.appointmentSlotError({date:'2026-11-16',time:'09:00'}),null);
- assert.equal(screens.appointmentSlotError({date:'2026-11-16',time:'17:00'}),null);
- assert.match(screens.appointmentSlotError({date:'2026-11-16',time:'08:30'}),/9:00 AM and 5:00 PM/);
- assert.match(screens.appointmentSlotError({date:'2026-11-15',time:'10:00'}),/Sundays/);
+ const futureSunday=new Date();futureSunday.setDate(futureSunday.getDate()+7-futureSunday.getDay());
+ const futureMonday=new Date(futureSunday);futureMonday.setDate(futureMonday.getDate()+1);
+ const localDate=date=>`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+ assert.equal(screens.appointmentSlotError({date:localDate(futureMonday),time:'09:00'}),null);
+ assert.equal(screens.appointmentSlotError({date:localDate(futureMonday),time:'17:00'}),null);
+ assert.match(screens.appointmentSlotError({date:localDate(futureMonday),time:'08:30'}),/9:00 AM and 5:00 PM/);
+ assert.match(screens.appointmentSlotError({date:localDate(futureSunday),time:'10:00'}),/Sundays/);
  const yesterday=new Date();yesterday.setDate(yesterday.getDate()-1);const pastDate=`${yesterday.getFullYear()}-${String(yesterday.getMonth()+1).padStart(2,'0')}-${String(yesterday.getDate()).padStart(2,'0')}`;
  assert.match(screens.appointmentSlotError({date:pastDate,time:'10:00'}),/future appointment date/);
 });

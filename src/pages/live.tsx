@@ -3,7 +3,6 @@ import { operations, type OperationsData } from "../api/operations"
 import { shop, type DashboardData, type PartRow, type PriceRow } from "../api/shop"
 import { useRemote } from "../hooks/useRemote"
 import { useNotifications } from "../store/NotificationsContext"
-import { useApp } from "../store/AppContext"
 import { useLocation } from "../router"
 import {
   Button,

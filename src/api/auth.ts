@@ -16,7 +16,7 @@ export function accountFromResponse(data: AuthResponse): Account {
   if (!roles.length) throw new ApiError("Your account has no supported roles. Contact your service center.");
   const name = [user.first_name, user.last_name].filter((part) => typeof part === "string" && part.trim()).join(" ").trim();
   return {
-    // Keep database identities distinct from the existing sample shop accounts.
+    // Prefix IDs to distinguish server accounts from legacy cached accounts.
     id: `db:${user.id}`,
     name: name || (typeof user.username === "string" && user.username) || user.email,
     email: user.email,

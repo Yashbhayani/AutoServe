@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='utf-8'?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="com.example.DevAutoServ.AdminUsersIntegrationTests" time="0.835" tests="4" errors="0" skipped="0" failures="0" flakes="0">
-  <testcase name="rejectsNonAdminAndDuplicateEmail" classname="com.example.DevAutoServ.AdminUsersIntegrationTests" time="0.285" />
-  <testcase name="updatesAccountAndRejectsRemovingLastAdministrator" classname="com.example.DevAutoServ.AdminUsersIntegrationTests" time="0.263" />
-  <testcase name="rejectsMultipleRoles" classname="com.example.DevAutoServ.AdminUsersIntegrationTests" time="0.024" />
-  <testcase name="adminCreatesAndListsExactlyOneRole" classname="com.example.DevAutoServ.AdminUsersIntegrationTests" time="0.255" />
-</testsuite>

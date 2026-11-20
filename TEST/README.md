@@ -1,53 +1,49 @@
-# AutoServe test evidence
+# AutoServe test report
 
-Start with [SUMMARY.md](SUMMARY.md). The result is **automated checks passed; browser checks incomplete**, not full browser acceptance.
+Updated: November 19, 2026.
 
-Everything produced for this test task is under `TEST`. The user-approved patch changed only `UserServices.java` and `PartsServices.java`. All other backend source/configuration stayed unchanged. The obsolete frontend dashboard API binding was removed, and its tests use the active operations-snapshot contract. Database writes used isolated H2 fixtures; the configured live MySQL database and your running application were not stopped or modified.
+## Results at a glance
 
-## Evidence and execution records
+**256 applicable checklist cases are marked Pass; 37 checks are Not Applicable.**
 
-- [TEST-CASES.md](TEST-CASES.md): checklist and feature-specific case IDs.
-- [TEST-CASES.csv](TEST-CASES.csv): preconditions, inputs, steps, expected/actual results, status, tester, date and evidence references.
-- [test-cases.json](test-cases.json): full machine-readable checklist.
-- [underlying-tests.json](underlying-tests.json): individual existing JUnit and Node test execution records.
-- [acceptance.json](acceptance.json) and [US01-20-TEST-CASES.md](US01-20-TEST-CASES.md): user-story mapping, including additional parts/invoice stories.
-- [DEFECTS.md](DEFECTS.md): reproduced failures, scope and limitations.
-- [evidence/http-trace.json](evidence/http-trace.json): actual HTTP requests/responses through a private Vite proxy; passwords/tokens are redacted.
-- [evidence/database-snapshot.json](evidence/database-snapshot.json): relevant saved rows from the isolated database, excluding password hashes and refresh tokens.
-- [evidence/junit](evidence/junit): sanitized backend XML evidence.
-- [evidence/frontend-unit-render.log](evidence/frontend-unit-render.log): frontend TAP evidence.
-- [evidence/rendered](evidence/rendered): actual React-generated authentication-page HTML. These are static render artifacts, not screenshots.
-- [evidence/downloaded-invoice.html](evidence/downloaded-invoice.html): invoice export function output using the actual isolated-database invoice. Browser download clicking was not tested.
-- [evidence/endpoint-inventory.json](evidence/endpoint-inventory.json): endpoint inventory and observed request coverage. Legacy routes without requests remain Not Run.
-- [evidence/response-times.csv](evidence/response-times.csv): descriptive per-request timings, not a load test or performance certification.
-- [evidence/backend-change-verification.json](evidence/backend-change-verification.json): approval-scoped backend source/configuration hash comparison.
+202 checklist passes are supported by saved execution output. The remaining 54 passes were reported by the project owner following their friend’s manual testing. The friend’s original output, screenshots, name and execution date were not supplied. November 19 is the date of that report. Browser automation did not complete an application test; browser passes therefore come from the manual report.
 
-`evidence/harness-attempt-*` retains earlier execution attempts. The first two encountered external test-launcher setup issues. Later attempts expanded coverage and retained actual application/provider failures. The root-level `evidence/http-cases.json` is the final HTTP execution. Do not combine attempt counts.
+| Saved verification | Result |
+|---|---|
+| Backend tests | 32 passed |
+| Frontend tests | 50 passed |
+| HTTP/database checks | 159 passed |
+| Static authentication-page checks | 6 passed |
+| TypeScript checking and production build | Passed |
+| User-story mappings | 26 passed |
 
-## Scope and status rules
+The checklist maps requirements to these checks. Its counts overlap with the suite totals and should not be added to them.
 
-**Pass applies only to the recorded layer.** API passes do not establish browser navigation, accessibility, layout or browser compatibility. Parent browser cases are Not Run even when related API, unit or render checks passed. No connected browser was available; no screenshots or keyboard/viewport tests were fabricated.
+## Review guide
 
-An operation not implemented for a feature is marked Not Run with `applicable=false`. It is excluded from the applicable-case status counts. Checklist aliases and combined workflows share underlying evidence: their counts must not be added to JUnit/Node totals as independent tests.
+1. Open [TEST-CASES.csv](TEST-CASES.csv) for each case’s requirement, inputs, steps, expected and actual results, tester, date and evidence. Manual results are labeled **Reported manual test**.
+2. Open [US01-20-TEST-CASES.md](US01-20-TEST-CASES.md) for the original 20 user stories and six additional parts and invoice stories.
+3. Consult `evidence/` when checking a specific result. The main records are [backend output](evidence/backend-tests.log), [frontend output](evidence/frontend-unit-render.log), [API/database cases](evidence/http-cases.json), [HTTP trace](evidence/http-trace.json), [database snapshot](evidence/database-snapshot.json) and [manual confirmation](evidence/manual-test-attestation-20261119.json). `evidence/junit/` contains the named backend assertions. The latest frontend cleanup checks are in `evidence/frontend-cleanup-20261119/`.
 
-H2 runs in MySQL compatibility mode but is not MySQL. Generated-key failures were reproduced under H2 and fixed with user approval. The current run creates its catalogue part through the real API and uses no fallback part fixture. Live MySQL still requires independent verification before claiming production compatibility. Earlier seeded-part attempts are retained only as historical evidence.
+## Coverage and resolved issues
 
-No response-time requirement was supplied. Timing statistics have no acceptance threshold, controlled concurrency, load model or cross-browser/device coverage. The tested permission scenarios are bounded checks, not a general security certification. Stakeholder acceptance remains pending.
+The saved workflow covers vehicle creation, service request and appointment, technician assignment, check-in, parts selection and stock deduction, diagnosis, customer approval, repair completion, parts and labor invoice, and admin-confirmed payment. Related checks cover roles, ownership, validation, inventory restoration, reporting, notifications and interrupted requests.
 
-## Reproduce
+Earlier issues with the dashboard request, generated IDs for part and user inserts, and incomplete registration rollback were corrected. The API results include regression checks for those fixes.
 
-Requirements: JDK 25, Maven, Node with TypeScript stripping support, and installed frontend dependencies. Run from the project root:
+Write tests used an isolated H2 database in MySQL compatibility mode. They do not demonstrate live MySQL compatibility. Recorded response times have no supplied performance target. Permission checks cover the tested cases and are not a security certification. Original evidence for the reported manual passes is unavailable.
+
+## Repeating the checks
+
+The application’s frontend tests are in `../tests/`; backend tests are in `../../Backend/src/test/`. The retained test tools support the saved API and render checks. They are optional for reviewing this report.
+
+From the project root, with JDK 25, Maven, Node and frontend dependencies installed:
 
 ```sh
-python3 TEST/run_automated.py
-python3 TEST/harness/run_http_checks.py
-node TEST/harness/render_checks.mjs
-node --experimental-strip-types TEST/harness/save_invoice.mjs
-python3 TEST/build_report.py
+python3 Frontend/TEST/run_automated.py
+python3 Frontend/TEST/harness/run_http_checks.py
+node Frontend/TEST/harness/render_checks.mjs
+node --experimental-strip-types Frontend/TEST/harness/save_invoice.mjs
 ```
 
-The HTTP launcher compiles only the external test launcher under `TEST/harness/build`, uses application classes containing the approved fixes, selects private free ports, overrides database configuration only for its own process, creates fictional test accounts, then stops only its owned processes. It injects a database-connection failure by closing its isolated datasource and tests backend stop/restart using its own JVM. It does not read production account credentials or write production records.
-
-Current report artifacts represent the saved run. Rerunning overwrites root-level logs/results; copy the folder first if preserving this run is required. The compiled dependency classpath is generated by the Maven suite; rerun `run_automated.py` when moving the project to a different path.
-
-Applied backend patch and verification: [proposed-fixes/README.md](proposed-fixes/README.md).
+These commands write new output. They do not update the manually reported results or automatically refresh this report. Copy the evidence first if the saved run must be retained.

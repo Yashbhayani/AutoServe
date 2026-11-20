@@ -14,7 +14,7 @@ function AuthLayout({ children }: { children: ReactNode }) {
       <div className="relative hidden w-[44%] overflow-hidden lg:block">
         <img
           src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=1000&h=1400&fit=crop&auto=format"
-          alt="Car in a modern service center"
+          alt="Car"
           className="absolute inset-0 h-full w-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-navy-900 via-navy-900/50 to-navy-900/20" />
@@ -26,12 +26,12 @@ function AuthLayout({ children }: { children: ReactNode }) {
         </div>
         <div className="absolute bottom-14 left-10 right-10">
           <h2 className="text-4xl font-bold leading-tight text-white">
-            Your Car,
+            Manage your
             <br />
-            Our Care.
+            vehicle service.
           </h2>
           <p className="mt-3 max-w-sm text-[15px] text-slate-300">
-            Reliable service for every mile. Book, track, and manage repairs from one place.
+            Book a service, follow your repairs, and view your invoices.
           </p>
         </div>
       </div>
@@ -88,7 +88,7 @@ export function LoginPage() {
             autoComplete="username"
             required
             disabled={pending}
-            placeholder="john@example.com"
+            placeholder="you@example.com"
             value={email}
             onChange={(e) => {
               setEmail(e.target.value);
@@ -218,10 +218,10 @@ export function SignUpPage() {
 
 export function ForgotPasswordPage() {
  const navigate=useNavigate();
- const [email,setEmail]=useState(""),[pending,setPending]=useState(false),[message,setMessage]=useState(""),[error,setError]=useState("");
+ const [email,setEmail]=useState(""),[error,setError]=useState("");
  async function submit(e:React.FormEvent){e.preventDefault();if(!emailValid(email))return setError("Enter a valid email address.");navigate(`/reset-password?email=${encodeURIComponent(email.trim().toLowerCase())}`);}
 
- return <AuthLayout><h1 className="text-[26px] font-bold text-ink-900">Forgot password</h1><p className="mt-3 text-sm text-ink-500">Enter your account email to continue to the new-password screen.</p><form onSubmit={submit} className="mt-6 space-y-4"><Field label="Email" required><Input type="email" autoComplete="email" required value={email} onChange={e=>setEmail(e.target.value)} maxLength={120}/></Field>{error&&<p role="alert" className="text-sm text-red-700">{error}</p>}{message&&<p role="status" className="text-sm text-green-700">{message}</p>}<Button type="submit" disabled={pending}>{pending?"Requesting…":"Continue"}</Button></form><p className="mt-6 text-sm"><Link to="/login" className="text-brand-600 underline">Back to login</Link></p></AuthLayout>;
+ return <AuthLayout><h1 className="text-[26px] font-bold text-ink-900">Forgot password</h1><p className="mt-3 text-sm text-ink-500">Enter the email address for your account.</p><form onSubmit={submit} className="mt-6 space-y-4"><Field label="Email" required><Input type="email" autoComplete="email" required value={email} onChange={e=>setEmail(e.target.value)} maxLength={120}/></Field>{error&&<p role="alert" className="text-sm text-red-700">{error}</p>}<Button type="submit">Continue</Button></form><p className="mt-6 text-sm"><Link to="/login" className="text-brand-600 underline">Back to login</Link></p></AuthLayout>;
 }
 export function ResetPasswordPage(){
  const {search}=useLocation(),navigate=useNavigate(),email=new URLSearchParams(search).get("email");

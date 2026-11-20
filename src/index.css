@@ -62,7 +62,7 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* Hide scrollbars until scrolling */
+/* Show scrollbar thumbs on hover. */
 * {
   scrollbar-width: thin;
   scrollbar-color: transparent transparent;

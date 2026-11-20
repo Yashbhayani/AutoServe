@@ -1,11 +1,12 @@
 import {readFileSync,writeFileSync,existsSync,mkdirSync} from 'node:fs';
 import {createRequire} from 'node:module';
 import path from 'node:path';
+import {fileURLToPath} from 'node:url';
 import vm from 'node:vm';
 import assert from 'node:assert/strict';
-const root=path.resolve('Frontend/src'),require=createRequire(path.resolve('Frontend/package.json'));
+const root=fileURLToPath(new URL('../../src',import.meta.url)),require=createRequire(new URL('../../package.json',import.meta.url));
 const ts=require('typescript'),React=require('react'),{renderToStaticMarkup}=require('react-dom/server');
-const cache=new Map(),out=path.resolve('TEST/evidence/rendered');mkdirSync(out,{recursive:true});
+const cache=new Map(),out=fileURLToPath(new URL('../evidence/rendered',import.meta.url));mkdirSync(out,{recursive:true});
 let authError='',search='';
 function load(file){if(cache.has(file))return cache.get(file).exports;const mod={exports:{}};cache.set(file,mod);const code=ts.transpileModule(readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX,target:ts.ScriptTarget.ES2020}}).outputText;
  function dep(name){
@@ -26,4 +27,4 @@ check('UI-02-RENDER','Login errors are rendered in an alert region',()=>{authErr
 check('AUTH-09-RENDER','Registration success prompts user to log in',()=>{search='?registered=1';assert.match(render('LoginPage','registration-return.html'),/account|created|sign in|Sign In/i);search=''});
 check('SIGNUP-RENDER','Signup page renders identity and password fields',()=>{const html=render('SignUpPage','signup.html');assert.match(html,/First name|First Name/);assert.match(html,/password/)});
 check('RESET-RENDER','Reset page renders new-password controls',()=>{search='?email=customer%40test.invalid';assert.match(render('ResetPasswordPage','reset-password.html'),/password/i);search=''});
-writeFileSync('TEST/evidence/render-checks.json',JSON.stringify(results,null,2)+'\n');console.log(JSON.stringify(results,null,2));
+writeFileSync(new URL('../evidence/render-checks.json',import.meta.url),JSON.stringify(results,null,2)+'\n');console.log(JSON.stringify(results,null,2));

@@ -1,0 +1,17 @@
+{
+  "tests": {
+    "exitCode": 0,
+    "log": "tests.log"
+  },
+  "typecheck": {
+    "exitCode": 0,
+    "log": "typecheck.log"
+  },
+  "build": {
+    "exitCode": 0,
+    "log": "build.log"
+  },
+  "backendUnchanged": true,
+  "date": "2026-11-19",
+  "scope": "Frontend cleanup; test fixtures retained outside src. No backend changes or new browser execution."
+}

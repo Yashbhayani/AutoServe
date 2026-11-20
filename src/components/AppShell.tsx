@@ -15,7 +15,6 @@ import {
   IconLogout,
   IconWrench,
   IconBox,
-  IconClock,
   IconChart,
   IconMenu,
   IconX,
@@ -64,11 +63,7 @@ const navGroups = {
   Account: ["Notifications", "Profile"],
 };
 
-/**
- * Merge the menus of every assigned role into one list. Items that resolve to the
- * same URL (Dashboard, Profile, ...) appear once, taking the higher-privilege role's
- * entry. Profile is always kept last.
- */
+// Show each destination once, using the highest-priority role.
 function unifiedNav(roles: Role[]): NavItem[] {
   const seen = new Set<string>();
   const out: NavItem[] = [];

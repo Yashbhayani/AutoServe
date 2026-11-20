@@ -2,9 +2,9 @@
 """Real HTTP checks on unchanged application classes, isolated H2 and a private Vite proxy."""
 from pathlib import Path
 import subprocess,os,time,json,urllib.request,urllib.error,datetime,socket,traceback,re
-ROOT=Path(__file__).resolve().parents[2];OUT=ROOT/'TEST/evidence';BUILD=ROOT/'TEST/harness/build';BUILD.mkdir(exist_ok=True)
+TEST=Path(__file__).resolve().parents[1];ROOT=TEST.parent.parent;OUT=TEST/'evidence';BUILD=TEST/'harness/build';BUILD.mkdir(exist_ok=True)
 JAVA=Path('/Library/Java/JavaVirtualMachines/temurin-25.jdk/Contents/Home/bin')
-CP=(ROOT/'TEST/harness/classpath.txt').read_text().strip()
+CP=(TEST/'harness/classpath.txt').read_text().strip()
 ENV=os.environ.copy();ENV['JAVA_HOME']=str(JAVA.parent)
 TRACE=[];CASES=[];TOKENS={};STATE={};processes=[]
 def port():
@@ -92,7 +92,7 @@ def login_role(role):
 def password_reset():
  result=ok(req('/api/user/password/reset',body={'email':'stranger@test.invalid','password':'NewTestOnly-Password42!'}));reject(req('/api/user/login',body={'email':'stranger@test.invalid','password':'TestOnly-Password42!'}));ok(req('/api/user/login',body={'email':'stranger@test.invalid','password':'NewTestOnly-Password42!'}));return {'reset':'successful','oldPassword':'rejected','newPassword':'accepted'}
 try:
- subprocess.run([str(JAVA/'javac'),'-cp',CP,'-d',str(BUILD),str(ROOT/'TEST/harness/IsolatedServer.java')],check=True,stdout=(OUT/'harness-compile.log').open('w'),stderr=subprocess.STDOUT)
+ subprocess.run([str(JAVA/'javac'),'-cp',CP,'-d',str(BUILD),str(TEST/'harness/IsolatedServer.java')],check=True,stdout=(OUT/'harness-compile.log').open('w'),stderr=subprocess.STDOUT)
  server=start_backend()
  vlog=(OUT/'isolated-frontend.log').open('w');vite=subprocess.Popen(['node',str(ROOT/'Frontend/node_modules/vite/bin/vite.js'),'--host','127.0.0.1','--port',str(FRONTEND_PORT),'--strictPort'],cwd=ROOT/'Frontend',env=ENV,stdout=vlog,stderr=subprocess.STDOUT);processes.append(vite)
  for i in range(60):

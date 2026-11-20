@@ -2,8 +2,8 @@
 """Owned local processes for interactive testing; no live database configuration is loaded."""
 from pathlib import Path
 import os,subprocess,socket,time,json,datetime,re
-ROOT=Path(__file__).resolve().parents[2];OUT=ROOT/'TEST/evidence/browser';OUT.mkdir(parents=True,exist_ok=True)
-JAVA=Path('/Library/Java/JavaVirtualMachines/temurin-25.jdk/Contents/Home/bin');CP=(ROOT/'TEST/harness/classpath.txt').read_text().strip();BUILD=ROOT/'TEST/harness/build'
+TEST=Path(__file__).resolve().parents[1];ROOT=TEST.parent.parent;OUT=TEST/'evidence/browser';OUT.mkdir(parents=True,exist_ok=True)
+JAVA=Path('/Library/Java/JavaVirtualMachines/temurin-25.jdk/Contents/Home/bin');CP=(TEST/'harness/classpath.txt').read_text().strip();BUILD=TEST/'harness/build';BUILD.mkdir(parents=True,exist_ok=True)
 def free_port():
  with socket.socket() as s:s.bind(('127.0.0.1',0));return s.getsockname()[1]
 bp,fp=free_port(),free_port();env=os.environ.copy();env.update(API_PROXY_TARGET=f'http://127.0.0.1:{bp}',VITE_API_BASE_URL='/api')
@@ -17,7 +17,7 @@ def start():
 def stop_backend():
  if backend and backend.poll() is None:backend.terminate();backend.wait(timeout=15)
 try:
- subprocess.run([str(JAVA/'javac'),'-cp',CP,'-d',str(BUILD),str(ROOT/'TEST/harness/IsolatedServer.java')],check=True,stdout=(OUT/'compile.log').open('w'),stderr=subprocess.STDOUT)
+ subprocess.run([str(JAVA/'javac'),'-cp',CP,'-d',str(BUILD),str(TEST/'harness/IsolatedServer.java')],check=True,stdout=(OUT/'compile.log').open('w'),stderr=subprocess.STDOUT)
  start()
  vite=subprocess.Popen(['node',str(ROOT/'Frontend/node_modules/vite/bin/vite.js'),'--host','127.0.0.1','--port',str(fp),'--strictPort'],cwd=ROOT/'Frontend',env=env,stdout=vlog,stderr=subprocess.STDOUT)
  metadata={'url':f'http://127.0.0.1:{fp}','backendPort':bp,'frontendPort':fp,'database':'isolated H2 only','backendPid':backend.pid,'frontendPid':vite.pid,'startedUtc':datetime.datetime.now(datetime.timezone.utc).isoformat()}
